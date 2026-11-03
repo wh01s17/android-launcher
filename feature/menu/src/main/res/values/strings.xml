@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Drawer provisional de apps (plan.md §7, Hito 2). -->
+    <string name="drawer_search_placeholder">Buscar apps…</string>
+    <string name="drawer_loading">Cargando apps…</string>
+    <string name="drawer_empty">Sin resultados</string>
+    <string name="drawer_close">Cerrar</string>
+    <string name="drawer_profile_paused">en pausa</string>
+    <string name="drawer_suspended">suspendida</string>
+    <string name="drawer_work_profile">trabajo</string>
+    <string name="drawer_message_paused_requested">El perfil de trabajo está en pausa: se pidió reanudarlo.</string>
+    <string name="drawer_message_paused">El perfil de trabajo está en pausa.</string>
+    <string name="drawer_message_failed">No se pudo abrir.</string>
+    <string name="drawer_action_info">Info de la app</string>
+    <string name="drawer_action_uninstall">Desinstalar</string>
+    <string name="drawer_shortcuts_unavailable">Los atajos de app sólo están disponibles si wh01s17 es el launcher predeterminado.</string>
+</resources>
