@@ -2,6 +2,7 @@ package com.wh01s17.launcher
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.SystemBarStyle
@@ -51,10 +52,24 @@ class MainActivity : ComponentActivity() {
             WhTheme {
                 val state by drawer.state.collectAsStateWithLifecycle()
                 Box(Modifier.fillMaxSize()) {
-                    HomeScreen(onOpenApps = { drawer.onIntent(DrawerIntent.Open) })
+                    HomeScreen(
+                        onOpenApps = { drawer.onIntent(DrawerIntent.Open) },
+                        onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
+                    )
                     AppDrawer(state, container.iconLoader, drawer::onIntent)
                 }
             }
+        }
+    }
+
+    /**
+     * Vigilancia de plan.md §5.9: si los botones están ocultos y la navegación propia no está viva,
+     * se devuelven y se avisa. Como launcher HOME, esto corre en cada vuelta al inicio y al arrancar.
+     */
+    override fun onResume() {
+        super.onResume()
+        if (container.navigationWatchdog.check()) {
+            Toast.makeText(this, R.string.navigation_buttons_restored, Toast.LENGTH_LONG).show()
         }
     }
 

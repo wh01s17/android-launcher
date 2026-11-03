@@ -8,6 +8,9 @@ import com.wh01s17.launcher.core.apps.actions.LauncherAppActions
 import com.wh01s17.launcher.core.apps.icons.AppIconLoader
 import com.wh01s17.launcher.core.apps.icons.LauncherIconLoader
 import com.wh01s17.launcher.core.apps.source.AndroidLauncherAppsGateway
+import com.wh01s17.launcher.core.system.navigation.NavigationWatchdog
+import com.wh01s17.launcher.core.system.oem.xiaomi.AndroidCompatibilityGateway
+import com.wh01s17.launcher.core.system.oem.xiaomi.CompatibilityGateway
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,4 +36,9 @@ class AppContainer(
     val iconLoader: AppIconLoader by lazy { LauncherIconLoader(appContext, launcherAppsGateway, Dispatchers.IO) }
 
     val appActions: AppActions by lazy { LauncherAppActions(appContext, launcherAppsGateway) }
+
+    /** Vigila que nunca queden los botones ocultos sin la navegación propia (plan.md §5.9). */
+    val navigationWatchdog: NavigationWatchdog by lazy { NavigationWatchdog(appContext) }
+
+    val compatibilityGateway: CompatibilityGateway by lazy { AndroidCompatibilityGateway(appContext, navigationWatchdog) }
 }

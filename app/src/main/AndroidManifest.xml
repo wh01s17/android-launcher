@@ -31,5 +31,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Ajustes (Compatibilidad): sólo desde el propio launcher. -->
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings_label" />
     </application>
 </manifest>

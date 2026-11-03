@@ -2,6 +2,9 @@
 <resources>
     <string name="app_name">wh01s17 Launcher</string>
     <!-- Pantalla de inicio provisional, hasta los workspaces del Hito 4. -->
-    <string name="home_hint">desliza hacia arriba · apps</string>
+    <string name="home_hint">desliza hacia arriba · apps    mantén pulsado · ajustes</string>
     <string name="home_open_apps">Abrir apps</string>
+    <string name="home_open_settings">Abrir ajustes</string>
+    <string name="settings_label">Ajustes wh01s17</string>
+    <string name="navigation_buttons_restored">Los gestos wh01s17 no estaban activos: se devolvieron los botones de navegación.</string>
 </resources>

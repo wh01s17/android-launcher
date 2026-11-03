@@ -1,7 +1,7 @@
 package com.wh01s17.launcher
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -22,11 +22,13 @@ import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 
 /**
  * Inicio provisional: fondo wh01s17 y una pista. Deslizar hacia arriba o tocar abre el drawer
- * (plan.md §3: "deslizar hacia arriba → menú"). Los workspaces la sustituyen en el Hito 4.
+ * (plan.md §3: "deslizar hacia arriba → menú"); mantener pulsado abre los ajustes. Los workspaces
+ * la sustituyen en el Hito 4.
  */
 @Composable
 internal fun HomeScreen(
     onOpenApps: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // Un desplazamiento hacia arriba de una fila de menú basta para abrir; el ruido no.
@@ -37,8 +39,14 @@ internal fun HomeScreen(
             modifier
                 .fillMaxSize()
                 .background(WhTheme.colors.background)
-                .clickable(interaction, indication = null, onClickLabel = stringResource(R.string.home_open_apps), onClick = onOpenApps)
-                .pointerInput(onOpenApps, threshold) {
+                .combinedClickable(
+                    interactionSource = interaction,
+                    indication = null,
+                    onClickLabel = stringResource(R.string.home_open_apps),
+                    onLongClickLabel = stringResource(R.string.home_open_settings),
+                    onLongClick = onOpenSettings,
+                    onClick = onOpenApps,
+                ).pointerInput(onOpenApps, threshold) {
                     var travelled = 0f
                     detectVerticalDragGestures(
                         onDragStart = { travelled = 0f },
