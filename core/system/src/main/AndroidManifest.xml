@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+        Capa 2 de plan.md §5.9 (ocultar los botones en HyperOS). Sólo se obtiene con
+        `adb shell pm grant`; sin él, el launcher sólo muestra el asistente de compatibilidad.
+    -->
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
+    <application>
+        <!--
+            Capa 3: gestos de borde. En su propio proceso para que el launcher note al instante si
+            muere (NavigationWatchdog) y para que un fallo del launcher no deje sin navegación.
+        -->
+        <service
+            android:name=".navigation.WhNavigationService"
+            android:exported="true"
+            android:label="@string/nav_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:process=":nav">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/wh_navigation_service" />
+        </service>
+
+        <service
+            android:name=".navigation.NavigationLinkService"
+            android:exported="false"
+            android:process=":nav" />
+    </application>
+</manifest>
