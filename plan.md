@@ -260,7 +260,9 @@ Fuente: `~/dotfiles/desktop/.config/wh01s17/themes/wh01s17/`.
   genera `build/generated/.../WhTokens.kt`. El código **nunca** edita los
   tokens a mano; para cambiarlos se edita el dotfile y se vuelve a sincronizar.
 - Así el launcher sigue al tema del escritorio (mismo flujo que
-  `wh01s17 theme set wh01s17`). Un test compara el hash de los TOML
+  `wh01s17 theme set wh01s17`). `theme/wh01s17/SHA256SUMS` guarda los hashes y
+  `tools/sync-theme.py --check` (parte de `check`) falla si un archivo se editó a mano
+  y avisa si diverge de `~/dotfiles`. Un test compara el hash de los TOML
   versionados con los de `~/dotfiles` cuando existen, y avisa si divergen.
 
 ### 4.2 Paleta (de `colors.toml`)
@@ -304,10 +306,12 @@ Todos con borde de 1 px. En táctil, *pressed* sustituye a *hover*.
 
 ### 4.4 Tipografía (de `shell.font.toml`)
 
-- Familia: **Departure Mono** (OFL) incluida en `assets/fonts/` con su licencia.
+- Familia: **Departure Mono** (OFL) en `core/designsystem/src/main/res/font/` (Compose carga
+  las fuentes desde `res/font`); las licencias, en `src/main/assets/licenses/`.
 - Iconos: **wh01s17 Pixel Icons** (`wh01s17-pixel-icons.ttf`, Pixelarticons MIT)
   usando los mismos code points Nerd Font del shell. Mapa en
-  `:core:designsystem/icons/WhIcons.kt` (constantes `char`).
+  `:core:designsystem/icons/WhIcons.kt` (constantes `WhGlyph`, de tipo `String`: varios code
+  points superan U+FFFF y no caben en un `Char`).
 - Escala (sp, con factor 1.25 sobre los px del shell para legibilidad móvil;
   ajustable en ajustes): caption 10, bodySmall 11, body 12, subtitle 13,
   title 14, heading 16, display 24, displayLarge 28.
@@ -366,8 +370,8 @@ Desenfoque (blur 3, 2 pasadas) sólo con `RenderEffect` en API 31+; en API
 | Persistencia | `config/launcher.json` (kotlinx.serialization) + DataStore para estado efímero (último workspace, conteo de uso) | Config legible y exportable como `shell.json` |
 | Build | Gradle Kotlin DSL, *version catalog* `gradle/libs.versions.toml`, *convention plugins* en `build-logic/` | Multi-módulo ordenado |
 | JDK | Gradle corre con el JBR 25 de Android Studio; *bytecode* Java 17. No se usa el JDK 27 del sistema | Ver §10 |
-| Calidad | ktlint, detekt (2.0 alpha, §11.1), Android Lint, Kover | — |
-| Tests | JUnit5 (JVM), Robolectric, Compose UI test, Roborazzi (capturas) | — |
+| Calidad | ktlint, detekt (2.0 alpha, §11.1), Android Lint, Kover; líneas de máx. 140 columnas (`.editorconfig` y `detekt.yml`) | — |
+| Tests | JUnit5 en módulos JVM; JUnit4 en módulos Android (lo exigen Robolectric y Roborazzi); Compose UI test; Roborazzi (capturas) | — |
 
 Fijar versiones estables verificadas en el Hito 0 y anotarlas en §11; no usar
 `+` ni rangos.
@@ -731,20 +735,26 @@ vuelve a fallar si la justificación queda vacía.
 
 ### Hito 1 — Sistema de diseño (M)
 
-- [ ] `tools/sync-theme.py` + `theme/wh01s17/*.toml` sincronizados.
-- [ ] Generador `generateTokens` → `WhTokens.kt` (colores, alfas, medidas,
-      tipografía).
-- [ ] Fuentes Departure Mono y wh01s17 Pixel Icons con licencias en `assets`.
-- [ ] `WhTheme` (`CompositionLocal`s), `WhIcons`, `Modifier.whBorder(active)`
-      con degradado 45°, `Modifier.whControlState(...)`.
-- [ ] Componentes: `WhText`, `WhIcon`, `WhButton`, `WhPanel`, `WhScrim`,
+- [x] `tools/sync-theme.py` + `theme/wh01s17/*.toml` sincronizados. Además `--check`,
+      `SHA256SUMS` y pruebas en `tools/tests/`.
+- [x] Generador `generateTokens` → `WhTokens.kt` y `wh_tokens.xml` (colores, alfas, medidas,
+      tipografía). Plugin `wh01s17.design.tokens` en `build-logic`, con 17 pruebas que incluyen
+      el tema real.
+- [x] Fuentes Departure Mono y wh01s17 Pixel Icons en `res/font`, licencias en
+      `assets/licenses`.
+- [x] `WhTheme` (`CompositionLocal`s), `WhIcons` (56 glifos), `Modifier.whBorder(active)`
+      con degradado 45°, `rememberWhControlState` y `Modifier.whControlSurface(...)`.
+- [x] Componentes: `WhText`, `WhIcon`, `WhButton`, `WhPanel`, `WhScrim`,
       `WhBracketLabel`, `WhListRow`, `WhTextField`, `WhTooltip`, `WhToggle`.
-- [ ] Pantalla *gallery* (sólo debug) con todos los componentes y estados.
-- [ ] Capturas Roborazzi de la galería como referencia.
+- [x] Pantalla *gallery* (sólo debug, `GalleryActivity`) con todos los componentes y estados.
+- [x] Capturas Roborazzi de la galería como referencia (8, en `src/test/screenshots/`).
+- [x] `tools/check-no-literal-colors.sh` (R6) enganchado a `check`.
+- [ ] Contrastar a ojo el menú y los popups con el shell abierto al lado
+      (`docs/design-system.md`, última fila de la comparación).
 
 **Terminado cuando:** la galería coincide con el shell del escritorio
-(comparación visual manual documentada) y no hay colores literales fuera del
-módulo (R6).
+(comparación visual manual documentada en `docs/design-system.md`) y no hay colores
+literales fuera del módulo (R6, comprobado por `check`).
 
 ### Hito 2 — Índice de apps y lanzamiento (M)
 
@@ -920,9 +930,10 @@ Roborazzi, commit `chore(theme): sync wh01s17 tokens`.
 | Nivel | Qué | Herramienta | Cuándo |
 | --- | --- | --- | --- |
 | Unitarias JVM | tiling, fuzzy, config/migraciones, resolución de atajos | JUnit5, pruebas de propiedades (Kotest property o jqwik) | Siempre en CI |
+| Herramientas | `tools/*.py`, generador de tokens de `build-logic` | `unittest` (Python), JUnit5 en `build-logic` | Parte de `check` |
 | Android unitarias | repositorios con fakes, ViewModels | Robolectric, Turbine | CI |
 | UI | barra, menú, modo edición | Compose UI test | CI |
-| Capturas | componentes y pantallas en tema wh01s17 | Roborazzi | CI; actualizar con `recordRoborazziDebug` |
+| Capturas | componentes y pantallas en tema wh01s17 (a 480 dpi y 407 dp, como el Redmi) | Roborazzi + Robolectric (API 35) sobre JDK 25 | `verifyRoborazziDebug` forma parte de `check`; regrabar con `recordRoborazziDebug` |
 | Instrumentadas | lanzar apps, widgets, rol HOME | Emulador (Gradle Managed Devices) | Antes de cada release |
 | Rendimiento | arranque, pager | Macrobenchmark | Hito 11 y releases |
 | Manual | checklist `docs/manual-qa.md` (permisos denegados, rotación, teclado BT) | Dispositivo real | Antes de cada release |
@@ -1009,6 +1020,12 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-02 | AGP 9.5.0 (el máximo que soporta Android Studio 2026.2.2), Gradle 9.8.2, Kotlin 2.4.21 (Kotlin integrado en AGP 9), Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 29, bytecode Java 17 | Últimas estables al 2026-11-02 (`gradle/libs.versions.toml`) |
 | 2026-11-02 | Gradle corre con el JBR 25 de Android Studio; CI con Temurin 25 | El JDK 27 del sistema es más nuevo de lo que soporta la cadena de herramientas |
 | 2026-11-02 | **Excepción a versiones estables:** detekt 2.0.0-alpha.6 | detekt 1.23.8 falla con JDK 25 (`25.0.4` no reconocido por su compilador de Kotlin 2.0). Volver a una estable en cuanto salga detekt 2.0 |
+| 2026-11-02 | Roborazzi 1.77.0 + Robolectric 4.17 con `@Config(sdk = [35])` | Funcionan sobre JDK 25; los tests de módulos Android usan JUnit4 (lo exigen) |
+| 2026-11-02 | `tomlj` 2.2.0 en `build-logic` para leer los TOML del tema | Parser estándar; evita uno propio |
+| 2026-11-02 | Los tokens generados son `internal`; los demás módulos usan `WhTheme.*` | Un solo punto de acceso y sin literales (R6) |
+| 2026-11-02 | Fuentes en `res/font`, no en `assets` | Compose las carga con `Font(R.font.…)` |
+| 2026-11-02 | Dirección del borde activo `(cos θ, sin θ)` en pantalla: 45° = arriba-izq. → abajo-der. | Medido en una ventana real de Hyprland (`docs/design-system.md`) |
+| 2026-11-02 | Máximo de 140 columnas por línea (ktlint y detekt) | Valor por defecto de `ktlint_official`; el modo `android` de ktlint imponía 100 |
 | 2026-11-02 | Skills `android-di-hilt` y `android-networking-retrofit-okhttp` **no aplican** | Contradicen la DI manual (§5.1) y R9 (sin red) |
 
 ### 11.2 Riesgos
@@ -1033,12 +1050,14 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Hito en curso:** Hito 1 (no iniciado). **Hito 0 terminado** el
-  2026-11-02: cumple su definición de terminado en el emulador y en el Redmi.
-- **Última tarea completada:** prueba del APK como launcher predeterminado en
-  el Redmi (Inicio, *atrás*) y restauración de `bitpit.launcher`.
-- **Siguiente tarea:** Hito 1, `tools/sync-theme.py` y `theme/wh01s17/*.toml`.
-  Modelo recomendado en §0: Sonnet 5.5 · `high` (o `gpt-6.1-terra` · `high`).
+- **Hito en curso:** Hito 1, hecho salvo un punto: contrastar a ojo el menú y los
+  popups con el shell abierto al lado (`docs/design-system.md`). **Hito 0 terminado.**
+- **Última tarea completada:** sistema de diseño completo: tokens generados desde los
+  dotfiles, tema, 10 componentes, galería (debug), 8 capturas Roborazzi. Probado en el
+  emulador y en el Redmi. `./gradlew check` en verde.
+- **Siguiente tarea:** confirmar el punto pendiente del Hito 1 y empezar el Hito 2
+  (índice de apps y navegación por accesibilidad). Modelo recomendado en §0:
+  Opus 5.5 · `xhigh` (o `gpt-6.1-sol` · `xhigh`).
 - **Bloqueos:** ninguno.
 - **Launcher predeterminado del Redmi:** `bitpit.launcher`, hasta que el
   nuestro sea usable a diario (fin del Hito 2).
@@ -1063,6 +1082,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 | --- | --- | --- | --- |
 | 2026-11-02 | 0 | **Hito 0 terminado.** APK instalado en el Redmi y probado como HOME vía `cmd role` (Inicio vuelve, *atrás* no cierra); se restauró `bitpit.launcher`. Arranque en frío del build debug: 1,75 s (se mide en release en el Hito 11) | `plan.md`, `docs/xiaomi.md` |
 | 2026-11-02 | — | Tabla de modelo y esfuerzo por hito en §0, con equivalentes de Codex (`gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna`, `gpt-6-astra`) | `plan.md` |
+| 2026-11-02 | 1 | Sistema de diseño: `sync-theme.py`, generador de tokens (`build-logic`), tema, iconos, 10 componentes, galería debug, capturas Roborazzi, R6 y `docs/design-system.md` | `core/designsystem/`, `build-logic/`, `tools/`, `theme/`, `docs/design-system.md` |
 | 2026-11-02 | 0 | Historial reescrito en commits semánticos (force push a `main`); CI en verde en GitHub Actions | `.github/workflows/ci.yml` |
 | 2026-11-02 | 0 | Proyecto Gradle (AGP 9.5.0, Kotlin 2.4.21, Gradle 9.8.2), 15 módulos con convention plugins, `MainActivity` HOME verificada en emulador, calidad (ktlint, detekt 2 alpha, Lint, Kover, longitud de archivos), CI, `docs/setup.md`, sección de skills | `build-logic/`, `app/`, `.github/workflows/ci.yml`, `docs/setup.md` |
 | 2026-11-02 | 0 | Entorno completo: command-line tools 23.0.0, build-tools 37.0.0, imagen API 35 `google_apis`; AVD `redmi-api35` creado (1220×2712, 480 dpi, teclado) | `plan.md`, `~/.android/avd/redmi-api35.avd` |

@@ -31,10 +31,16 @@ Si prefieres no exportar `JAVA_HOME`, añade
 ## Comandos
 
 ```bash
-./gradlew check            # tests, Lint, ktlint, detekt, longitud de archivos
+./gradlew check            # todo: tests, Lint, ktlint, detekt, R1 (longitud), R6 (literales),
+                           # integridad del tema y capturas Roborazzi
 ./gradlew assembleDebug    # APK en app/build/outputs/apk/debug/app-debug.apk
 ./gradlew ktlintFormat     # corrige el formato
+./gradlew :core:designsystem:recordRoborazziDebug   # regrabar las capturas de referencia
+python3 tools/sync-theme.py                          # traer el tema desde ~/dotfiles
 ```
+
+Hace falta `python3` (3.10 o superior) para las herramientas de `tools/`. Los tests con Robolectric
+descargan el `android-all` de la API que usan la primera vez.
 
 ## Emulador del Redmi
 
