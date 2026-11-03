@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Tema de ventana: sólo evita un destello claro antes de que Compose dibuje.
+        void_background = `background` de colors.toml (plan.md §4.2); en el Hito 1
+        se genera desde los tokens.
+    -->
+    <color name="void_background">#0A0E0F</color>
+
+    <style name="Theme.Wh01s17Launcher" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/void_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowShowWallpaper">false</item>
+    </style>
+</resources>
