@@ -2,7 +2,7 @@ package com.wh01s17.launcher.core.designsystem.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -59,6 +60,43 @@ fun WhListRow(
     chevron: Boolean = false,
     size: WhListRowSize = WhListRowSize.Popup,
     menu: WhMenuStyle = WhTheme.surfaces.menu,
+    onLongClick: (() -> Unit)? = null,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+) {
+    val iconSize = rowMetrics(size).iconSize
+    WhListRow(
+        title = AnnotatedString(title),
+        onClick = onClick,
+        modifier = modifier,
+        selected = selected,
+        enabled = enabled,
+        leading = leadingIcon?.let { glyph -> { tint -> WhIcon(glyph, tint = tint, size = iconSize) } },
+        trailingText = trailingText,
+        chevron = chevron,
+        size = size,
+        menu = menu,
+        onLongClick = onLongClick,
+        interactionSource = interactionSource,
+    )
+}
+
+/**
+ * Variante con [title] enriquecido (p. ej. las letras que coinciden con una búsqueda) y un
+ * [leading] libre, como el icono de una app. [leading] recibe el color del contenido de la fila.
+ */
+@Composable
+fun WhListRow(
+    title: AnnotatedString,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    enabled: Boolean = true,
+    leading: (@Composable (contentColor: Color) -> Unit)? = null,
+    trailingText: String? = null,
+    chevron: Boolean = false,
+    size: WhListRowSize = WhListRowSize.Popup,
+    menu: WhMenuStyle = WhTheme.surfaces.menu,
+    onLongClick: (() -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val state = rememberWhControlState(interactionSource, selected, enabled)
@@ -81,11 +119,12 @@ fun WhListRow(
             modifier
                 .fillMaxWidth()
                 .whTouchTarget()
-                .clickable(
+                .combinedClickable(
                     interactionSource = interactionSource,
                     indication = null,
                     enabled = enabled,
                     role = Role.Button,
+                    onLongClick = onLongClick,
                     onClick = onClick,
                 ),
         contentAlignment = Alignment.Center,
@@ -102,7 +141,7 @@ fun WhListRow(
             horizontalArrangement = Arrangement.spacedBy(spacing.controlGap),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (leadingIcon != null) WhIcon(leadingIcon, tint = contentColor, size = metrics.iconSize)
+            leading?.invoke(contentColor)
             WhText(
                 title,
                 Modifier.weight(1f),
