@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Abrir el diálogo de desinstalación del sistema (permiso normal, sin confirmación aparte). -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <!--
+        Visibilidad de paquetes (Android 11+): sólo las apps con actividad MAIN/LAUNCHER, sin
+        QUERY_ALL_PACKAGES (plan.md §5.8).
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+</manifest>
