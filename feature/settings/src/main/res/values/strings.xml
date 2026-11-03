@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ajustes → Compatibilidad (plan.md §5.9, §7 Hito 2). -->
+    <string name="compat_title">Compatibilidad</string>
+    <string name="compat_intro">Navegación por gestos con este launcher. HyperOS desactiva sus gestos con launchers que no son el suyo: aquí se activan los gestos propios de wh01s17 y, si quieres, se ocultan los botones.</string>
+
+    <string name="compat_section_device">dispositivo</string>
+    <string name="compat_model">Modelo</string>
+    <string name="compat_system">Sistema</string>
+    <string name="compat_system_value">%1$s · API %2$d</string>
+    <string name="compat_not_xiaomi">No es un Xiaomi: los gestos propios funcionan, pero ocultar los botones sólo existe en HyperOS/MIUI.</string>
+
+    <string name="compat_section_gestures">gestos wh01s17</string>
+    <string name="compat_service">Servicio de accesibilidad</string>
+    <string name="compat_service_running">activo</string>
+    <string name="compat_service_stuck">activado, sin conexión</string>
+    <string name="compat_service_off">desactivado</string>
+    <string name="compat_open_accessibility">Abrir ajustes de accesibilidad</string>
+    <string name="compat_permission">Permiso para ocultar los botones</string>
+    <string name="compat_permission_granted">concedido</string>
+    <string name="compat_permission_missing">falta (ver «permiso por ADB»)</string>
+    <string name="compat_home">Launcher predeterminado</string>
+    <string name="compat_yes">sí</string>
+    <string name="compat_no">no</string>
+    <string name="compat_buttons">Botones de navegación</string>
+    <string name="compat_buttons_hidden">ocultos (force_fsg_nav_bar = 1)</string>
+    <string name="compat_buttons_visible">visibles (force_fsg_nav_bar = %1$s)</string>
+    <string name="compat_mode">Modo «gestos wh01s17»: ocultar los botones</string>
+    <string name="compat_mode_help">Los botones sólo se ocultan mientras el servicio está activo y este launcher es el predeterminado. Si el servicio se para, vuelven solos.</string>
+    <string name="compat_mode_needs">Para activarlo hacen falta el servicio activo y el permiso.</string>
+    <string name="compat_last_restore">La vigilancia devolvió los botones a las %1$s.</string>
+
+    <string name="compat_status_off">Modo desactivado: no se toca la barra de navegación.</string>
+    <string name="compat_status_not_home">Este launcher no es el predeterminado: los botones no se ocultan.</string>
+    <string name="compat_status_permission">Falta el permiso o HyperOS rechazó el cambio.</string>
+    <string name="compat_status_hidden">Funcionando: botones ocultos, gestos wh01s17 activos.</string>
+    <string name="compat_status_gave_up">HyperOS deshizo el cambio demasiadas veces: se dejó de insistir y los botones siguen visibles. Desactiva y vuelve a activar el modo para reintentarlo.</string>
+    <string name="compat_status_restored">El servicio se detuvo y los botones volvieron.</string>
+    <string name="compat_status_at">%1$s (%2$s)</string>
+
+    <string name="compat_section_background">que hyperos no lo cierre</string>
+    <string name="compat_background_help">HyperOS cierra servicios en segundo plano. En la ficha de la app pon el ahorro de batería en «Sin restricciones» y activa «Inicio automático».</string>
+    <string name="compat_open_app_details">Abrir la ficha de la app</string>
+    <string name="compat_open_autostart">Abrir «Inicio automático»</string>
+
+    <string name="compat_section_adb">permiso por adb</string>
+    <string name="compat_adb_steps">1. Opciones de desarrollador: activa «Depuración USB» y «Depuración USB (ajustes de seguridad)». Xiaomi pide cuenta Mi y SIM.\n2. Desconecta y vuelve a conectar el cable: la sesión de ADB anterior no puede escribir ajustes.\n3. En el PC:</string>
+    <string name="compat_adb_no_pc">Sin PC, LADB o Shizuku ejecutan el mismo comando desde el teléfono.</string>
+    <string name="compat_open_developer">Abrir opciones de desarrollador</string>
+    <string name="compat_copy">copiar</string>
+    <string name="compat_copied">Copiado</string>
+
+    <string name="compat_section_recovery">si te quedas sin navegación</string>
+    <string name="compat_recovery_reboot">Reinicia el teléfono (mantén pulsado el botón de encendido → Reiniciar): al arrancar, el launcher devuelve los botones. Con un PC:</string>
+    <string name="compat_recovery_official">Para volver al launcher de Xiaomi con sus gestos:</string>
+    <string name="compat_recovery_force_stop">No uses «Forzar detención» con este launcher mientras el modo está activo: Android apaga el servicio y los botones no vuelven hasta reiniciar.</string>
+</resources>
