@@ -17,3 +17,5 @@ keystore.properties
 # OS / editors
 .DS_Store
 *.swp
+__pycache__/
+*.pyc
