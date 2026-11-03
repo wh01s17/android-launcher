@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      # Mismo JDK que el JBR de Android Studio usado en local (plan.md §10).
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Check (tests, lint, ktlint, detekt, longitud de archivos)
+        run: ./gradlew check assembleDebug --continue
+
+      - name: Subir APK debug
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: wh01s17-launcher-debug
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Subir informes
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports
+          path: "**/build/reports/"
