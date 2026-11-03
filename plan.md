@@ -678,8 +678,8 @@ de trabajo de agente (S ≈ 1, M ≈ 2–3, L ≈ 4–6).
       `checkFileLength` dependiente de `check` (R1–R3).
 - [x] ktlint, detekt (con `LongMethod` R4), Lint, Kover configurados.
       detekt es 2.0.0-alpha.6: la 1.23 no corre con JDK 25 (§11.1).
-- [ ] CI GitHub Actions: `./gradlew check assembleDebug` + artefacto APK.
-      Escrito (`.github/workflows/ci.yml`); falta verlo en verde en GitHub.
+- [x] CI GitHub Actions: `./gradlew check assembleDebug` + artefacto APK
+      (`.github/workflows/ci.yml`, primera ejecución en verde el 2026-11-02).
 - [x] `AGENTS.md` y `CLAUDE.md` que remiten a `plan.md`.
 - [x] Registrar versiones elegidas en §11.
 - [ ] Redmi Note 13 Pro 5G: región (global), API 35 y `garnet` ya
@@ -1000,10 +1000,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   `./gradlew check` pasa. El APK funciona como HOME en el emulador
   `redmi-api35`.
 - **Última tarea completada:** proyecto Gradle multi-módulo, `MainActivity`
-  HOME, calidad (ktlint, detekt, Lint, Kover, longitud de archivos) y CI
-  escrito.
-- **Siguiente tarea:** ver el CI en verde en GitHub e instalar el APK en el
-  Redmi como launcher. Después, Hito 1.
+  HOME, calidad (ktlint, detekt, Lint, Kover, longitud de archivos) y CI en
+  verde en GitHub.
+- **Siguiente tarea:** instalar el APK en el Redmi como launcher (última
+  tarea del Hito 0). Después, Hito 1.
 - **Bloqueos:** en el Redmi, `adb install` falla con
   `INSTALL_FAILED_USER_RESTRICTED` hasta activar *Instalar vía USB* en
   Opciones de desarrollador (`docs/setup.md`).
@@ -1026,6 +1026,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-02 | 0 | Historial reescrito en commits semánticos (force push a `main`); CI en verde en GitHub Actions | `.github/workflows/ci.yml` |
 | 2026-11-02 | 0 | Proyecto Gradle (AGP 9.5.0, Kotlin 2.4.21, Gradle 9.8.2), 15 módulos con convention plugins, `MainActivity` HOME verificada en emulador, calidad (ktlint, detekt 2 alpha, Lint, Kover, longitud de archivos), CI, `docs/setup.md`, sección de skills | `build-logic/`, `app/`, `.github/workflows/ci.yml`, `docs/setup.md` |
 | 2026-11-02 | 0 | Entorno completo: command-line tools 23.0.0, build-tools 37.0.0, imagen API 35 `google_apis`; AVD `redmi-api35` creado (1220×2712, 480 dpi, teclado) | `plan.md`, `~/.android/avd/redmi-api35.avd` |
 | 2026-11-02 | — | SDK instalado vía Android Studio: API 37.0, build-tools 36.0.0, emulador, AVD API 37; faltan command-line tools e imagen API 35 | `plan.md` |
