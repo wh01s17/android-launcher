@@ -3,6 +3,7 @@ package com.wh01s17.launcher.core.designsystem.theme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.wh01s17.launcher.core.designsystem.tokens.WhTokens
 
 /**
@@ -17,7 +18,13 @@ data class WhSurfaceStyle(
     val borderWidth: Dp,
 )
 
-/** Menú y launcher: superficie, scrim y fila seleccionada (plan.md §4.6). */
+/**
+ * Menú y launcher: superficie, scrim y fila seleccionada (plan.md §4.6).
+ *
+ * [selectedBorderWidth] es 0 como en el shell: `selected-border` sólo se dibuja si el tema fija
+ * `selected-border-width`, y el tema wh01s17 no lo hace. La fila elegida se marca con el fondo y el
+ * texto verdes.
+ */
 @Immutable
 data class WhMenuStyle(
     val surface: WhSurfaceStyle,
@@ -25,6 +32,7 @@ data class WhMenuStyle(
     val selectedBackground: Color,
     val selectedText: Color,
     val selectedBorder: Color,
+    val selectedBorderWidth: Dp = 0.dp,
 )
 
 @Immutable
@@ -87,7 +95,7 @@ data class WhSurfaces(
                                 launcher.background.copy(alpha = launcher.backgroundAlpha),
                                 launcher.text,
                                 launcher.borderAlpha,
-                                spacing.borderSize,
+                                spacing.menuBorderSize,
                             ),
                         scrim = launcher.scrim.copy(alpha = launcher.scrimAlpha),
                         selectedBackground = launcher.selectedBackground.copy(alpha = launcher.selectedBackgroundAlpha),
@@ -101,7 +109,7 @@ data class WhSurfaces(
                                 menu.background.copy(alpha = menu.backgroundAlpha),
                                 menu.text,
                                 menu.borderAlpha,
-                                spacing.borderSize,
+                                spacing.menuBorderSize,
                             ),
                         scrim = menu.scrim.copy(alpha = menu.scrimAlpha),
                         selectedBackground = menu.selectedBackground.copy(alpha = menu.selectedBackgroundAlpha),

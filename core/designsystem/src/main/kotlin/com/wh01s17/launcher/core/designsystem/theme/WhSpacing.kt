@@ -16,7 +16,12 @@ data class WhSpacing(
     val controlGap: Dp,
     val controlPaddingX: Dp,
     val controlPaddingY: Dp,
+    /** Fila de popups y listas compactas (`popup-row-height`). */
     val rowHeight: Dp,
+    /** Fila del menú wh01s17: el shell la fija en 50 px (`Menu.qml`, `baseRowHeight`). */
+    val menuRowHeight: Dp,
+    /** Ancho del menú wh01s17 (`Menu.qml`, `cardWidth`). */
+    val menuWidth: Dp,
     val rowPaddingX: Dp,
     val panelGap: Dp,
     val panelPadding: Dp,
@@ -27,6 +32,8 @@ data class WhSpacing(
     /** Hueco al borde de la pantalla (`gaps_out` de `looknfeel.lua`, no sincronizado). */
     val gapsOut: Dp,
     val borderSize: Dp,
+    /** Borde del menú y del launcher: el shell usa `max(1, space(2))` porque su TOML no fija ancho. */
+    val menuBorderSize: Dp,
     /** 16 dp = 48 px a 480 dpi = 2 px por píxel del icono (rejilla de 24): nítido. */
     val iconSize: Dp,
     val iconSizeLarge: Dp,
@@ -34,6 +41,11 @@ data class WhSpacing(
     val touchTarget: Dp,
 ) {
     companion object {
+        /** Medidas que `Menu.qml` escribe en código (en px del shell) en vez de leerlas del TOML. */
+        private val SHELL_MENU_ROW_HEIGHT = 50.dp
+        private val SHELL_MENU_BORDER = 2.dp
+        private val SHELL_MENU_WIDTH = 300.dp
+
         fun create(fontScale: Float): WhSpacing {
             val s = WhTokens.Spacing
             val factor = s.scale * if (s.scaleWithFont) fontScale else 1f
@@ -42,6 +54,8 @@ data class WhSpacing(
                 controlPaddingX = s.controlPaddingX * factor,
                 controlPaddingY = s.controlPaddingY * factor,
                 rowHeight = s.popupRowHeight * factor,
+                menuRowHeight = SHELL_MENU_ROW_HEIGHT * factor,
+                menuWidth = SHELL_MENU_WIDTH * factor,
                 rowPaddingX = s.rowPaddingX * factor,
                 panelGap = s.panelGap * factor,
                 panelPadding = s.panelPadding * factor,
@@ -50,6 +64,7 @@ data class WhSpacing(
                 gapsIn = 2.dp,
                 gapsOut = 2.dp,
                 borderSize = WhTokens.Controls.normalBorderWidth,
+                menuBorderSize = SHELL_MENU_BORDER * factor,
                 iconSize = 16.dp,
                 iconSizeLarge = 24.dp,
                 touchTarget = 48.dp,

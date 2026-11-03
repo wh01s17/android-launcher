@@ -16,7 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.wh01s17.launcher.core.designsystem.icons.WhGlyph
 import com.wh01s17.launcher.core.designsystem.modifier.rememberWhControlState
 import com.wh01s17.launcher.core.designsystem.modifier.whTouchTarget
@@ -26,12 +29,23 @@ import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 
 private const val DISABLED_ALPHA = 0.4f
 
+/** Opacidad del `›` de los submenús en `Menu.qml`. */
+private const val CHEVRON_ALPHA = 0.36f
+private const val CHEVRON = "›"
+
 /**
- * Fila de un menú o lista: icono opcional, título y texto a la derecha (p. ej. un atajo).
+ * Tamaño de la fila. [Popup] es la fila compacta de popups y listas (`popup-row-height`);
+ * [Menu] reproduce la del menú wh01s17 (`Menu.qml`): 50 px, texto `heading` e icono grande.
+ */
+enum class WhListRowSize { Popup, Menu }
+
+/**
+ * Fila de un menú o lista: icono opcional, título, texto a la derecha (p. ej. un atajo) y, si
+ * [chevron], el `›` que marca un submenú.
  *
- * Estados (`selected-*` del menú, plan.md §4.6): la fila [selected] o pulsada lleva fondo,
- * borde y texto verdes; con el foco del teclado, el borde cian de los controles.
- * El dibujo mide [com.wh01s17.launcher.core.designsystem.theme.WhSpacing.rowHeight] y el toque 48 dp.
+ * Estados (`selected-*` del menú, plan.md §4.6): la fila [selected] o pulsada lleva fondo y texto
+ * verdes, sin borde, como en el shell ([WhMenuStyle.selectedBorderWidth]); con el foco del
+ * teclado, el borde cian de los controles. El toque siempre mide al menos 48 dp.
  */
 @Composable
 fun WhListRow(
@@ -42,20 +56,23 @@ fun WhListRow(
     enabled: Boolean = true,
     leadingIcon: WhGlyph? = null,
     trailingText: String? = null,
+    chevron: Boolean = false,
+    size: WhListRowSize = WhListRowSize.Popup,
     menu: WhMenuStyle = WhTheme.surfaces.menu,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val state = rememberWhControlState(interactionSource, selected, enabled)
     val highlighted = state == WhControlState.Pressed || selected
+    val metrics = rowMetrics(size)
     val spacing = WhTheme.spacing
     val shape = WhTheme.borders.shape
-    val focus = WhTheme.controls.focus
+    val focused = state == WhControlState.Focus
     val background = if (highlighted) menu.selectedBackground else Color.Transparent
-    val borderColor =
+    val (borderWidth, borderColor) =
         when {
-            state == WhControlState.Focus -> focus.border
-            highlighted -> menu.selectedBorder
-            else -> Color.Transparent
+            focused -> WhTheme.controls.focus.let { it.borderWidth to it.border }
+            highlighted -> menu.selectedBorderWidth to menu.selectedBorder
+            else -> 0.dp to Color.Transparent
         }
     val baseColor = if (highlighted) menu.selectedText else menu.surface.text
     val contentColor = if (enabled) baseColor else baseColor.copy(alpha = DISABLED_ALPHA)
@@ -77,18 +94,45 @@ fun WhListRow(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .defaultMinSize(minHeight = spacing.rowHeight)
+                    .defaultMinSize(minHeight = metrics.height)
                     .background(background, shape)
-                    .border(spacing.borderSize, borderColor, shape)
+                    // `border(0.dp)` pinta una línea de 1 px (hairline): sin ancho, no se aplica.
+                    .then(if (borderWidth > 0.dp) Modifier.border(borderWidth, borderColor, shape) else Modifier)
                     .padding(horizontal = spacing.rowPaddingX),
             horizontalArrangement = Arrangement.spacedBy(spacing.controlGap),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (leadingIcon != null) WhIcon(leadingIcon, tint = contentColor)
-            WhText(title, Modifier.weight(1f), color = contentColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (leadingIcon != null) WhIcon(leadingIcon, tint = contentColor, size = metrics.iconSize)
+            WhText(
+                title,
+                Modifier.weight(1f),
+                style = metrics.textStyle,
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             if (trailingText != null) {
                 WhText(trailingText, style = WhTheme.typography.bodySmall, color = WhTheme.colors.darkForeground, maxLines = 1)
             }
+            if (chevron) {
+                WhText(CHEVRON, style = metrics.textStyle, color = contentColor.copy(alpha = contentColor.alpha * CHEVRON_ALPHA))
+            }
         }
+    }
+}
+
+private class RowMetrics(
+    val height: Dp,
+    val textStyle: TextStyle,
+    val iconSize: Dp,
+)
+
+@Composable
+private fun rowMetrics(size: WhListRowSize): RowMetrics {
+    val spacing = WhTheme.spacing
+    val typography = WhTheme.typography
+    return when (size) {
+        WhListRowSize.Popup -> RowMetrics(spacing.rowHeight, typography.body, spacing.iconSize)
+        WhListRowSize.Menu -> RowMetrics(spacing.menuRowHeight, typography.heading, spacing.iconSizeLarge)
     }
 }

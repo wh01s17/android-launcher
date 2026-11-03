@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.wh01s17.launcher.core.designsystem.components.WhBracketLabel
 import com.wh01s17.launcher.core.designsystem.components.WhListRow
+import com.wh01s17.launcher.core.designsystem.components.WhListRowSize
 import com.wh01s17.launcher.core.designsystem.components.WhPanel
 import com.wh01s17.launcher.core.designsystem.components.WhScrim
 import com.wh01s17.launcher.core.designsystem.components.WhText
@@ -54,14 +56,41 @@ internal fun GalleryPanels() {
 }
 
 @Composable
+internal fun GalleryMenu() {
+    GallerySection("menu - Menu.qml") {
+        // Como el menú del shell (Super+Space): ancho de 300 px, filas de 50 px y `›` en los submenús.
+        WhPanel(Modifier.width(WhTheme.spacing.menuWidth), contentPadding = WhTheme.spacing.controlGap) {
+            Column {
+                WhText(
+                    "Go\u2026",
+                    Modifier.padding(horizontal = WhTheme.spacing.rowPaddingX),
+                    style = WhTheme.typography.heading,
+                    color = WhTheme.colors.darkForeground,
+                )
+                WhListRow("Apps", {}, leadingIcon = WhIcons.Apps, chevron = true, size = WhListRowSize.Menu, selected = true)
+                WhListRow("Style", {}, leadingIcon = WhIcons.Theme, chevron = true, size = WhListRowSize.Menu)
+                WhListRow(
+                    "Setup",
+                    {},
+                    leadingIcon = WhIcons.Settings,
+                    chevron = true,
+                    size = WhListRowSize.Menu,
+                    interactionSource = forcedSource(WhControlState.Focus),
+                )
+                WhListRow("About", {}, leadingIcon = WhIcons.Info, size = WhListRowSize.Menu)
+            }
+        }
+    }
+}
+
+@Composable
 internal fun GalleryLists() {
-    GallerySection("list rows") {
-        WhPanel(Modifier.fillMaxWidth(), contentPadding = WhTheme.spacing.controlGap) {
+    GallerySection("list rows - popups") {
+        WhPanel(Modifier.fillMaxWidth(), style = WhTheme.surfaces.popup, contentPadding = WhTheme.spacing.controlGap) {
             // Las filas van juntas: el hueco de WhPanel es para secciones, no para listas.
             Column {
                 WhListRow("Apps", {}, leadingIcon = WhIcons.Apps, trailingText = "Super+Alt+Space")
                 WhListRow("Style", {}, leadingIcon = WhIcons.Theme, selected = true)
-                WhListRow("Setup", {}, leadingIcon = WhIcons.Settings, interactionSource = forcedSource(WhControlState.Focus))
                 WhListRow(
                     "System",
                     {},

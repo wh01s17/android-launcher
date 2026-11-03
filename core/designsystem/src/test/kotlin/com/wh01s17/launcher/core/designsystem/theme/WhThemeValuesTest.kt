@@ -82,4 +82,18 @@ class WhThemeValuesTest {
         assertEquals(Color(0xFFFF6B66), surfaces.bar.active)
         assertEquals(0.97f, surfaces.tooltip.background.alpha, ALPHA_TOLERANCE)
     }
+
+    @Test
+    fun `menu measures follow Menu qml`() {
+        val s = WhSpacing.create(1.25f)
+        assertEquals(62.5f, s.menuRowHeight.value, 0.001f)
+        assertEquals(2f, WhSpacing.create(1f).menuBorderSize.value, 0f)
+        val surfaces = WhSurfaces.create(s)
+        // El menú y el launcher llevan el borde de 2 px del shell; los popups, el de su TOML.
+        assertEquals(s.menuBorderSize, surfaces.menu.surface.borderWidth)
+        assertEquals(s.menuBorderSize, surfaces.launcher.surface.borderWidth)
+        assertEquals(1f, surfaces.popup.borderWidth.value, 0f)
+        // Sin `selected-border-width` en el tema, la fila elegida no lleva borde.
+        assertEquals(0f, surfaces.menu.selectedBorderWidth.value, 0f)
+    }
 }

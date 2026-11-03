@@ -62,6 +62,9 @@ class GalleryScreenshotTest {
     fun panels() = capture("panels") { GalleryPanels() }
 
     @Test
+    fun menu() = capture("menu") { GalleryMenu() }
+
+    @Test
     fun lists() = capture("lists") { GalleryLists() }
 
     @Test

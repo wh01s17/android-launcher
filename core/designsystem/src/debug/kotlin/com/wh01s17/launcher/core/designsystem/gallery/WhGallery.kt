@@ -47,6 +47,7 @@ fun WhGallery(modifier: Modifier = Modifier) {
             GalleryButtons()
             GalleryFields()
             GalleryPanels()
+            GalleryMenu()
             GalleryLists()
             GalleryBar()
         }
