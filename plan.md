@@ -329,8 +329,8 @@ todas en `dp` y multiplicadas por `spacing.scale`.
 | Superficie | Fondo | α | Borde |
 | --- | --- | --- | --- |
 | Barra | `#11161a` | 0.96 (o transparente, `bar.transparent`) | activo @ 0.55 |
-| Menú / launcher | `#11161a` | 0.97–0.98 | activo @ 0.90; scrim `#0a0e0f` @ 0.65–0.70 |
-| Seleccionado en menú | `#84c959` @ 0.10 | — | `#84c959` @ 0.55, texto verde |
+| Menú / launcher | `#11161a` | 0.97–0.98 | activo @ 0.90, 2 px (`max(1, space(2))` de `Menu.qml`); scrim `#0a0e0f` @ 0.65–0.70 |
+| Seleccionado en menú | `#84c959` @ 0.10 | — | Ninguno (`selected-border-width` no existe → 0, como en el shell); texto verde |
 | Popups / notificaciones | `#11161a` | 0.98 | activo 1 px @ 0.90 |
 | Tooltip | `#171e23` | 0.97 | `#33454f` @ 0.90 |
 
@@ -747,10 +747,12 @@ vuelve a fallar si la justificación queda vacía.
 - [x] Componentes: `WhText`, `WhIcon`, `WhButton`, `WhPanel`, `WhScrim`,
       `WhBracketLabel`, `WhListRow`, `WhTextField`, `WhTooltip`, `WhToggle`.
 - [x] Pantalla *gallery* (sólo debug, `GalleryActivity`) con todos los componentes y estados.
-- [x] Capturas Roborazzi de la galería como referencia (8, en `src/test/screenshots/`).
+- [x] Capturas Roborazzi de la galería como referencia (9, en `src/test/screenshots/`).
 - [x] `tools/check-no-literal-colors.sh` (R6) enganchado a `check`.
-- [ ] Contrastar a ojo el menú y los popups con el shell abierto al lado
-      (`docs/design-system.md`, última fila de la comparación).
+- [x] Contrastar a ojo el menú y los popups con el shell abierto al lado
+      (`docs/design-system.md`). Hecho el 2026-11-03 con capturas de `grim` y el código del
+      shell: se corrigieron el borde del menú (2 px), la fila seleccionada (sin borde) y las
+      medidas de fila de `Menu.qml` (`WhListRowSize.Menu`).
 
 **Terminado cuando:** la galería coincide con el shell del escritorio
 (comparación visual manual documentada en `docs/design-system.md`) y no hay colores
@@ -1027,6 +1029,9 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-02 | Dirección del borde activo `(cos θ, sin θ)` en pantalla: 45° = arriba-izq. → abajo-der. | Medido en una ventana real de Hyprland (`docs/design-system.md`) |
 | 2026-11-02 | Máximo de 140 columnas por línea (ktlint y detekt) | Valor por defecto de `ktlint_official`; el modo `android` de ktlint imponía 100 |
 | 2026-11-02 | Skills `android-di-hilt` y `android-networking-retrofit-okhttp` **no aplican** | Contradicen la DI manual (§5.1) y R9 (sin red) |
+| 2026-11-03 | Las medidas que `Menu.qml` escribe en código (fila de 50 px, ancho de 300 px, borde de 2 px) se copian en `WhSpacing` | No están en ningún TOML; sin ellas el menú no coincide con el shell (`docs/design-system.md`) |
+| 2026-11-03 | La fila seleccionada del menú no lleva borde aunque el TOML defina `selected-border` | El shell sólo lo dibuja si el tema fija `selected-border-width`, y el tema wh01s17 no lo hace |
+| 2026-11-03 | Las notificaciones usan Departure Mono, no la Liberation Sans del shell | Una sola familia en el launcher (§4.4); revisable en el Hito 8 si se prefiere igualar el shell |
 
 ### 11.2 Riesgos
 
@@ -1050,14 +1055,12 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Hito en curso:** Hito 1, hecho salvo un punto: contrastar a ojo el menú y los
-  popups con el shell abierto al lado (`docs/design-system.md`). **Hito 0 terminado.**
-- **Última tarea completada:** sistema de diseño completo: tokens generados desde los
-  dotfiles, tema, 10 componentes, galería (debug), 8 capturas Roborazzi. Probado en el
-  emulador y en el Redmi. `./gradlew check` en verde.
-- **Siguiente tarea:** confirmar el punto pendiente del Hito 1 y empezar el Hito 2
-  (índice de apps y navegación por accesibilidad). Modelo recomendado en §0:
-  Opus 5.5 · `xhigh` (o `gpt-6.1-sol` · `xhigh`).
+- **Hito en curso:** Hito 2 (sin empezar). **Hitos 0 y 1 terminados.**
+- **Última tarea completada:** comparación visual del Hito 1 con el shell (menú y
+  notificaciones). Se corrigieron el borde del menú, la fila seleccionada y las medidas de
+  fila; 9 capturas Roborazzi. Probado en el Redmi. `./gradlew check` en verde.
+- **Siguiente tarea:** Hito 2, primera tarea: `AppRepository` con `LauncherApps`. Modelo
+  recomendado en §0: Opus 5.5 · `xhigh` (o `gpt-6.1-sol` · `xhigh`).
 - **Bloqueos:** ninguno.
 - **Launcher predeterminado del Redmi:** `bitpit.launcher`, hasta que el
   nuestro sea usable a diario (fin del Hito 2).
@@ -1080,6 +1083,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-03 | 1 | **Hito 1 terminado.** Comparación con el shell (capturas `grim` del menú y de una notificación, código de `Menu.qml`): borde del menú a 2 px, fila seleccionada sin borde, `WhListRowSize.Menu` con las medidas de `Menu.qml` y `›`, nueva sección y captura *menu*. Notificaciones: se mantiene Departure Mono (§11.1) | `core/designsystem/`, `docs/design-system.md` |
 | 2026-11-02 | 0 | **Hito 0 terminado.** APK instalado en el Redmi y probado como HOME vía `cmd role` (Inicio vuelve, *atrás* no cierra); se restauró `bitpit.launcher`. Arranque en frío del build debug: 1,75 s (se mide en release en el Hito 11) | `plan.md`, `docs/xiaomi.md` |
 | 2026-11-02 | — | Tabla de modelo y esfuerzo por hito en §0, con equivalentes de Codex (`gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna`, `gpt-6-astra`) | `plan.md` |
 | 2026-11-02 | 1 | Sistema de diseño: `sync-theme.py`, generador de tokens (`build-logic`), tema, iconos, 10 componentes, galería debug, capturas Roborazzi, R6 y `docs/design-system.md` | `core/designsystem/`, `build-logic/`, `tools/`, `theme/`, `docs/design-system.md` |
