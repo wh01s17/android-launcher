@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Sólo debug: adb shell am start -n com.wh01s17.launcher.debug/com.wh01s17.launcher.GalleryActivity -->
+        <activity
+            android:name=".GalleryActivity"
+            android:exported="true"
+            android:label="wh01s17 Gallery"
+            android:theme="@style/Theme.Wh01s17Launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
