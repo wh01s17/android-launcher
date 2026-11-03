@@ -718,10 +718,11 @@ de trabajo de agente (S ≈ 1, M ≈ 2–3, L ≈ 4–6).
       (`.github/workflows/ci.yml`, primera ejecución en verde el 2026-11-02).
 - [x] `AGENTS.md` y `CLAUDE.md` que remiten a `plan.md`.
 - [x] Registrar versiones elegidas en §11.
-- [ ] Redmi Note 13 Pro 5G: región (global), API 35 y `garnet` ya
-      confirmados por ADB (§12). `force_fsg_nav_bar` ya se probó con otro
-      launcher ajeno (`docs/xiaomi.md`). Falta instalar el APK en el Redmi
-      (requiere *Instalar vía USB*) y elegirlo como launcher.
+- [x] Redmi Note 13 Pro 5G: región (global), API 35 y `garnet` confirmados
+      por ADB; `force_fsg_nav_bar` probado con otro launcher ajeno
+      (`docs/xiaomi.md`). APK instalado (con *Instalar vía USB*) y probado como
+      HOME: Inicio vuelve al launcher y *atrás* no lo cierra. Se restauró
+      `bitpit.launcher` como predeterminado.
 
 **Terminado cuando:** el APK se instala, se elige como launcher y muestra
 pantalla negra wh01s17; CI verde. Un archivo de prueba de 1001 líneas hace
@@ -1032,17 +1033,15 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Hito en curso:** Hito 0, casi terminado. El proyecto compila y
-  `./gradlew check` pasa. El APK funciona como HOME en el emulador
-  `redmi-api35`.
-- **Última tarea completada:** proyecto Gradle multi-módulo, `MainActivity`
-  HOME, calidad (ktlint, detekt, Lint, Kover, longitud de archivos) y CI en
-  verde en GitHub.
-- **Siguiente tarea:** instalar el APK en el Redmi como launcher (última
-  tarea del Hito 0). Después, Hito 1.
-- **Bloqueos:** en el Redmi, `adb install` falla con
-  `INSTALL_FAILED_USER_RESTRICTED` hasta activar *Instalar vía USB* en
-  Opciones de desarrollador (`docs/setup.md`).
+- **Hito en curso:** Hito 1 (no iniciado). **Hito 0 terminado** el
+  2026-11-02: cumple su definición de terminado en el emulador y en el Redmi.
+- **Última tarea completada:** prueba del APK como launcher predeterminado en
+  el Redmi (Inicio, *atrás*) y restauración de `bitpit.launcher`.
+- **Siguiente tarea:** Hito 1, `tools/sync-theme.py` y `theme/wh01s17/*.toml`.
+  Modelo recomendado en §0: Sonnet 5.5 · `high` (o `gpt-6.1-terra` · `high`).
+- **Bloqueos:** ninguno.
+- **Launcher predeterminado del Redmi:** `bitpit.launcher`, hasta que el
+  nuestro sea usable a diario (fin del Hito 2).
 - **Dispositivo objetivo:** Redmi Note 13 Pro 5G, HyperOS
   `OS2.0.204.0.VNRMIXM` (ROM global), Android 15 / API 35, sin más
   actualizaciones. ADB funciona desde el PC de desarrollo, con
@@ -1062,6 +1061,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-02 | 0 | **Hito 0 terminado.** APK instalado en el Redmi y probado como HOME vía `cmd role` (Inicio vuelve, *atrás* no cierra); se restauró `bitpit.launcher`. Arranque en frío del build debug: 1,75 s (se mide en release en el Hito 11) | `plan.md`, `docs/xiaomi.md` |
 | 2026-11-02 | — | Tabla de modelo y esfuerzo por hito en §0, con equivalentes de Codex (`gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna`, `gpt-6-astra`) | `plan.md` |
 | 2026-11-02 | 0 | Historial reescrito en commits semánticos (force push a `main`); CI en verde en GitHub Actions | `.github/workflows/ci.yml` |
 | 2026-11-02 | 0 | Proyecto Gradle (AGP 9.5.0, Kotlin 2.4.21, Gradle 9.8.2), 15 módulos con convention plugins, `MainActivity` HOME verificada en emulador, calidad (ktlint, detekt 2 alpha, Lint, Kover, longitud de archivos), CI, `docs/setup.md`, sección de skills | `build-logic/`, `app/`, `.github/workflows/ci.yml`, `docs/setup.md` |

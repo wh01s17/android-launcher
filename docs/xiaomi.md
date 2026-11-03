@@ -45,6 +45,10 @@ cada tabla.
    `com.miui.home`.
 5. Al restaurar `force_fsg_nav_bar = 0`, `navigation_mode` vuelve solo a `0`
    en unos segundos.
+6. Con *Instalar vía USB* activado (`persist.security.adbinstall = 1`),
+   `adb install` funciona. `cmd role add-role-holder android.app.role.HOME
+   <paquete>` cambia el launcher predeterminado sin diálogos, y sirve tanto
+   para poner el nuestro como para restaurar `bitpit.launcher`.
 
 **Conclusión:** la capa 2 sola no sirve en este equipo. La navegación con
 gestos depende de la capa 3 (accesibilidad) y la capa 2 sólo se usa para
@@ -58,6 +62,7 @@ ocultar los botones mientras la capa 3 está viva (modo *gestos wh01s17*).
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-11-02 | `bitpit.launcher` | Capa 2 sola (`force_fsg_nav_bar = 1`) | ✗ | ✗ | ✗ | — |
 | 2026-11-02 | `bitpit.launcher` | Capa 1 (3 botones) | ✓ | ✓ | ✓ | — |
+| 2026-11-02 | wh01s17 (Hito 0, pantalla negra) | Capa 1 (3 botones) | ✓ | ✓ (no cierra el launcher) | — | — |
 | — | wh01s17 | Capa 3 con botones visibles | — | — | — | — |
 | — | wh01s17 | Modo *gestos wh01s17* (capas 2 + 3) | — | — | — | — |
 
