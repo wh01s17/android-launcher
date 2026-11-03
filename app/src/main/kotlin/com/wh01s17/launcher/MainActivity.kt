@@ -10,11 +10,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import com.wh01s17.launcher.core.designsystem.WhPalette
+import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import android.graphics.Color as AndroidColor
 
 /**
- * Pantalla de inicio (rol HOME). En el Hito 0 sólo dibuja el fondo wh01s17;
+ * Pantalla de inicio (rol HOME). Por ahora sólo dibuja el fondo wh01s17;
  * los workspaces llegan en el Hito 4 (plan.md §7).
  */
 class MainActivity : ComponentActivity() {
@@ -34,12 +34,14 @@ class MainActivity : ComponentActivity() {
             },
         )
         setContent {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(WhPalette.Void),
-            )
+            WhTheme {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(WhTheme.colors.background),
+                )
+            }
         }
     }
 }
