@@ -1,0 +1,4 @@
+(^|/)build/
+\.(png|jpg|jpeg|webp|otf|ttf|jar)$
+^gradle/wrapper/
+\.lockfile$
