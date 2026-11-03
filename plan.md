@@ -603,6 +603,14 @@ mantiene el ajuste oculto `force_fsg_nav_bar`:
     nuevo el launcher oficial, que vuelve a los botones.
 - Test instrumentado obligatorio: matar el servicio debe dejar
   `force_fsg_nav_bar = 0` en menos de 1 s.
+- **Implementación (Hito 2):** el servicio corre en el proceso `:nav`. Si ese proceso
+  muere, `onUnbind` no llega a correr; por eso el launcher se enlaza a
+  `NavigationLinkService` (en `:nav`) y Android le avisa al instante. Android marca el
+  servicio muerto como *crashed* y MIUI no lo reinicia: `AccessibilityReviver` lo vuelve
+  a activar (con `WRITE_SECURE_SETTINGS`, si sigue en la lista del usuario). El modo sólo
+  actúa si somos el HOME: con `com.miui.home`, `force_fsg_nav_bar = 1` es su estado normal.
+  **Límite conocido:** «Forzar detención» quita el servicio de la lista y mata los dos
+  procesos; la salida es reiniciar (`docs/xiaomi.md`, observación 9).
 
 **Capa 3: gestos de borde propios** (navegación principal en el Redmi, Hito 2;
 respaldo en otros equipos). El mismo servicio de
@@ -784,14 +792,20 @@ literales fuera del módulo (R6, comprobado por `check`).
       launcher a diario. `feature/menu/drawer`: deslizar hacia arriba o tocar el inicio;
       Enter abre el primero; mantener pulsado → atajos, info, desinstalar; marcas de
       trabajo, pausa y suspendida, que cambian en vivo.
-- [ ] `WhNavigationService` (capa 3 de §5.9): gestos de borde para atrás,
+- [x] `WhNavigationService` (capa 3 de §5.9): gestos de borde para atrás,
       inicio y recientes con `performGlobalAction`. Es la navegación principal
-      en el Redmi.
-- [ ] `XiaomiGestureCompat` (capa 2 de §5.9) en modo *gestos wh01s17*:
+      en el Redmi. `core/system/navigation`: franjas `TYPE_ACCESSIBILITY_OVERLAY`
+      (14/16 dp), `EdgeGestureRecognizer` puro, sin tapar el teclado ni la barra de
+      estado, suspendidas con la pantalla bloqueada. Proceso propio `:nav`.
+- [x] `XiaomiGestureCompat` (capa 2 de §5.9) en modo *gestos wh01s17*:
       oculta los botones sólo con la capa 3 viva, con la vigilancia que
-      restaura `0` y tests con un `SettingsGateway` falso.
-- [ ] Ajustes → Compatibilidad: asistente con estado, comandos ADB y accesos
-      a batería/inicio automático.
+      restaura `0` y tests con un `SettingsGateway` falso. `GestureModeController`
+      (sólo si somos HOME, 5 reescrituras/min), `NavigationWatchdog` (enlace con `:nav`,
+      `onResume`) y `AccessibilityReviver`. Test instrumentado `NavigationWatchdogTest`
+      en verde en el Redmi.
+- [x] Ajustes → Compatibilidad: asistente con estado, comandos ADB y accesos
+      a batería/inicio automático. `feature/settings/compat` + `SettingsActivity`
+      (mantener pulsado el inicio).
 
 **Terminado cuando:** se puede usar como launcher diario mínimo en el
 Redmi, con gestos wh01s17 (capas 2 y 3) o con 3 botones (capa 1), y matar el
@@ -1008,6 +1022,8 @@ adb shell cmd role add-role-holder android.app.role.HOME com.wh01s17.launcher
 adb shell pm grant com.wh01s17.launcher android.permission.WRITE_SECURE_SETTINGS
 adb shell settings get global force_fsg_nav_bar    # 1 = gestos forzados
 adb shell settings put global force_fsg_nav_bar 0  # volver a 3 botones
+./gradlew :app:connectedDebugAndroidTest -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true
+                                # test de la vigilancia en el Redmi (docs/xiaomi.md)
 tools/check-file-length.sh      # control R1 rápido
 python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 ```
@@ -1047,6 +1063,12 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-03 | Las medidas que `Menu.qml` escribe en código (fila de 50 px, ancho de 300 px, borde de 2 px) se copian en `WhSpacing` | No están en ningún TOML; sin ellas el menú no coincide con el shell (`docs/design-system.md`) |
 | 2026-11-03 | La fila seleccionada del menú no lleva borde aunque el TOML defina `selected-border` | El shell sólo lo dibuja si el tema fija `selected-border-width`, y el tema wh01s17 no lo hace |
 | 2026-11-03 | Las notificaciones usan Departure Mono, no la Liberation Sans del shell | Una sola familia en el launcher (§4.4); revisable en el Hito 8 si se prefiere igualar el shell |
+| 2026-11-03 | `WhNavigationService` en un proceso propio (`:nav`) y `NavigationLinkService` para que el launcher note su muerte | Si el proceso muere, `onUnbind`/`onDestroy` no corren; con el enlace, los botones vuelven en ~70 ms (medido en el Redmi) |
+| 2026-11-03 | Reactivar el servicio si murió (`AccessibilityReviver`: quitarlo y ponerlo en `enabled_accessibility_services`; máx. 3 cada 10 min; desde `onResume`, tras 3 s de margen) | Android lo deja *crashed* y MIUI rechaza reiniciarlo sin *Inicio automático*; sin esto, los gestos quedarían apagados hasta tocar Ajustes |
+| 2026-11-03 | El modo *gestos wh01s17* sólo oculta o restaura botones si este launcher es el HOME | Con el oficial, `force_fsg_nav_bar = 1` es su estado normal: tocarlo quitaría sus gestos |
+| 2026-11-03 | Estado entre procesos en archivos de un solo escritor (`NavigationFiles`, temporal + `rename`) | `SharedPreferences` no se sincroniza entre procesos |
+| 2026-11-03 | La capa 3 declara `canRetrieveWindowContent` sólo para ver si el teclado está abierto; nunca lee contenido | Sin ella `getWindows()` no da la ventana del IME y las franjas taparían el teclado |
+| 2026-11-03 | AndroidX Test runner 1.7.0 y ext-junit 1.3.0 (`connectedDebugAndroidTest`) | Últimas estables, alineadas con `androidx.test:core` 1.7.0 |
 
 ### 11.2 Riesgos
 
@@ -1065,23 +1087,28 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | MIUI mata el servicio de accesibilidad | Se pierden los gestos de la capa 3 | Batería *Sin restricciones* + *Inicio automático* desde el asistente |
 | Quedar sin navegación: botones ocultos (`force_fsg_nav_bar = 1`) sin la capa 3 viva | Teléfono inutilizable sin ADB | Vigilancia del modo *gestos wh01s17* (§5.9) y test instrumentado; recuperación documentada |
 | `pm grant` rechazado en Xiaomi | Capa 2 inutilizable | Activar *Depuración USB (ajustes de seguridad)*; si no, capa 3 |
+| «Forzar detención» del launcher con el modo activo | Sin botones ni gestos con otra app delante (Android quita el servicio y mata los dos procesos) | Aviso en el asistente; reiniciar devuelve los botones (`onResume`); ADB (`docs/xiaomi.md`) |
+| El proceso `:nav` muere y Android/MIUI no lo reinician | Gestos propios apagados | Vigilancia devuelve los botones al instante y `AccessibilityReviver` reactiva el servicio |
 
 ---
 
 ## 12. Estado actual
 
-- **Hito en curso:** Hito 2. **Hitos 0 y 1 terminados.**
-- **Última tarea completada:** drawer provisional (`feature/menu/drawer`) con búsqueda
-  difusa (`core/fuzzy`), lanzamiento desde el icono, info, desinstalar y atajos. Probado en
-  el Redmi (como HOME temporal para los atajos).
-- **Siguiente tarea:** `WhNavigationService` (capa 3 de §5.9). Es la parte delicada del
-  hito: no dejar el teléfono sin navegación. Modelo recomendado en §0: Opus 5.5 · `xhigh`.
-  Pendiente de medir: la primera carga del índice tarda ≈ 3,4 s en debug; si sigue lenta
-  en release, guardar el último índice en disco (Hito 11).
+- **Hito en curso:** Hito 3 (sin empezar). **Hitos 0, 1 y 2 terminados.**
+- **Última tarea completada:** navegación propia (capa 3), modo *gestos wh01s17* con
+  vigilancia y reactivación (capa 2) y asistente de Compatibilidad. Probado en el Redmi
+  con botones visibles y ocultos; `NavigationWatchdogTest` en verde.
+- **Siguiente tarea:** Hito 3, barra (`BarModule`, registro, parseo de `bar`). Modelo
+  recomendado en §0: Sonnet 5.5 · `high`. Pendientes del Hito 2 sin bloquear: medir en
+  release la primera carga del índice (≈ 3,4 s en debug) y probar los gestos tras un
+  reinicio del teléfono (columna «Tras reinicio» de `docs/xiaomi.md`).
+- **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
+  launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio),
+  activar el modo. El permiso `WRITE_SECURE_SETTINGS` ya está concedido a la app debug.
 - **Bloqueos:** ninguno.
 - **Launcher predeterminado del Redmi:** `com.miui.home` con gestos
-  (`force_fsg_nav_bar = 1`, `navigation_mode = 2`), comprobado el 2026-11-03, hasta que el
-  nuestro sea usable a diario (fin del Hito 2). Ya no es `bitpit.launcher`.
+  (`force_fsg_nav_bar = 1`, `navigation_mode = 2`), restaurado el 2026-11-03 tras las
+  pruebas. Cambiar a wh01s17 es decisión del usuario (pasos arriba).
 - **Dispositivo objetivo:** Redmi Note 13 Pro 5G, HyperOS
   `OS2.0.204.0.VNRMIXM` (ROM global), Android 15 / API 35, sin más
   actualizaciones. ADB funciona desde el PC de desarrollo, con
@@ -1101,6 +1128,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-03 | 2 | **Hito 2 terminado.** Capa 3 (`WhNavigationService` en `:nav`, franjas de borde, reconocedor puro, teclado y bloqueo), capa 2 (`GestureModeController`, `NavigationFiles`, `NavigationWatchdog` con enlace a `:nav`, `AccessibilityReviver`), asistente Ajustes → Compatibilidad, `NavigationWatchdogTest` (instrumentado). En el Redmi: atrás/inicio/recientes con y sin botones; matar `:nav` → botones en 66 ms y servicio revivido en 760 ms; «Forzar detención» documentado como límite. Teléfono restaurado a `com.miui.home` con gestos | `core/system/`, `feature/settings/`, `app/`, `docs/xiaomi.md` |
 | 2026-11-03 | 2 | Acciones de app (`LauncherAppActions`: lanzar desde el icono, info, desinstalar, atajos), `core/fuzzy` (`FuzzyIndex`, `FuzzyMatcher`, benchmark), drawer provisional (`AppDrawerViewModel` + Compose, 7 pruebas), `HomeScreen`; `WhListRow` con título enriquecido, `leading` y `onLongClick`. Probado en el Redmi: búsqueda, Enter, toque, menú, info, diálogo de desinstalar (cancelado), suspensión en vivo (`pm suspend`) y atajos como HOME temporal; se restauró `com.miui.home` y `force_fsg_nav_bar = 1` | `core/apps/actions/`, `core/fuzzy/`, `feature/menu/`, `app/` |
 | 2026-11-03 | 2 | Iconos: `IconStyle` (`monochrome`/`original`/`pixelated`), `IconRenderer`, `IconCache` LRU en bytes, `LauncherIconLoader` con insignia de perfil; `AppEntry.iconStamp`. 9 pruebas con Robolectric (píxeles reales) | `core/apps/.../icons/` |
 | 2026-11-03 | 2 | `AppRepository`: catálogo ordenado por idioma, perfiles (personal, trabajo, espacio privado), avisos de `LauncherApps` y broadcasts de perfil/idioma, `<queries>` MAIN/LAUNCHER; `AppContainer` y `LauncherApplication` (DI manual). 18 pruebas con un gateway falso | `core/apps/`, `app/.../di/AppContainer.kt` |
