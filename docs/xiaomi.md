@@ -50,6 +50,11 @@ cada tabla.
    <paquete>` cambia el launcher predeterminado sin diálogos, y sirve tanto
    para poner el nuestro como para restaurar `bitpit.launcher`.
 
+7. (2026-11-03) Al volver a poner `com.miui.home` con `cmd role add-role-holder`, HyperOS
+   **no** restaura los gestos: deja `force_fsg_nav_bar = 0` y `navigation_mode = 0` (3
+   botones). Hay que escribir `force_fsg_nav_bar = 1` a mano; con el launcher oficial,
+   `navigation_mode` pasa solo a `2` y los gestos funcionan.
+
 **Conclusión:** la capa 2 sola no sirve en este equipo. La navegación con
 gestos depende de la capa 3 (accesibilidad) y la capa 2 sólo se usa para
 ocultar los botones mientras la capa 3 está viva (modo *gestos wh01s17*).
@@ -72,6 +77,14 @@ Si el teléfono queda sin botones ni gestos:
 
 ```bash
 adb shell settings put global force_fsg_nav_bar 0
+```
+
+Con el launcher oficial de nuevo como predeterminado, para recuperar los gestos (no los
+devuelve solo, observación 7):
+
+```bash
+adb shell cmd role add-role-holder android.app.role.HOME com.miui.home 0
+adb shell settings put global force_fsg_nav_bar 1
 ```
 
 O, sin PC: elegir de nuevo el launcher oficial en *Ajustes → Aplicaciones →

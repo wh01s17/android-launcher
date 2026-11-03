@@ -760,15 +760,30 @@ literales fuera del módulo (R6, comprobado por `check`).
 
 ### Hito 2 — Índice de apps y lanzamiento (M)
 
-- [ ] `AppRepository` con `LauncherApps` + callback de cambios de paquetes,
-      perfiles de usuario/trabajo.
-- [ ] Carga de iconos en segundo plano con caché LRU; estilos monocromo /
-      original / pixelado.
-- [ ] Lanzar app con animación de origen (`ActivityOptions.makeScaleUpAnimation`).
-- [ ] Acciones: info de la app, desinstalar, atajos de app (si somos HOME).
-- [ ] `core/fuzzy` con tests y benchmark (500 apps < 16 ms).
-- [ ] Drawer de apps provisional (lista + búsqueda) para poder usar el
-      launcher a diario.
+- [x] `AppRepository` con `LauncherApps` + callback de cambios de paquetes,
+      perfiles de usuario/trabajo. `LauncherAppRepository` relee sólo el paquete que cambia
+      y todo con un cambio de perfil o de idioma; `LauncherAppsGateway` aísla Android para las
+      pruebas; `AppKey` con el formato `paquete/.Clase[@serial]` de la config. Conectado en
+      `AppContainer`. En el Redmi: 156 apps, primera carga ≈ 3,4 s en debug (los nombres).
+- [x] Carga de iconos en segundo plano con caché LRU; estilos monocromo /
+      original / pixelado. `LauncherIconLoader` + `IconRenderer` + `IconCache` (1/8 del heap,
+      clave con `iconStamp`, que cambia al actualizar la app). Monocromo: capa `monochrome`
+      teñida a 1,5× sin máscara; sin ella, original al 30 % de saturación. Pixelado: rejilla
+      de 24, alfa 0/255. En el Redmi: 72 iconos en 377 ms. Los iconos antiguos (no
+      adaptativos) se dibujan tal cual, sin redondear.
+- [x] Lanzar app con animación de origen (`ActivityOptions.makeScaleUpAnimation`).
+      `LauncherAppActions.launch` con `LaunchOrigin` (vista + icono); un perfil en pausa pide
+      reanudarse (`requestQuietModeEnabled`) en vez de fallar.
+- [x] Acciones: info de la app, desinstalar, atajos de app (si somos HOME).
+      Diálogo del sistema para desinstalar (`REQUEST_DELETE_PACKAGES`, normal); atajos del
+      manifiesto y dinámicos, máx. 4. Probado en el Redmi como HOME temporal.
+- [x] `core/fuzzy` con tests y benchmark (500 apps < 16 ms). DP tipo fzf, sin tildes,
+      varias palabras, palabras clave (paquete) sólo como subcadena, bonus de uso. Mediana
+      0,19 ms en el PC; cobertura 99 %.
+- [x] Drawer de apps provisional (lista + búsqueda) para poder usar el
+      launcher a diario. `feature/menu/drawer`: deslizar hacia arriba o tocar el inicio;
+      Enter abre el primero; mantener pulsado → atajos, info, desinstalar; marcas de
+      trabajo, pausa y suspendida, que cambian en vivo.
 - [ ] `WhNavigationService` (capa 3 de §5.9): gestos de borde para atrás,
       inicio y recientes con `performGlobalAction`. Es la navegación principal
       en el Redmi.
@@ -1055,15 +1070,18 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Hito en curso:** Hito 2 (sin empezar). **Hitos 0 y 1 terminados.**
-- **Última tarea completada:** comparación visual del Hito 1 con el shell (menú y
-  notificaciones). Se corrigieron el borde del menú, la fila seleccionada y las medidas de
-  fila; 9 capturas Roborazzi. Probado en el Redmi. `./gradlew check` en verde.
-- **Siguiente tarea:** Hito 2, primera tarea: `AppRepository` con `LauncherApps`. Modelo
-  recomendado en §0: Opus 5.5 · `xhigh` (o `gpt-6.1-sol` · `xhigh`).
+- **Hito en curso:** Hito 2. **Hitos 0 y 1 terminados.**
+- **Última tarea completada:** drawer provisional (`feature/menu/drawer`) con búsqueda
+  difusa (`core/fuzzy`), lanzamiento desde el icono, info, desinstalar y atajos. Probado en
+  el Redmi (como HOME temporal para los atajos).
+- **Siguiente tarea:** `WhNavigationService` (capa 3 de §5.9). Es la parte delicada del
+  hito: no dejar el teléfono sin navegación. Modelo recomendado en §0: Opus 5.5 · `xhigh`.
+  Pendiente de medir: la primera carga del índice tarda ≈ 3,4 s en debug; si sigue lenta
+  en release, guardar el último índice en disco (Hito 11).
 - **Bloqueos:** ninguno.
-- **Launcher predeterminado del Redmi:** `bitpit.launcher`, hasta que el
-  nuestro sea usable a diario (fin del Hito 2).
+- **Launcher predeterminado del Redmi:** `com.miui.home` con gestos
+  (`force_fsg_nav_bar = 1`, `navigation_mode = 2`), comprobado el 2026-11-03, hasta que el
+  nuestro sea usable a diario (fin del Hito 2). Ya no es `bitpit.launcher`.
 - **Dispositivo objetivo:** Redmi Note 13 Pro 5G, HyperOS
   `OS2.0.204.0.VNRMIXM` (ROM global), Android 15 / API 35, sin más
   actualizaciones. ADB funciona desde el PC de desarrollo, con
@@ -1083,6 +1101,9 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-03 | 2 | Acciones de app (`LauncherAppActions`: lanzar desde el icono, info, desinstalar, atajos), `core/fuzzy` (`FuzzyIndex`, `FuzzyMatcher`, benchmark), drawer provisional (`AppDrawerViewModel` + Compose, 7 pruebas), `HomeScreen`; `WhListRow` con título enriquecido, `leading` y `onLongClick`. Probado en el Redmi: búsqueda, Enter, toque, menú, info, diálogo de desinstalar (cancelado), suspensión en vivo (`pm suspend`) y atajos como HOME temporal; se restauró `com.miui.home` y `force_fsg_nav_bar = 1` | `core/apps/actions/`, `core/fuzzy/`, `feature/menu/`, `app/` |
+| 2026-11-03 | 2 | Iconos: `IconStyle` (`monochrome`/`original`/`pixelated`), `IconRenderer`, `IconCache` LRU en bytes, `LauncherIconLoader` con insignia de perfil; `AppEntry.iconStamp`. 9 pruebas con Robolectric (píxeles reales) | `core/apps/.../icons/` |
+| 2026-11-03 | 2 | `AppRepository`: catálogo ordenado por idioma, perfiles (personal, trabajo, espacio privado), avisos de `LauncherApps` y broadcasts de perfil/idioma, `<queries>` MAIN/LAUNCHER; `AppContainer` y `LauncherApplication` (DI manual). 18 pruebas con un gateway falso | `core/apps/`, `app/.../di/AppContainer.kt` |
 | 2026-11-03 | 1 | **Hito 1 terminado.** Comparación con el shell (capturas `grim` del menú y de una notificación, código de `Menu.qml`): borde del menú a 2 px, fila seleccionada sin borde, `WhListRowSize.Menu` con las medidas de `Menu.qml` y `›`, nueva sección y captura *menu*. Notificaciones: se mantiene Departure Mono (§11.1) | `core/designsystem/`, `docs/design-system.md` |
 | 2026-11-02 | 0 | **Hito 0 terminado.** APK instalado en el Redmi y probado como HOME vía `cmd role` (Inicio vuelve, *atrás* no cierra); se restauró `bitpit.launcher`. Arranque en frío del build debug: 1,75 s (se mide en release en el Hito 11) | `plan.md`, `docs/xiaomi.md` |
 | 2026-11-02 | — | Tabla de modelo y esfuerzo por hito en §0, con equivalentes de Codex (`gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna`, `gpt-6-astra`) | `plan.md` |
