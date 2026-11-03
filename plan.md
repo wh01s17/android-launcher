@@ -51,6 +51,42 @@ fijadas en `skills-lock.json`). Úsalas cuando la tarea coincida:
 | `android-di-hilt` | **No aplica**: DI manual (§5.1, §11.1) |
 | `android-networking-retrofit-okhttp` | **No aplica**: sin red (R9) |
 
+**Modelo y esfuerzo por hito.** Recomendación del 2026-11-02. El riesgo de
+cada hito decide el modelo: lo crítico (no dejar el teléfono sin navegación,
+el motor de tiling) va con el modelo principal y esfuerzo alto. Lo bien
+acotado va con el modelo equilibrado.
+
+| Hito | Claude Code | Codex (GPT) | Motivo |
+| --- | --- | --- | --- |
+| 1 · Sistema de diseño | Sonnet 5.5 · `high` | `gpt-6.1-terra` · `high` | Bien especificado; sólo el generador de tokens es delicado |
+| 2 · Apps + navegación por accesibilidad | **Opus 5.5 · `xhigh`** | **`gpt-6.1-sol` · `xhigh`** | La vigilancia de §5.9 evita dejar el Redmi sin navegación |
+| 3 · Barra | Sonnet 5.5 · `high` | `gpt-6.1-terra` · `high` | Módulos repetitivos sobre un patrón definido |
+| 4 · Motor de tiling y workspaces | **Opus 5.5 · `xhigh`** | **`gpt-6.1-sol` · `xhigh`** | Núcleo del proyecto: geometría, árbol dwindle, tests de propiedades |
+| 5 · Menú y búsqueda difusa | Sonnet 5.5 · `high` | `gpt-6.1-terra` · `high` | Algoritmo conocido, UI acotada |
+| 6 · Teclado y gestos | Opus 5.5 · `high` | `gpt-6.1-sol` · `high` | Conflictos con gestos del sistema y la tecla Super |
+| 7 · Widgets | Sonnet 5.5 · `high` | `gpt-6.1-terra` · `high` | `AppWidgetHost` bien documentado |
+| 8 · Scratchpad, notificaciones, media | Sonnet 5.5 · `high` | `gpt-6.1-terra` · `high` | APIs estándar |
+| 9 · Freeform (experimental) | Opus 5.5 · `xhigh` | `gpt-6.1-sol` · `xhigh` | Hay que investigar la plataforma |
+| 10 · Estilo y salvapantallas | Sonnet 5.5 · `medium` | `gpt-6.1-terra` · `medium` | Ajustes de UI y portar `w-spin.py` |
+| 11 · Rendimiento y versión 1.0 | Opus 5.5 · `high` | `gpt-6.1-sol` · `high` | Medición de rendimiento, accesibilidad, firma |
+| Tareas mecánicas (sincronizar tema, `ktlintFormat`, registro del plan, commits) | Haiku 5.5 · `low` | `gpt-6-luna` · `low` | Sin decisiones de diseño |
+| Atasco en algo difícil (bug de geometría, comportamiento raro de HyperOS) | Fable 5.1 · `high` | `gpt-6-astra` · `high` | El más capaz y el más caro; sólo puntualmente |
+
+- **Equivalencias entre proveedores:** son por posicionamiento según la
+  descripción de cada fabricante, no por benchmarks propios. Modelos de Codex
+  tomados de `~/.codex/models_cache.json` (Codex CLI 0.166.0).
+- **Cómo fijarlo:** en Claude Code, `/model` y `/effort`. En Codex,
+  `codex -m gpt-6.1-sol -c model_reasoning_effort="xhigh"`, o
+  `model`/`model_reasoning_effort` en `~/.codex/config.toml`. En Codex,
+  Sol, Astra y Terra arrancan en `low`: fija el esfuerzo siempre.
+- **No usar** `max` ni el `ultra` de Codex salvo petición expresa. `ultra`
+  coordina varios agentes en paralelo y multiplica el coste.
+- **Al cerrar un hito hecho con el modelo equilibrado** (Sonnet o Terra),
+  revisarlo con el principal (`/code-review` con Opus, o una revisión con
+  Sol) antes de marcarlo como terminado.
+- **Cada hito en una sesión nueva:** este plan basta para retomar sin el
+  historial. Codex lee `AGENTS.md`, que apunta aquí.
+
 ---
 
 ## 1. Reglas obligatorias
@@ -1026,6 +1062,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-02 | — | Tabla de modelo y esfuerzo por hito en §0, con equivalentes de Codex (`gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna`, `gpt-6-astra`) | `plan.md` |
 | 2026-11-02 | 0 | Historial reescrito en commits semánticos (force push a `main`); CI en verde en GitHub Actions | `.github/workflows/ci.yml` |
 | 2026-11-02 | 0 | Proyecto Gradle (AGP 9.5.0, Kotlin 2.4.21, Gradle 9.8.2), 15 módulos con convention plugins, `MainActivity` HOME verificada en emulador, calidad (ktlint, detekt 2 alpha, Lint, Kover, longitud de archivos), CI, `docs/setup.md`, sección de skills | `build-logic/`, `app/`, `.github/workflows/ci.yml`, `docs/setup.md` |
 | 2026-11-02 | 0 | Entorno completo: command-line tools 23.0.0, build-tools 37.0.0, imagen API 35 `google_apis`; AVD `redmi-api35` creado (1220×2712, 480 dpi, teclado) | `plan.md`, `~/.android/avd/redmi-api35.avd` |
