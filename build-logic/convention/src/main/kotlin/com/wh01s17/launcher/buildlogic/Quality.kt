@@ -17,7 +17,8 @@ internal fun Project.configureQuality() {
     pluginManager.apply("org.jetbrains.kotlinx.kover")
 
     extensions.configure<KtlintExtension> {
-        android.set(true)
+        // Código generado (p. ej. WhTokens): se valida compilándolo, no formateándolo.
+        filter { exclude("**/generated/**") }
     }
 
     extensions.configure<DetektExtension> {

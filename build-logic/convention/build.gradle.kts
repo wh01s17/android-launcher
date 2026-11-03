@@ -22,6 +22,17 @@ dependencies {
     implementation(libs.ktlint.gradlePlugin)
     implementation(libs.detekt.gradlePlugin)
     implementation(libs.kover.gradlePlugin)
+    implementation(libs.tomlj)
+
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+    useJUnitPlatform()
+    // Las pruebas leen el tema real de ../../theme/wh01s17.
+    inputs.dir(rootDir.resolve("../theme/wh01s17"))
 }
 
 gradlePlugin {
@@ -37,6 +48,10 @@ gradlePlugin {
         register("androidCompose") {
             id = "wh01s17.android.compose"
             implementationClass = "AndroidComposeConventionPlugin"
+        }
+        register("designTokens") {
+            id = "wh01s17.design.tokens"
+            implementationClass = "DesignTokensConventionPlugin"
         }
         register("jvmLibrary") {
             id = "wh01s17.jvm.library"

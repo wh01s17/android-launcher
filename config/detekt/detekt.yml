@@ -8,6 +8,9 @@ naming:
   FunctionNaming:
     ignoreAnnotated: ['Composable']
 style:
+  # Igual que max_line_length de .editorconfig (ktlint).
+  MaxLineLength:
+    maxLineLength: 140
   MagicNumber:
     ignorePropertyDeclaration: true
     ignoreCompanionObjectPropertyDeclaration: true
