@@ -1,0 +1,14 @@
+# Sobre la configuración por defecto de detekt (buildUponDefaultConfig).
+# R4 (plan.md §1): funciones ≤ 80 líneas; un @Composable puede llegar a 120
+# con @Suppress("LongMethod") y un comentario que lo justifique.
+complexity:
+  LongMethod:
+    allowedLines: 80
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+style:
+  MagicNumber:
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    excludes: ['**/designsystem/**', '**/test/**', '**/buildlogic/**']
