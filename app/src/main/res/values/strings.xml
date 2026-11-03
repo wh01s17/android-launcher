@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">wh01s17 Launcher</string>
+    <!-- Pantalla de inicio provisional, hasta los workspaces del Hito 4. -->
+    <string name="home_hint">desliza hacia arriba · apps</string>
+    <string name="home_open_apps">Abrir apps</string>
 </resources>
