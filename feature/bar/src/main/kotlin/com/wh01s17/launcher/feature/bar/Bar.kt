@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import com.wh01s17.launcher.core.config.BarConfig
 import com.wh01s17.launcher.core.config.BarModuleConfig
 import com.wh01s17.launcher.core.designsystem.components.WhIcon
@@ -27,11 +28,22 @@ import com.wh01s17.launcher.feature.bar.module.BarModuleRegistry
 import com.wh01s17.launcher.feature.bar.module.ModuleStyle
 
 /**
+ * Lo que ocupa la barra debajo de la barra de estado: el alto de la barra del tema, con el área
+ * táctil como mínimo. Es la zona que los escritorios dejan libre (la `exclusive zone` de Hyprland).
+ */
+@Composable
+fun barHeight(): Dp {
+    val spacing = WhTheme.spacing
+    return maxOf(spacing.barHeight, spacing.touchTarget)
+}
+
+/**
  * La barra superior (plan.md §5.5): tres grupos de módulos de la config sobre el fondo del
  * launcher, con contorno si `outline` y sin fondo propio si `transparent`. Deslizar hacia abajo
  * emite [LauncherCommand.OpenNotificationShade]. El alto es el de la barra del tema, con el área
  * táctil de 48 dp como mínimo. Quien la coloca le aplica los *insets* de la barra de estado.
  */
+
 @Composable
 fun Bar(
     config: BarConfig,
@@ -43,7 +55,7 @@ fun Bar(
     val spacing = WhTheme.spacing
     val surface = WhTheme.surfaces.bar.surface
     val shape = WhTheme.borders.shape
-    val height = maxOf(spacing.barHeight, spacing.touchTarget)
+    val height = barHeight()
     val dragThreshold = with(LocalDensity.current) { height.toPx() }
     val groupGapPx = with(LocalDensity.current) { (spacing.barItemPaddingX * 2).roundToPx() }
     Box(

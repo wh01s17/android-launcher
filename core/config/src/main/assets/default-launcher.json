@@ -1,5 +1,12 @@
 {
   "version": 1,
+  "general": {
+    "layout": "dwindle",
+    "maxTilesPerWorkspace": 8
+  },
+  "animations": {
+    "workspaces": { "enabled": true, "style": "slide", "bezier": "easeOutQuint", "speed": 2 }
+  },
   "bar": {
     "position": "top",
     "transparent": true,

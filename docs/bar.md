@@ -54,8 +54,8 @@ Colores: `#RGB`, `#RRGGBB` o `#RRGGBBAA`.
 | `id` | Qué muestra | Clases | Por defecto |
 | --- | --- | --- | --- |
 | `core.menu` | Botón del menú; abre el drawer de apps (el menú wh01s17 llega en el Hito 5) | — | verde |
-| `core.workspaces` | Números `1`–`5` (más los ocupados y el activo; el 10 se llama `0`). Activo en verde con subrayado, ocupados en el color del texto, vacíos al 35 %. Tocar cambia de escritorio | — | — |
-| `wh01s17.clock` | Hora y fecha. Tocar: calendario. Mantener: alterna `format` y `formatAlt` | — | `format` `dddd HH:mm` |
+| `core.workspaces` | Números `1`–`persistent` (por defecto `5`, como el shell) más los que tienen tiles y el activo; los demás vacíos no se muestran. El 10 se llama `0`. Activo en verde con subrayado, ocupados en el color del texto, vacíos al 35 %. Tocar cambia de escritorio | — | — |
+| `wh01s17.clock` | Hora y fecha. Tocar: calendario. Mantener: alterna `format` y `formatAlt` | — | `format` `HH:mm` |
 | `wh01s17.indicators` | No molestar (luna). Sólo ocupa sitio si hay algo activo | `dnd` | — |
 | `wh01s17.power` | Batería (icono + %). Sin batería, nada | `charging`, `full`, `low` (≤ 20 %), `critical` (≤ 10 %), `power-save` | cargando verde, `low` amarillo, `critical` rojo |
 | `wh01s17.network` | Red por defecto: Wi-Fi, datos móviles, cable o sin conexión | `wifi`, `cellular`, `ethernet`, `other`, `none`, `no-internet`, `vpn` | `none` atenuado, `no-internet` amarillo |
@@ -100,8 +100,7 @@ barra se ve (con 5 s de margen para girar la pantalla). Sin permisos peligrosos 
 - **Bluetooth conectado** exige `BLUETOOTH_CONNECT`, que no se pide aún: hoy sólo se distingue
   encendido de apagado. El opt-in llegará con los ajustes.
 - **Notificaciones** (contador) llegan con el acceso a notificaciones del Hito 8.
-- **Escritorios**: hasta el Hito 4 son provisionales (`ProvisionalWorkspaces`): sólo recuerdan cuál
-  está activo.
+- **Escritorios**: los reales del Hito 4 (`docs/workspaces.md`): el actual y los que tienen tiles.
 
 ## Pruebas
 

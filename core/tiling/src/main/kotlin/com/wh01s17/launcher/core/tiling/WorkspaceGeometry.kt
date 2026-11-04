@@ -88,68 +88,6 @@ private fun offsetAcross(
 ): Int = if (direction.axis == Orientation.Horizontal) abs(to.centerY2 - from.centerY2) else abs(to.centerX2 - from.centerX2)
 
 /**
- * `Super + Ctrl + Shift + flechas` o arrastrar un borde (plan.md §3): el tile con el foco crece
- * [deltaPx] hacia [direction] (o encoge si es negativo), moviendo el borde que comparte con su
- * vecino. En dwindle se ajusta el split más cercano que tenga ese borde; en master, la proporción
- * del principal. Sin borde en esa dirección (está pegado al área), nada cambia.
- */
-fun Workspace.resize(
-    direction: Direction,
-    deltaPx: Int,
-    area: Rect,
-    gaps: Gaps,
-): Workspace {
-    val current = focused?.takeIf { fullscreen == null && !isFloating(it) } ?: return this
-    val root = root ?: return this
-    val outer = area.inset(gaps.outer)
-    return when (layout) {
-        TilingLayout.Dwindle -> resizeDwindle(root, current, direction, deltaPx, outer, gaps.inner)
-        TilingLayout.Master -> resizeMaster(root, current, direction, deltaPx, outer, gaps.inner)
-    }
-}
-
-private fun Workspace.resizeDwindle(
-    root: Node,
-    current: TileId,
-    direction: Direction,
-    deltaPx: Int,
-    outer: Rect,
-    gap: Int,
-): Workspace {
-    val placed = root.placeLeaves(outer, gap).first { current in (it.node as Leaf).tiles }
-    // El borde de ese lado lo pone el split más cercano cuya orientación cruza la dirección y en el
-    // que el tile está del lado correcto (en el primero si crece hacia la derecha o abajo).
-    val owner =
-        placed.ancestors.firstOrNull { it.split.orientationIn(it.rect) == direction.axis && it.inFirst == direction.positive }
-            ?: return this
-    val side = (if (direction.axis == Orientation.Horizontal) owner.rect.width else owner.rect.height) - gap
-    if (side <= 0) return this
-    val change = deltaPx.toFloat() / side * (if (owner.inFirst) 1 else -1)
-    val updated = owner.split.copy(ratio = SplitRatio.clamp(owner.split.ratio + change))
-    return copy(root = root.replaceNode(owner.split, updated))
-}
-
-private fun Workspace.resizeMaster(
-    root: Node,
-    current: TileId,
-    direction: Direction,
-    deltaPx: Int,
-    outer: Rect,
-    gap: Int,
-): Workspace {
-    val leaves = root.leaves()
-    val orientation = Orientation.longSideOf(outer)
-    if (leaves.size < 2 || direction.axis != orientation) return this
-    val isMaster = current in leaves.first().tiles
-    // El principal tiene su borde hacia la derecha/abajo; los apilados, hacia la izquierda/arriba.
-    if (isMaster != direction.positive) return this
-    val side = (if (orientation == Orientation.Horizontal) outer.width else outer.height) - gap
-    if (side <= 0) return this
-    val change = deltaPx.toFloat() / side * (if (isMaster) 1 else -1)
-    return withMasterRatio(masterRatio + change)
-}
-
-/**
  * `Super + J`: invierte la orientación del split que contiene el tile con el foco (deja de ser
  * automática). Sólo en dwindle.
  */

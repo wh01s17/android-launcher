@@ -7,6 +7,11 @@ import com.wh01s17.launcher.core.apps.model.AppEntry
 @Immutable
 data class AppDrawerState(
     val open: Boolean = false,
+    /**
+     * Elegir una app para un tile (modo edición, plan.md §7 Hito 4) en vez de abrirla: tocarla la
+     * entrega por [AppDrawerViewModel.picks] y no hay menú contextual.
+     */
+    val picking: Boolean = false,
     val query: String = "",
     /** `false` mientras el índice de apps aún no se ha leído. */
     val loaded: Boolean = false,

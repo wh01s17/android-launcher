@@ -16,8 +16,8 @@ class LauncherCommandBusTest {
             val received = mutableListOf<LauncherCommand>()
             backgroundScope.launch { bus.commands.collect { received += it } }
             bus.send(LauncherCommand.OpenMenu)
-            bus.send(LauncherCommand.FocusWorkspace(3))
-            assertEquals(listOf(LauncherCommand.OpenMenu, LauncherCommand.FocusWorkspace(3)), received)
+            bus.send(WorkspaceCommand.FocusWorkspace(3))
+            assertEquals(listOf(LauncherCommand.OpenMenu, WorkspaceCommand.FocusWorkspace(3)), received)
         }
 
     @Test

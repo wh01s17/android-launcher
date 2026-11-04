@@ -5,6 +5,8 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.floatOrNull
+import kotlinx.serialization.json.intOrNull
 
 /** Lectura y validación de valores sueltos de `launcher.json`, anotando los problemas con su ruta. */
 internal object ConfigValues {
@@ -33,6 +35,40 @@ internal object ConfigValues {
         val text = (element as? JsonPrimitive)?.takeIf { it.isString }?.content
         if (text == null) errors += ConfigError(path, "debe ser un texto")
         return text
+    }
+
+    /** Un entero dentro de [range]; `null` (con error) si no lo es. */
+    fun readInt(
+        element: JsonElement?,
+        path: String,
+        range: IntRange,
+        errors: MutableList<ConfigError>,
+    ): Int? {
+        if (element == null) return null
+        val value = (element as? JsonPrimitive)?.takeIf { !it.isString }?.intOrNull
+        val message =
+            when {
+                value == null -> "debe ser un número entero"
+                value !in range -> "debe estar entre ${range.first} y ${range.last}"
+                else -> null
+            }
+        message?.let { errors += ConfigError(path, it) }
+        return value.takeIf { message == null }
+    }
+
+    /** Un número mayor que [above] y hasta [max]; `null` (con error) si no lo es. */
+    fun readNumber(
+        element: JsonElement?,
+        path: String,
+        above: Float,
+        max: Float,
+        errors: MutableList<ConfigError>,
+    ): Float? {
+        if (element == null) return null
+        val value = (element as? JsonPrimitive)?.takeIf { !it.isString }?.floatOrNull
+        val valid = value != null && value > above && value <= max
+        if (!valid) errors += ConfigError(path, "debe ser un número mayor que ${above.toInt()} y hasta ${max.toInt()}")
+        return value.takeIf { valid }
     }
 
     /** Las opciones comunes a todos los módulos (`classColors`, `dimClasses`, `brackets`) tienen tipo fijo. */

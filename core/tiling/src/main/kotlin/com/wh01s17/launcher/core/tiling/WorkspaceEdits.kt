@@ -2,9 +2,11 @@ package com.wh01s17.launcher.core.tiling
 
 /**
  * Añade [tile] (plan.md §5.4). En dwindle parte la hoja con el foco (o la última si el foco está en
- * un flotante); con [Workspace.maxTiles] huecos ocupados, el tile entra en el grupo del foco, justo
- * detrás de la pestaña visible. El nuevo tile recibe el foco (el anterior pasa al historial) y se
- * sale de pantalla completa.
+ * un flotante), y el nuevo queda a la derecha o abajo (`force_split = 2` de Hyprland). En master
+ * pasa a ser el principal y el anterior encabeza la pila (`new_status = "master"`). Con
+ * [Workspace.maxTiles] huecos ocupados, el tile entra en el grupo del foco, justo detrás de la
+ * pestaña visible. El nuevo tile recibe el foco (el anterior pasa al historial) y se sale de
+ * pantalla completa.
  *
  * `remove(insert(x))` devuelve el workspace original (propiedad probada).
  */
@@ -12,13 +14,20 @@ fun Workspace.insert(tile: TileId): Workspace {
     require(tile !in this) { "$tile is already in the workspace" }
     val root = root ?: return copy(root = Leaf.of(tile), fullscreen = null).focus(tile)
     val target = focused?.let(root::leafOf) ?: root.leaves().last()
-    val replacement =
-        if (slots >= maxTiles) {
-            Leaf(target.tiles.toMutableList().apply { add(target.active + 1, tile) }, target.active + 1)
-        } else {
-            Split(target, Leaf.of(tile))
+    val updated =
+        when {
+            slots >= maxTiles ->
+                root.replaceLeaf(
+                    target,
+                    Leaf(
+                        target.tiles.toMutableList().apply { add(target.active + 1, tile) },
+                        target.active + 1,
+                    ),
+                )
+            layout == TilingLayout.Master -> Split(Leaf.of(tile), root)
+            else -> root.replaceLeaf(target, Split(target, Leaf.of(tile)))
         }
-    return copy(root = root.replaceLeaf(target, replacement), fullscreen = null).focus(tile)
+    return copy(root = updated, fullscreen = null).focus(tile)
 }
 
 /**

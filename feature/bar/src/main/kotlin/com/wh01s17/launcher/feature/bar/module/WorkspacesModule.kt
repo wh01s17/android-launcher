@@ -20,7 +20,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
-import com.wh01s17.launcher.core.input.LauncherCommand
+import com.wh01s17.launcher.core.input.WorkspaceCommand
 import com.wh01s17.launcher.feature.bar.R
 import com.wh01s17.launcher.feature.bar.WorkspaceBarState
 
@@ -29,22 +29,25 @@ private const val EMPTY_ALPHA = 0.35f
 
 /**
  * `core.workspaces`: sólo los números, como en el shell. El escritorio actual en verde con un
- * subrayado corto, los que tienen apps en el color del texto y los vacíos apagados. Tocar uno
- * emite `FocusWorkspace`. Los escritorios reales llegan con el Hito 4.
+ * subrayado corto, los que tienen apps en el color del texto y los vacíos apagados. Se ven siempre
+ * los `persistent` primeros (opción del módulo; 5 por defecto, como el shell) más los ocupados y el
+ * activo; el resto de vacíos se oculta, como en Hyprland. Tocar uno emite `FocusWorkspace`.
  */
 internal class WorkspacesModule : BarModule {
     override val id = ID
 
     @Composable
     override fun Content(context: BarModuleContext) {
-        val workspaces = context.state.workspaces
+        val state = context.state.workspaces
+        val persistent = context.settings.int(PERSISTENT)?.coerceIn(0, WorkspaceBarState.LAST) ?: state.persistent
+        val workspaces = state.copy(persistent = persistent)
         Row {
             for (id in workspaces.ids) {
                 WorkspaceCell(
                     id = id,
                     focused = id == workspaces.focused,
                     occupied = id in workspaces.occupied,
-                    onClick = { context.onCommand(LauncherCommand.FocusWorkspace(id)) },
+                    onClick = { context.onCommand(WorkspaceCommand.FocusWorkspace(id)) },
                 )
             }
         }
@@ -52,6 +55,7 @@ internal class WorkspacesModule : BarModule {
 
     companion object {
         const val ID = "core.workspaces"
+        private const val PERSISTENT = "persistent"
     }
 }
 

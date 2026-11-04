@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Escritorios y tiles (plan.md §7, Hito 4). -->
+    <string name="tile_not_installed">%1$s · no instalada</string>
+    <string name="workspace_empty_title">escritorio %1$s</string>
+    <string name="workspace_empty_hint">Mantén pulsado para añadir apps · desliza arriba para el menú</string>
+    <string name="workspace_open_menu">Abrir el menú</string>
+    <string name="workspace_edit">Editar el escritorio</string>
+    <string name="tile_open">Abrir</string>
+    <string name="tile_edit">Editar</string>
+    <string name="tile_drop_here">Soltar en el escritorio %1$s</string>
+    <string name="edit_add">+ app</string>
+    <string name="edit_split">split</string>
+    <string name="edit_float">flotar</string>
+    <string name="edit_fullscreen">completa</string>
+    <string name="edit_close">quitar</string>
+    <string name="edit_settings">ajustes</string>
+    <string name="edit_done">listo</string>
+    <string name="edit_hint">Arrastra un tile sobre otro para cambiarlos, o arriba sobre un número para llevarlo a otro escritorio. Arrastra los bordes para cambiar el tamaño.</string>
+    <string name="message_not_installed">Esa app ya no está instalada.</string>
+    <string name="message_paused">El perfil de trabajo está en pausa.</string>
+    <string name="message_paused_requested">El perfil de trabajo está en pausa: se pidió reanudarlo.</string>
+    <string name="message_failed">No se pudo abrir.</string>
+</resources>

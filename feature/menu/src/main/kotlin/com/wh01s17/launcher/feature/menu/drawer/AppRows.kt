@@ -26,7 +26,9 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import com.wh01s17.launcher.core.apps.actions.LaunchOrigin
+import com.wh01s17.launcher.core.apps.icons.AppIcon
 import com.wh01s17.launcher.core.apps.icons.AppIconLoader
+import com.wh01s17.launcher.core.apps.model.AppEntry
 import com.wh01s17.launcher.core.designsystem.components.WhListRow
 import com.wh01s17.launcher.core.designsystem.components.WhListRowSize
 import com.wh01s17.launcher.core.designsystem.components.WhPanel
@@ -50,7 +52,7 @@ internal fun AppRow(
         title = highlighted(item.app.label, item.matchPositions, WhTheme.colors.accent),
         onClick = { onIntent(DrawerIntent.Launch(item.app, iconBounds?.let { LaunchOrigin(view, it.toAndroidRect()) })) },
         onLongClick = { onIntent(DrawerIntent.ShowMenu(item.app)) },
-        leading = { AppIcon(item.app, iconLoader, Modifier.onGloballyPositioned { iconBounds = it.boundsInRoot() }) },
+        leading = { DrawerIcon(item.app, iconLoader, Modifier.onGloballyPositioned { iconBounds = it.boundsInRoot() }) },
         trailingText = item.badge?.let { badgeText(it) },
         size = WhListRowSize.Menu,
     )
@@ -71,7 +73,7 @@ internal fun AppMenuOverlay(
                 horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                AppIcon(menu.app, iconLoader)
+                DrawerIcon(menu.app, iconLoader)
                 WhText(menu.app.label, style = WhTheme.typography.heading, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Column {
@@ -127,3 +129,11 @@ internal fun highlighted(
         val style = SpanStyle(color = color)
         positions.filter { it in text.indices }.forEach { addStyle(style, it, it + 1) }
     }
+
+/** Icono de la lista: grande y teñido con el color del texto. */
+@Composable
+private fun DrawerIcon(
+    app: AppEntry,
+    loader: AppIconLoader,
+    modifier: Modifier = Modifier,
+) = AppIcon(app, loader, WhTheme.spacing.iconSizeLarge, WhTheme.colors.foreground, modifier)

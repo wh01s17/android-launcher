@@ -7,10 +7,7 @@ import com.wh01s17.launcher.core.system.status.BluetoothStatus
 import com.wh01s17.launcher.core.system.status.DoNotDisturbState
 import com.wh01s17.launcher.core.system.status.NetworkState
 
-/**
- * Los workspaces tal como los ve la barra. Hasta el Hito 4 (motor de tiling) no hay workspaces
- * reales: la app aporta un estado provisional con [persistent] escritorios vacíos.
- */
+/** Los workspaces tal como los ve la barra: el activo, los que tienen tiles y cuántos se ven siempre. */
 @Immutable
 data class WorkspaceBarState(
     val focused: Int = 1,

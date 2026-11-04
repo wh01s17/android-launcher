@@ -9,13 +9,14 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 
 /**
- * `launcher.json` (plan.md §6). Por ahora sólo se lee `bar`; el resto del archivo se ignora (las
- * secciones de workspaces, atajos y animaciones se añaden en sus hitos, con su migración si hace
- * falta).
+ * `launcher.json` (plan.md §6). Se leen `bar`, `general` y `animations`; el resto del archivo se
+ * ignora (atajos, fondos y demás llegan en sus hitos, con su migración si hace falta).
  */
 data class LauncherConfig(
     val version: Int,
     val bar: BarConfig,
+    val general: GeneralConfig = GeneralConfig(),
+    val animations: AnimationsConfig = AnimationsConfig(),
 )
 
 /** `bar` de `launcher.json`, igual que `bar` de `shell.json` del escritorio. */

@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">wh01s17 Launcher</string>
-    <!-- Pantalla de inicio provisional, hasta los workspaces del Hito 4. -->
-    <string name="home_hint">desliza hacia arriba · apps    mantén pulsado · ajustes</string>
-    <string name="home_open_apps">Abrir apps</string>
-    <string name="home_open_settings">Abrir ajustes</string>
     <string name="settings_label">Ajustes wh01s17</string>
     <string name="notice_config_invalid">Config no válida (se usa la anterior): %1$s</string>
     <string name="notice_navigation_gave_up">HyperOS deshizo el ajuste de los botones varias veces: siguen visibles. Mira Ajustes → Compatibilidad.</string>

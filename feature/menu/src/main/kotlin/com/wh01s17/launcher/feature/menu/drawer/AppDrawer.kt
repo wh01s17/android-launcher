@@ -100,7 +100,7 @@ private fun DrawerPanel(
             value = state.query,
             onValueChange = { onIntent(DrawerIntent.QueryChanged(it)) },
             modifier = Modifier.fillMaxWidth().focusRequester(focus),
-            placeholder = stringResource(R.string.drawer_search_placeholder),
+            placeholder = stringResource(if (state.picking) R.string.drawer_pick_placeholder else R.string.drawer_search_placeholder),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
             keyboardActions = KeyboardActions(onGo = { onIntent(DrawerIntent.LaunchFirst) }),
         )

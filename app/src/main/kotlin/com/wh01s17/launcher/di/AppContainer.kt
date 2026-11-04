@@ -3,7 +3,6 @@ package com.wh01s17.launcher.di
 import android.content.Context
 import com.wh01s17.launcher.bar.BarNotices
 import com.wh01s17.launcher.bar.OneTimeHints
-import com.wh01s17.launcher.bar.ProvisionalWorkspaces
 import com.wh01s17.launcher.core.apps.AppRepository
 import com.wh01s17.launcher.core.apps.LauncherAppRepository
 import com.wh01s17.launcher.core.apps.actions.AppActions
@@ -27,11 +26,18 @@ import com.wh01s17.launcher.core.system.status.DoNotDisturbSource
 import com.wh01s17.launcher.core.system.status.NetworkSource
 import com.wh01s17.launcher.core.system.status.SystemClockSource
 import com.wh01s17.launcher.feature.bar.BarSources
+import com.wh01s17.launcher.feature.bar.WorkspaceBarState
 import com.wh01s17.launcher.feature.bar.defaultBarRegistry
 import com.wh01s17.launcher.feature.bar.module.BarModuleRegistry
+import com.wh01s17.launcher.feature.workspaces.data.DeskRepository
+import com.wh01s17.launcher.feature.workspaces.data.FileDeskStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import java.io.File
 
 /**
  * Dependencias de la app, creadas a mano (plan.md §5.1: sin Hilt). Vive lo mismo que el proceso;
@@ -81,8 +87,17 @@ class AppContainer(
 
     val barNotices: BarNotices by lazy { BarNotices(appContext, configRepository.state, compatibilityGateway) }
 
-    /** Hasta el Hito 4 no hay workspaces reales. */
-    val workspaces = ProvisionalWorkspaces()
+    /** Los escritorios y sus tiles, guardados en `files/state/workspaces.json` (plan.md §7 Hito 4). */
+    val desk: DeskRepository by lazy {
+        DeskRepository(FileDeskStorage(File(File(appContext.filesDir, "state"), "workspaces.json")), processScope, Dispatchers.IO)
+    }
+
+    /** Lo que la barra necesita de los escritorios: el actual y los que tienen tiles. */
+    val workspaceBarState: Flow<WorkspaceBarState> by lazy {
+        desk.state
+            .map { desk -> desk?.let { WorkspaceBarState(focused = it.current, occupied = it.occupied) } ?: WorkspaceBarState() }
+            .distinctUntilChanged()
+    }
 
     val notificationShade: NotificationShade by lazy { NotificationShade(appContext, navigationWatchdog) }
 

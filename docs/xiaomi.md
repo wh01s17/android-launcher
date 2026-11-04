@@ -86,6 +86,7 @@ ocultar los botones mientras la capa 3 está viva (modo *gestos wh01s17*).
 | 2026-11-02 | wh01s17 (Hito 0, pantalla negra) | Capa 1 (3 botones) | ✓ | ✓ (no cierra el launcher) | — | — |
 | 2026-11-03 | wh01s17 (Hito 2) | Modo *gestos wh01s17* (capas 2 + 3): botones ocultos | ✓ | ✓ (ambos lados) | ✓ (subir y mantener) | — |
 | 2026-11-03 | `com.miui.home` | Capa 3 con botones visibles (`force_fsg_nav_bar = 0`) | ✓ | ✓ (ambos lados) | ✓ | — |
+| 2026-11-03 | wh01s17 (Hito 4) | Modo *gestos wh01s17* tras `adb reboot` y desbloquear | ✓ | ✓ (izquierda) | — | ✓ (servicio enlazado y botones ocultos solos, `force_fsg_nav_bar = 1`) |
 
 Gestos simulados con `adb shell input swipe` / `input motionevent`; las acciones salen del log
 `WhNavigation: action: …`. Con el teclado abierto, la franja inferior no recibe toques y las
@@ -100,6 +101,7 @@ laterales terminan encima del teclado (y = 1589 en vez de 2664).
 | 2026-11-03 | Desactivar el servicio en Ajustes | `onUnbind` devuelve los botones; no se revive |
 | 2026-11-03 | HyperOS pone `force_fsg_nav_bar = 0` (simulado) | Se reescribe; al 6.º en un minuto se rinde (`GaveUp`) y quedan los botones |
 | 2026-11-03 | «Forzar detención» con Ajustes delante | Sin botones ni gestos hasta volver al inicio o reiniciar (observación 9) |
+| 2026-11-03 | `am force-stop` con el launcher delante | Android quita el servicio de `enabled_accessibility_services`; al reabrir, la vigilancia devuelve los botones (`navigation binding died`). El servicio no se revive: hay que activarlo otra vez en Accesibilidad |
 
 ## Recuperación
 

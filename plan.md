@@ -840,16 +840,22 @@ servicio de accesibilidad devuelve los botones.
       pasar de `maxTiles`, `WorkspaceCodec` (JSON validado). 12 000 operaciones aleatorias por
       ejecución sin solapes, cubriendo el área exacta, `remove(insert(x)) == x` y JSON reversible;
       cobertura 97,9 % (`koverVerify` ≥ 90 % en `check`).
-- [ ] `feature/workspaces`: `HorizontalPager` de workspaces con animación
-      slide/easeOutQuint; persistencia del workspace actual.
-- [ ] Render de tiles: app (icono grande + nombre + badge de notificaciones),
-      bordes activo/inactivo, huecos, radio 10.
-- [ ] Modo edición (mantener en hueco vacío): añadir tile, arrastrar para
-      reordenar/swap, arrastrar a `[n]` de la barra para mover de workspace,
-      redimensionar arrastrando bordes, alternar split/float/fullscreen.
-- [ ] Comandos vía `LauncherCommandBus`.
-- [ ] Workspaces vacíos se ocultan en la barra salvo el activo (como Hyprland
-      con `persistent` configurable).
+- [x] `feature/workspaces`: `HorizontalPager` de workspaces con animación
+      slide/easeOutQuint; persistencia del workspace actual. `Desk` (10 workspaces + qué app
+      hay en cada tile), `DeskRepository` (`files/state/workspaces.json` con `AtomicFile`,
+      medio segundo tras el último cambio y en `onStop`), `general` y `animations.workspaces`
+      en `launcher.json`. Guía: [`docs/workspaces.md`](docs/workspaces.md).
+- [x] Render de tiles: app (icono grande + nombre), bordes activo/inactivo, huecos, radio 10;
+      pestañas de grupo y app desinstalada atenuada. El badge de notificaciones pasa al Hito 8
+      (necesita el acceso a notificaciones).
+- [x] Modo edición (mantener en hueco vacío o en un tile): añadir tile (drawer en modo
+      selección), arrastrar para swap, arrastrar a la tira `[1]…[0]` para mover de workspace,
+      redimensionar arrastrando bordes (`dividers`/`moveDivider` en el motor), mover y
+      redimensionar flotantes, alternar split/float/fullscreen/layout y quitar.
+- [x] Comandos vía `LauncherCommandBus`: `WorkspaceCommand` (ir, ciclar, mover tile, foco,
+      intercambio, `resizeBy` como `resizeactive`, toggles, layout, quitar, grupo, edición).
+- [x] Workspaces vacíos se ocultan en la barra salvo el activo (como Hyprland
+      con `persistent` configurable): opción `persistent` de `core.workspaces` (5 por defecto).
 
 **Terminado cuando:** se pueden armar 5 workspaces con tiles, reordenarlos y
 persisten tras reiniciar el teléfono.
@@ -892,7 +898,8 @@ menú. **Fin del MVP (Hitos 0–5)** → etiquetar `v0.1.0`.
 
 - [ ] Scratchpad: workspace especial superpuesto con scrim y animación desde
       arriba (`Super + S` / dos dedos abajo).
-- [ ] `NotificationListenerService` opt-in: badges en tiles, contador en
+- [ ] `NotificationListenerService` opt-in: badges en tiles (el hueco del badge en
+      `TileView`, Hito 4), contador en
       indicadores, panel de notificaciones propio con la superficie de
       `shell.notifications.toml` (barra de cuenta atrás `#84c959`).
 - [ ] Controles de media (`MediaSessionManager`) en barra y atajos
@@ -1092,11 +1099,21 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-03 | `ACCESS_NETWORK_STATE` declarado en `core/system` | Permiso normal que exige `registerDefaultNetworkCallback`; no hay `INTERNET` (R9) |
 | 2026-11-03 | «Una vez» del aviso de la cortina se guarda en un `SharedPreferences` propio | Es un dato de UI, no config; evita añadir DataStore sólo para esto (DataStore llega con el ranking de uso, Hito 5) |
 | 2026-11-03 | Huecos del tiling: `Gaps.inner` es la distancia entre dos tiles (en Hyprland, 2 × `gaps_in`) y el borde se dibuja dentro del tile | Así el motor sólo reparte píxeles; quien lo llama pasa `2 × gapsIn` |
-| 2026-11-03 | Split dwindle sin orientación fija (`null` = por el lado largo, como Hyprland sin `preserve_split`); `toggleSplit` la fija | Girar la pantalla reorganiza solo, y `Super + J` sigue disponible |
+| 2026-11-03 | Split dwindle sin orientación fija (`null` = por el lado largo, como Hyprland sin `preserve_split`); `toggleSplit` la fija | Girar la pantalla reorganiza solo, y `Super + J` sigue disponible. Los dotfiles usan `preserve_split = true`; en el teléfono pesa más el giro, y el modo edición escala el escritorio para no reordenarlo |
 | 2026-11-03 | Master usa el orden de las hojas del árbol dwindle (no una lista aparte) | Un único modelo: cambiar de layout, intercambiar o cerrar no desincroniza dos estructuras |
 | 2026-11-03 | Historial de foco en `Workspace`: al cerrar el tile con foco, vuelve al último enfocado | Como `focus_on_close` de Hyprland; además hace que `remove(insert(x)) == x` valga siempre |
 | 2026-11-03 | Pruebas de propiedades con `kotlin.random` y semilla fija, sin Kotest ni jqwik | Reproducibles y sin dependencias nuevas; 200 secuencias × 60 pasos por propiedad |
 | 2026-11-03 | detekt `ReturnCount` con `excludeGuardClauses: true` | Las guardas iniciales son la forma más clara de las operaciones del motor |
+| 2026-11-03 | En master el tile nuevo es el principal y `resizeBy` mueve el borde libre (`resizeactive`) | Igual que `new_status = "master"` y los atajos `Super + -`/`=` de los dotfiles |
+| 2026-11-03 | Los escritorios se guardan en `files/state/workspaces.json`, aparte de `launcher.json` | Es estado que la app escribe en cada cambio; mezclarlo con la config del usuario la reescribiría. `launcher.json` sólo da `general` y `animations` |
+| 2026-11-03 | Un workspace vacío toma `general.layout` al arrancar y al cambiar la config | Los que tienen tiles conservan su layout; así cambiar el valor por defecto se nota sin perder lo hecho |
+| 2026-11-03 | Una app desinstalada deja su tile atenuado («no instalada») en vez de borrarlo | Una actualización o un perfil en pausa no deben deshacer la distribución |
+| 2026-11-03 | Tocar un tile lo enfoca y abre la app; doble toque y demás gestos de §3 llegan con el Hito 6 | Un doble toque retrasaría cada apertura; el modo edición ya cubre split/float/fullscreen |
+| 2026-11-03 | Mantener pulsado el inicio entra en edición; los ajustes pasan al botón `ajustes` de la barra de herramientas | Lo pide el Hito 4 (modo edición al mantener un hueco); los ajustes siguen a dos toques |
+| 2026-11-03 | Para mover un tile de escritorio se suelta en una tira `[1]…[0]` que aparece arriba, no en los números de la barra | La barra es otro módulo (`feature/bar`); compartir sus posiciones exigiría acoplarlos. La tira queda justo debajo y se ve igual |
+| 2026-11-03 | En edición el escritorio se escala (sin cambiar el área del motor) para dejar sitio a la barra de herramientas | Encoger el área podía girar un split automático y reordenar los tiles justo al editarlos (se vio en las capturas) |
+| 2026-11-03 | `AppIcon` pasa a `core/apps` (con Compose) y recibe tamaño y tinte | Lo usan el drawer y los tiles, y un `feature` no puede depender de otro |
+| 2026-11-03 | El drawer tiene un modo selección (`DrawerIntent.OpenPicker`, `picks`) para el `+ app` del modo edición | Reutiliza la búsqueda difusa; la app une los dos módulos (§5.2) |
 | 2026-11-03 | El catálogo de iconos tiene su captura propia, con la ventana más alta | Con 70 glifos la captura de 904 dp se cortaba y los nuevos quedaban fuera de la comparación |
 
 ### 11.2 Riesgos
@@ -1123,18 +1140,23 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Hito en curso:** Hito 4: motor de tiling (`core/tiling`) hecho. **Hitos 0–3 terminados** (el 3,
-  revisado con Opus y con sus hallazgos corregidos).
-- **Última tarea completada:** la barra (`feature/bar`, `core/config`, `core/input`,
-  `core/system/status`). Probada en el Redmi: estados en vivo (volumen, No molestar, red, hora),
-  calendario, formatos, escritorios, config válida/inválida/borrada y cortina con y sin el
-  servicio. `./gradlew check` en verde.
-- **Siguiente tarea:** Hito 4, `feature/workspaces` (pager con slide/easeOutQuint y
-  persistencia del workspace actual) sobre `core/tiling` (**Opus 5.5 · `xhigh`**, §0). Pendientes sin bloquear: medir en release la primera carga del índice
-  (≈ 3,4 s en debug), probar los gestos tras reiniciar el teléfono (`docs/xiaomi.md`), el opt-in de
+- **Balance al 2026-11-04:** 40 de 75 tareas marcadas (53,3 % del plan completo);
+  para el MVP, 40 de 45 (88,9 %). Son casillas, no una medida del esfuerzo.
+  Quedan el Hito 5 para `v0.1.0` y los Hitos 6–11 para completar el alcance;
+  el Hito 9 es experimental y no bloquea la 1.0.
+- **Hito en curso:** Hito 5 (sin empezar). **Hitos 0–4 terminados** (el 3, revisado con Opus y con
+  sus hallazgos corregidos; el 4, hecho con Opus y con su *Terminado cuando* comprobado en el Redmi:
+  cinco escritorios reordenados siguen idénticos tras `adb reboot`).
+- **Última tarea completada:** los escritorios (`feature/workspaces`, guía en `docs/workspaces.md`).
+  Probados en el Redmi: añadir, bordes, swap, mover de escritorio, flotar, master, pantalla
+  completa, abrir apps, Inicio y persistencia tras matar el proceso y tras reiniciar.
+  `./gradlew check` en verde.
+- **Siguiente tarea:** el Hito 5 (menú wh01s17, **Sonnet 5.5 · `high`**, §0); al cerrarlo, revisión
+  con Opus. Pendientes sin bloquear: medir en release la primera carga del índice
+  (≈ 3,4 s en debug), el opt-in de
   `BLUETOOTH_CONNECT` y la persistencia del formato alterno del reloj (escribir la config).
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
-  launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio),
+  launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio → `ajustes`),
   activar el modo. El permiso `WRITE_SECURE_SETTINGS` ya está concedido a la app debug.
 - **Bloqueos:** ninguno.
 - **Launcher predeterminado del Redmi:** `com.miui.home` con gestos
@@ -1159,6 +1181,9 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-04 | 4 / documentación | Actualizado el README con las funciones implementadas y enlaces a las guías; balance de avance en §12 y formato de reloj de fábrica corregido en la guía de barra. Trabajo completo de escritorios preparado para el repositorio; `./gradlew check assembleDebug` en verde | `README.md`, `docs/bar.md`, `plan.md`, `feature/workspaces/` |
+| 2026-11-03 | 4 | Cierre del Hito 4 en el Redmi: cinco escritorios (dwindle, master, flotante, grupo de tres reordenado y con el borde movido) siguen idénticos tras `adb reboot` (mismo `workspaces.json` byte a byte). Gestos wh01s17 tras reiniciar: servicio enlazado y botones ocultos solos; Inicio y Atrás funcionan. Se anotó que `am force-stop` desactiva el servicio. Tiles de prueba quitados | `docs/xiaomi.md`, `plan.md` |
+| 2026-11-03 | 4 | Escritorios: `feature/workspaces` (`Desk`, `DeskCodec`, `DeskRepository`, `WorkspacesViewModel`, pager con la curva de `animations.workspaces`, tiles, modo edición con asas de borde, tira de escritorios, flotantes y barra de herramientas), `WorkspaceCommand` en `core/input`, `general`/`animations` en la config, `persistent` en `core.workspaces`, drawer en modo selección, `AppIcon` en `core/apps`. Motor: `dividers`/`moveDivider`, `resizeBy`, master con `new_status = "master"`. 25 pruebas nuevas en el módulo (4 capturas), 8 en el motor, 4 en la config. Probado en el Redmi: añadir, borde, swap, mover al 3, flotar, master, pantalla completa, abrir app, Inicio y persistencia tras `force-stop` | `feature/workspaces/`, `core/tiling/Divider.kt`, `core/config/GeneralSections.kt`, `docs/workspaces.md` |
 | 2026-11-03 | 4 | Motor de tiling `core/tiling` (Kotlin puro): dwindle y master, foco direccional, intercambio, resize por bordes, toggleSplit, flotantes, pantalla completa, grupos, historial de foco y `WorkspaceCodec`. 35 pruebas (distribuciones de referencia, operaciones y propiedades); cobertura 97,9 % con `koverVerify` en `check` | `core/tiling/` |
 | 2026-11-03 | 3 | **Hito 3 terminado** tras la revisión con Opus (`/code-review`). Corregido: una `bar` parcial ya no vacía la barra (se combina clave a clave con la de fábrica), el aviso «se rindió» llega al escribirse el archivo de estado (`FileObserver`), recargas de config en fila y fábrica parseada una vez, sin colores hex en `default-launcher.json` (R6), red sin parpadeo inicial ni `onLost` ajenos, Bluetooth escucha conexiones siempre, medidas de barra y calendario escalan con la fuente, gesto con el `onCommand` vigente | `core/config/`, `core/system/`, `core/designsystem/`, `feature/bar/`, `docs/bar.md` |
 | 2026-11-03 | 3 | **Barra.** `core/config` (parser con errores por ruta, repositorio que conserva la última config buena, `default-launcher.json`), `core/input` (comandos y bus), `core/system/status` (batería, red, Bluetooth, audio, No molestar, reloj como `Flow` fríos), `feature/bar` (módulos, `classColors`/`dimClasses`/`brackets`, layout con `centerAnchor`, calendario, formato Qt), cortina por accesibilidad, avisos y capturas Roborazzi. 12 glifos nuevos; `barHeight` corregido a `size-horizontal`; el R6 deja fuera los tests. En el Redmi: todos los indicadores cambian en vivo; teléfono restaurado | `feature/bar/`, `core/config/`, `core/input/`, `core/system/.../status/`, `docs/bar.md` |

@@ -9,9 +9,12 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.getValue
@@ -24,17 +27,23 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.input.LauncherCommand
+import com.wh01s17.launcher.core.input.WorkspaceCommand
 import com.wh01s17.launcher.feature.bar.Bar
 import com.wh01s17.launcher.feature.bar.BarViewModel
+import com.wh01s17.launcher.feature.bar.barHeight
 import com.wh01s17.launcher.feature.menu.drawer.AppDrawer
 import com.wh01s17.launcher.feature.menu.drawer.AppDrawerViewModel
 import com.wh01s17.launcher.feature.menu.drawer.DrawerIntent
+import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
+import com.wh01s17.launcher.feature.workspaces.WorkspacesViewModel
+import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import android.graphics.Color as AndroidColor
 
 /**
- * Pantalla de inicio (rol HOME). Por ahora: fondo wh01s17, la barra (Hito 3) y el drawer provisional
- * de apps (Hito 2); los workspaces llegan en el Hito 4.
+ * Pantalla de inicio (rol HOME): los escritorios en mosaico (Hito 4), la barra encima (Hito 3) y el
+ * drawer provisional de apps (Hito 2), que también elige la app de un tile nuevo.
  */
 class MainActivity : ComponentActivity() {
     private val container get() = (application as LauncherApplication).container
@@ -46,7 +55,20 @@ class MainActivity : ComponentActivity() {
     private val bar: BarViewModel by viewModels {
         viewModelFactory {
             initializer {
-                BarViewModel(container.barSources, container.workspaces.state, container.barNotices.notices, container.commandBus)
+                BarViewModel(container.barSources, container.workspaceBarState, container.barNotices.notices, container.commandBus)
+            }
+        }
+    }
+
+    private val workspaces: WorkspacesViewModel by viewModels {
+        viewModelFactory {
+            initializer {
+                WorkspacesViewModel(
+                    desk = container.desk,
+                    catalog = container.appRepository.catalog,
+                    config = container.configRepository.state.map { it.config },
+                    actions = container.appActions,
+                )
             }
         }
     }
@@ -71,11 +93,20 @@ class MainActivity : ComponentActivity() {
             WhTheme {
                 val state by drawer.state.collectAsStateWithLifecycle()
                 val barState by bar.state.collectAsStateWithLifecycle()
+                val workspacesState by workspaces.state.collectAsStateWithLifecycle()
                 val config by container.configRepository.state.collectAsStateWithLifecycle()
-                Box(Modifier.fillMaxSize()) {
-                    HomeScreen(
-                        onOpenApps = { drawer.onIntent(DrawerIntent.Open) },
+                Box(Modifier.fillMaxSize().background(WhTheme.colors.background)) {
+                    // Los escritorios ocupan lo que dejan la barra y los insets (la exclusive zone de
+                    // la barra en Hyprland): ningún tile queda debajo.
+                    WorkspacesScreen(
+                        state = workspacesState,
+                        iconLoader = container.iconLoader,
+                        onIntent = workspaces::onIntent,
+                        onCommand = workspaces::onCommand,
+                        onAddTile = { drawer.onIntent(DrawerIntent.OpenPicker) },
+                        onOpenMenu = { drawer.onIntent(DrawerIntent.Open) },
                         onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
+                        modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(top = barHeight()),
                     )
                     // La barra va debajo de la barra de estado del sistema (plan.md §5.5). Hasta que
                     // se lee la config no hay barra que pintar.
@@ -94,15 +125,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** Los comandos de la barra (y, más adelante, del teclado y los gestos) llegan por el bus. */
+    /**
+     * Los comandos de la barra (y, más adelante, del teclado, los gestos y el menú) llegan por el bus;
+     * la app elegida en el drawer en modo selección se convierte en un tile.
+     */
     private fun handleCommands() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { drawer.picks.collect { workspaces.addApp(it.key) } }
                 container.commandBus.commands.collect { command ->
                     when (command) {
                         LauncherCommand.OpenMenu -> drawer.onIntent(DrawerIntent.Open)
-                        is LauncherCommand.FocusWorkspace -> container.workspaces.focus(command.id)
                         LauncherCommand.OpenNotificationShade -> openNotificationShade()
+                        is WorkspaceCommand -> workspaces.onCommand(command)
                     }
                 }
             }
@@ -131,11 +166,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** Al salir del inicio se guardan ya los escritorios, por si Android cierra el proceso. */
+    override fun onStop() {
+        super.onStop()
+        container.processScope.launch { container.desk.flush() }
+    }
+
     /** Pulsar Inicio estando ya en el launcher vuelve a la pantalla limpia. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
             drawer.onIntent(DrawerIntent.Close)
+            workspaces.onIntent(WorkspacesIntent.ExitEdit)
         }
     }
 

@@ -119,6 +119,33 @@ class AppDrawerViewModelTest {
         }
 
     @Test
+    fun `picking hands the app over instead of launching it`() =
+        runTest(dispatcher) {
+            val vm = viewModel()
+            val picked = mutableListOf<String>()
+            backgroundScope.launch { vm.picks.collect { picked += it.label } }
+            vm.onIntent(DrawerIntent.OpenPicker)
+            runCurrent()
+            assertTrue(vm.state.value.picking)
+            // Sin menú contextual mientras se elige.
+            vm.onIntent(DrawerIntent.ShowMenu(app("Calculadora")))
+            assertNull(vm.state.value.menu)
+            vm.onIntent(DrawerIntent.QueryChanged("calc"))
+            runCurrent()
+            vm.onIntent(DrawerIntent.LaunchFirst)
+            runCurrent()
+            assertEquals(listOf("Calculadora"), picked)
+            assertEquals(emptyList<String>(), actions.launched)
+            assertFalse(vm.state.value.open)
+            // Abrir de nuevo normal ya no elige.
+            vm.onIntent(DrawerIntent.Open)
+            runCurrent()
+            assertFalse(vm.state.value.picking)
+            vm.onIntent(DrawerIntent.Launch(app("Calendario")))
+            assertEquals(listOf("Calendario"), actions.launched)
+        }
+
+    @Test
     fun `launching closes the drawer and clears the search`() =
         runTest(dispatcher) {
             val vm = viewModel()

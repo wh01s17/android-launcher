@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.wh01s17.android.library)
+    // `AppIcon`: el icono de una app en Compose, compartido por el menú y los tiles.
+    alias(libs.plugins.wh01s17.android.compose)
 }
 
 dependencies {

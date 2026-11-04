@@ -2,6 +2,7 @@
 <resources>
     <!-- Drawer provisional de apps (plan.md §7, Hito 2). -->
     <string name="drawer_search_placeholder">Buscar apps…</string>
+    <string name="drawer_pick_placeholder">Añadir al escritorio…</string>
     <string name="drawer_loading">Cargando apps…</string>
     <string name="drawer_empty">Sin resultados</string>
     <string name="drawer_close">Cerrar</string>

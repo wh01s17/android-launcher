@@ -27,7 +27,7 @@ sealed interface ParseResult {
 
 /**
  * Lee `launcher.json` (plan.md §6) con mensajes legibles. Es estricto con lo que entiende (tipos
- * y valores de `version` y `bar`) y tolerante con lo que no (claves desconocidas se ignoran, para
+ * y valores de `version`, `bar`, `general` y `animations`) y tolerante con lo que no (claves desconocidas se ignoran, para
  * que una config de una versión futura siga abriéndose). Una config con errores no se aplica a
  * medias: devuelve todos los errores a la vez.
  */
@@ -81,7 +81,9 @@ object ConfigParser {
                 is JsonObject -> readBar(element, fallback?.bar ?: BarConfig(), errors)
                 else -> null.also { errors += ConfigError("bar", "debe ser un objeto") }
             }
-        return if (version != null && bar != null) LauncherConfig(version, bar) else null
+        val general = GeneralSections.readGeneral(root["general"], fallback?.general ?: GeneralConfig(), errors)
+        val animations = GeneralSections.readAnimations(root["animations"], fallback?.animations ?: AnimationsConfig(), errors)
+        return if (version != null && bar != null) LauncherConfig(version, bar, general, animations) else null
     }
 
     private fun readVersion(

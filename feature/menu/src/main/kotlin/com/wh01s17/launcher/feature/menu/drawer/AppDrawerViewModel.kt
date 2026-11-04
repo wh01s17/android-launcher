@@ -13,9 +13,13 @@ import com.wh01s17.launcher.core.apps.model.ProfileKind
 import com.wh01s17.launcher.core.fuzzy.FuzzyIndex
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -27,6 +31,9 @@ import kotlinx.coroutines.withContext
 /** Lo que el usuario puede hacer en el drawer (UDF, plan.md §5.1). */
 sealed interface DrawerIntent {
     data object Open : DrawerIntent
+
+    /** Abrir para elegir una app (añadir un tile) en vez de lanzarla. */
+    data object OpenPicker : DrawerIntent
 
     data object Close : DrawerIntent
 
@@ -75,6 +82,11 @@ class AppDrawerViewModel(
     private val workDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
     private val open = MutableStateFlow(false)
+    private val picking = MutableStateFlow(false)
+    private val pickedApps = MutableSharedFlow<AppEntry>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    /** Las apps elegidas en modo [DrawerIntent.OpenPicker]; quien abrió el selector decide qué hacer. */
+    val picks: SharedFlow<AppEntry> = pickedApps.asSharedFlow()
     private val query = MutableStateFlow("")
     private val menu = MutableStateFlow<AppMenu?>(null)
     private val message = MutableStateFlow<DrawerMessage?>(null)
@@ -89,25 +101,34 @@ class AppDrawerViewModel(
             Results(catalog.loaded, index.search(q).map { DrawerItem(it.item, it.positions, catalog.badgeFor(it.item)) })
         }.flowOn(workDispatcher)
 
+    private val mode = combine(open, picking) { open, picking -> open to (open && picking) }
+
     val state: StateFlow<AppDrawerState> =
-        combine(open, query, results, menu, message) { open, query, results, menu, message ->
-            AppDrawerState(open, query, results.loaded, results.items, menu, message)
+        combine(mode, query, results, menu, message) { (open, picking), query, results, menu, message ->
+            AppDrawerState(open, picking, query, results.loaded, results.items, menu, message)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), AppDrawerState())
 
     fun onIntent(intent: DrawerIntent) {
         when (intent) {
-            DrawerIntent.Open -> open.value = true
+            DrawerIntent.Open -> {
+                picking.value = false
+                open.value = true
+            }
+            DrawerIntent.OpenPicker -> {
+                picking.value = true
+                open.value = true
+            }
             DrawerIntent.Close -> close()
             is DrawerIntent.QueryChanged -> {
                 query.value = intent.query
                 message.value = null
             }
-            is DrawerIntent.Launch -> handle(actions.launch(intent.app, intent.origin))
+            is DrawerIntent.Launch -> choose(intent.app, intent.origin)
             DrawerIntent.LaunchFirst ->
                 state.value.items
                     .firstOrNull()
-                    ?.let { handle(actions.launch(it.app)) }
-            is DrawerIntent.ShowMenu -> showMenu(intent.app)
+                    ?.let { choose(it.app, null) }
+            is DrawerIntent.ShowMenu -> if (!picking.value) showMenu(intent.app)
             DrawerIntent.DismissMenu -> menu.value = null
             is DrawerIntent.OpenInfo -> handle(actions.openAppInfo(intent.app))
             is DrawerIntent.Uninstall -> {
@@ -118,8 +139,22 @@ class AppDrawerViewModel(
         }
     }
 
+    /** Abrir la app o, eligiendo para un tile, entregarla y cerrar. */
+    private fun choose(
+        app: AppEntry,
+        origin: LaunchOrigin?,
+    ) {
+        if (picking.value) {
+            pickedApps.tryEmit(app)
+            close()
+        } else {
+            handle(actions.launch(app, origin))
+        }
+    }
+
     private fun close() {
         open.value = false
+        picking.value = false
         query.value = ""
         menu.value = null
         message.value = null

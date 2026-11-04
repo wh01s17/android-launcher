@@ -1,0 +1,96 @@
+# Escritorios y tiles
+
+Los escritorios (`feature/workspaces`) son el inicio del launcher: diez workspaces que se recorren
+deslizando, cada uno con sus apps en mosaico, colocadas por el motor de tiling (`core/tiling`).
+Un tile es un *lanzador vivo* (plan.md §2.2): tocarlo abre la app, no la incrusta.
+
+## Uso
+
+| Gesto | Fuera del modo edición | En el modo edición |
+| --- | --- | --- |
+| Tocar un tile | Lo enfoca y abre la app (la ventana crece desde el tile) | Lo enfoca |
+| Mantener pulsado un tile | Entra en edición con ese tile enfocado | — |
+| Mantener pulsado un hueco | Entra en edición | Entra en edición |
+| Tocar un hueco | Abre el menú (drawer de apps) | Sale de edición |
+| Deslizar a los lados | Cambia de escritorio | Desactivado (para poder arrastrar) |
+| Deslizar hacia arriba | Abre el menú | — |
+| Arrastrar un tile sobre otro | — | Los intercambia |
+| Arrastrar un tile a la tira `[1] … [0]` de arriba | — | Lo lleva a ese escritorio (sin seguirlo) |
+| Arrastrar una asa verde de un borde | — | Cambia el tamaño de los dos lados |
+| Arrastrar un flotante / su punto de la esquina | — | Lo mueve / le cambia el tamaño |
+| *Atrás* o *Inicio* | — | Sale de edición |
+
+En edición el escritorio se encoge entero para dejar sitio a la barra de herramientas, sin cambiar
+la distribución. La barra de herramientas actúa sobre el tile con el foco:
+
+| Botón | Equivale a | Qué hace |
+| --- | --- | --- |
+| `+ app` | — | Abre el drawer para elegir una app; se añade al escritorio actual |
+| `split` | `Super + J` | Invierte el split del tile (sólo en dwindle) |
+| `flotar` | `Super + T` | Flotante ↔ mosaico |
+| `completa` | `Super + F` | Pantalla completa (sólo se ve ese tile) |
+| `dwindle` / `master` | `Super + L` | Cambia el layout del escritorio |
+| `quitar` | `Super + W` | Quita el tile (la app no se cierra ni se desinstala) |
+| `ajustes` | — | Ajustes de wh01s17 (Compatibilidad, etc.) |
+| `listo` | — | Sale de edición |
+
+Los atajos de teclado de la columna «Equivale a» llegan en el Hito 6; los comandos ya existen
+(`WorkspaceCommand` en `core/input`) y los atiende `WorkspacesViewModel`.
+
+## Comportamiento del mosaico
+
+Como en Hyprland con la config de `~/dotfiles`:
+
+- **Dwindle** (por defecto): cada tile nuevo parte el tile con el foco por su lado largo y queda a
+  la derecha o abajo (`force_split = 2`). La orientación de cada split se recalcula con el tamaño
+  (girar la pantalla reorganiza); `split` la fija.
+- **Master**: el principal ocupa el 55 % del lado largo (arriba en vertical) y el resto se reparte
+  en una pila. Un tile nuevo pasa a ser el principal (`new_status = "master"`).
+- **Grupos**: con `maxTilesPerWorkspace` huecos ocupados, un tile nuevo entra como pestaña en el
+  grupo del tile con el foco. Las pestañas se ven arriba del grupo; tocar una la muestra.
+- **Foco**: al quitar el tile con el foco, pasa al último que lo tuvo (`focus_on_close`).
+- Huecos, borde y radio salen del tema (`gaps_in 2`, `gaps_out 2`, `border_size 1`,
+  `rounding 10`) salvo que `general` los cambie. Entre dos tiles hay dos `gapsIn`, como en Hyprland.
+
+## Configuración (`launcher.json`)
+
+```json
+{
+  "version": 1,
+  "general": { "layout": "dwindle", "maxTilesPerWorkspace": 8, "gapsIn": 2, "gapsOut": 2,
+               "borderSize": 1, "rounding": 10 },
+  "animations": { "workspaces": { "enabled": true, "style": "slide", "bezier": "easeOutQuint", "speed": 2 } },
+  "bar": { "layout": { "left": [{ "id": "core.workspaces", "persistent": 5 }] } }
+}
+```
+
+- `general.layout`: `dwindle` o `master`, para los escritorios vacíos (los que tienen tiles
+  conservan el suyo).
+- `general.maxTilesPerWorkspace`: 1–16. Las medidas van en dp (`gapsIn`/`gapsOut` 0–32,
+  `borderSize` 0–8, `rounding` 0–32); si faltan, las del tema.
+- `animations.workspaces`: `speed` en décimas de segundo como en Hyprland (2 = 200 ms); `bezier`,
+  una de las curvas de `looknfeel.lua` (`easeOutQuint`, `easeInOutCubic`, `linear`,
+  `almostLinear`, `quick`). Sólo existe el estilo `slide`; `enabled: false` cambia sin animación.
+- `core.workspaces` → `persistent`: cuántos escritorios se ven siempre en la barra (5, como el
+  shell). Los demás sólo aparecen si tienen tiles o son el actual.
+
+Igual que `bar`, lo que no se escribe toma el valor de fábrica, y una config con errores no se
+aplica (se conserva la anterior y la barra lo avisa).
+
+## Dónde se guarda
+
+El estado (árboles, proporciones, foco, flotantes y qué app hay en cada tile) es de la app, no del
+usuario: va en `files/state/workspaces.json` (`DeskCodec`), escrito con `AtomicFile` medio segundo
+después del último cambio y al salir del inicio. Un archivo que no se entiende se aparta como
+`workspaces.json.broken` y se empieza con los escritorios vacíos. Las apps se guardan por
+`paquete/clase` y número de serie del perfil, que no cambian al reiniciar.
+
+Una app desinstalada deja su tile como «no instalada» (atenuado) hasta que se quite: así una
+actualización o un perfil de trabajo en pausa no borran la distribución.
+
+## Pruebas
+
+- `core/tiling`: propiedades y distribuciones de referencia (cobertura ≥ 90 % en `check`).
+- `feature/workspaces`: modelo (`DeskTest`, `DeskCodecTest`), guardado (`DeskRepositoryTest`),
+  ViewModel y la UI (`WorkspacesScreenTest`: capturas a 407 dp y gestos del modo edición).
+  `./gradlew :feature:workspaces:recordRoborazziDebug` regraba las capturas.
