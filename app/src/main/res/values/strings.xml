@@ -6,4 +6,5 @@
     <string name="notice_navigation_gave_up">HyperOS deshizo el ajuste de los botones varias veces: siguen visibles. Mira Ajustes → Compatibilidad.</string>
     <string name="shade_needs_service">Para abrir las notificaciones desde la barra, activa «Gestos wh01s17» en Ajustes → Accesibilidad.</string>
     <string name="navigation_buttons_restored">Los gestos wh01s17 no estaban activos: se devolvieron los botones de navegación.</string>
+    <string name="terminal_missing">No se pudo abrir la terminal «%1$s» (apps.terminal en launcher.json).</string>
 </resources>

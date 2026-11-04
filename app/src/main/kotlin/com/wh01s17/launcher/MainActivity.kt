@@ -30,6 +30,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.wh01s17.launcher.core.apps.actions.LaunchResult
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.input.LauncherCommand
 import com.wh01s17.launcher.core.input.WorkspaceCommand
@@ -45,8 +46,10 @@ import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesViewModel
 import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
 import com.wh01s17.launcher.input.Shortcuts
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.abs
 import android.graphics.Color as AndroidColor
 
@@ -194,8 +197,27 @@ class MainActivity : ComponentActivity() {
             LauncherCommand.OpenSystemMenu -> menuController.toggle(MenuPage.System)
             LauncherCommand.OpenNotificationShade -> openNotificationShade()
             LauncherCommand.ShowShortcuts -> startActivity(SettingsActivity.shortcuts(this))
+            LauncherCommand.OpenTerminal -> openTerminal()
             is LauncherCommand.AdjustVolume -> adjustVolume(command.steps)
             is WorkspaceCommand -> workspaces.onCommand(command)
+        }
+    }
+
+    /**
+     * `Super + Return` (plan.md §3): la app de `apps.terminal`; si no está, lo dice. Justo al arrancar
+     * el índice de apps puede no estar cargado (≈ 3 s en debug): se espera a la primera carga.
+     */
+    private fun openTerminal() {
+        val spec =
+            container.configRepository.state.value.config
+                ?.apps
+                ?.terminal ?: return
+        lifecycleScope.launch {
+            val catalog = withTimeoutOrNull(CATALOG_WAIT_MS) { container.appRepository.catalog.first { it.loaded } }
+            val result = catalog?.find(spec)?.let { container.appActions.launch(it) }
+            if (result !is LaunchResult.Launched) {
+                Toast.makeText(this@MainActivity, getString(R.string.terminal_missing, spec), Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -260,5 +282,6 @@ class MainActivity : ComponentActivity() {
 
     private companion object {
         const val HINT_SHADE = "notification-shade-needs-service"
+        const val CATALOG_WAIT_MS = 10_000L
     }
 }
