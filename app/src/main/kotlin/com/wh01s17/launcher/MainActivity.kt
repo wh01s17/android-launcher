@@ -129,7 +129,17 @@ class MainActivity : ComponentActivity() {
         )
         handleCommands()
         // Registra el resultado del diálogo de enlace de widgets: tiene que ser antes de onStart.
-        widgets = HomeWidgets(this, container.widgetHost, container.desk.state, workspaces::addWidget)
+        widgets =
+            HomeWidgets(
+                this,
+                container.widgetHost,
+                container.desk.state,
+                container.nativeWidgets,
+                onAudioPermission = { container.audioPermission.value = it },
+                setRequestAudio = { container.requestAudioPermission = it },
+                onAdded = workspaces::addWidget,
+                onAddNative = workspaces::addNative,
+            )
         setContent { HomeContent() }
     }
 

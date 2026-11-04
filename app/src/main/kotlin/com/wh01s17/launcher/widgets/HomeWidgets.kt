@@ -1,16 +1,21 @@
 package com.wh01s17.launcher.widgets
 
+import android.Manifest
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.wh01s17.launcher.feature.widgets.host.WidgetHost
+import com.wh01s17.launcher.feature.widgets.native.NativeWidgetSources
+import com.wh01s17.launcher.feature.widgets.native.NativeWidgetView
 import com.wh01s17.launcher.feature.widgets.ui.WidgetPicker
 import com.wh01s17.launcher.feature.widgets.ui.WidgetView
 import com.wh01s17.launcher.feature.workspaces.model.Desk
@@ -31,21 +36,46 @@ internal class HomeWidgets(
     private val activity: ComponentActivity,
     private val host: WidgetHost,
     desk: StateFlow<Desk?>,
+    private val sources: NativeWidgetSources,
+    private val onAudioPermission: (Boolean) -> Unit,
+    setRequestAudio: (() -> Unit) -> Unit,
     onAdded: (Int) -> Unit,
+    private val onAddNative: (String) -> Unit,
 ) {
     private val flow = WidgetFlow(activity, host, onAdded)
 
     private var picking by mutableStateOf(false)
 
     val renderer =
-        WidgetRenderer { appWidgetId, interactive, onLongPress, modifier ->
-            WidgetView(host, appWidgetId, interactive, onLongPress, modifier)
+        object : WidgetRenderer {
+            @Composable
+            override fun Content(
+                appWidgetId: Int,
+                interactive: Boolean,
+                onLongPress: () -> Unit,
+                modifier: Modifier,
+            ) = WidgetView(host, appWidgetId, interactive, onLongPress, modifier)
+
+            @Composable
+            override fun Native(
+                id: String,
+                interactive: Boolean,
+                modifier: Modifier,
+            ) = NativeWidgetView(id, sources, interactive, modifier)
         }
 
+    /** Permiso de micrófono para el visualizador; se pide sólo desde el widget (plan.md R8). */
+    private val audioPermission =
+        activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> onAudioPermission(granted) }
+
     init {
+        setRequestAudio { audioPermission.launch(Manifest.permission.RECORD_AUDIO) }
         activity.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
-                override fun onStart(owner: LifecycleOwner) = host.startListening()
+                override fun onStart(owner: LifecycleOwner) {
+                    host.startListening()
+                    onAudioPermission(sources.spectrum.permitted())
+                }
 
                 override fun onStop(owner: LifecycleOwner) = host.stopListening()
             },
@@ -80,6 +110,10 @@ internal class HomeWidgets(
             onPick = { provider ->
                 picking = false
                 flow.start(provider.info)
+            },
+            onPickNative = { widget ->
+                picking = false
+                onAddNative(widget.id)
             },
             onDismiss = { picking = false },
         )

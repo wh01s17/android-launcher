@@ -14,6 +14,8 @@ import com.wh01s17.launcher.core.config.AndroidConfigSource
 import com.wh01s17.launcher.core.config.ConfigRepository
 import com.wh01s17.launcher.core.input.DefaultLauncherCommandBus
 import com.wh01s17.launcher.core.input.LauncherCommandBus
+import com.wh01s17.launcher.core.system.media.AudioSpectrum
+import com.wh01s17.launcher.core.system.media.MediaSource
 import com.wh01s17.launcher.core.system.navigation.NavigationWatchdog
 import com.wh01s17.launcher.core.system.navigation.NotificationShade
 import com.wh01s17.launcher.core.system.oem.xiaomi.AndroidCompatibilityGateway
@@ -25,6 +27,8 @@ import com.wh01s17.launcher.core.system.status.ClockSource
 import com.wh01s17.launcher.core.system.status.DoNotDisturbSource
 import com.wh01s17.launcher.core.system.status.NetworkSource
 import com.wh01s17.launcher.core.system.status.SystemClockSource
+import com.wh01s17.launcher.core.system.timer.MetronomeRepository
+import com.wh01s17.launcher.core.system.timer.PomodoroRepository
 import com.wh01s17.launcher.feature.bar.BarSources
 import com.wh01s17.launcher.feature.bar.WorkspaceBarState
 import com.wh01s17.launcher.feature.bar.defaultBarRegistry
@@ -32,12 +36,14 @@ import com.wh01s17.launcher.feature.bar.module.BarModuleRegistry
 import com.wh01s17.launcher.feature.menu.data.DataStoreUsageRepository
 import com.wh01s17.launcher.feature.menu.panel.searchCommands
 import com.wh01s17.launcher.feature.widgets.host.WidgetHost
+import com.wh01s17.launcher.feature.widgets.native.NativeWidgetSources
 import com.wh01s17.launcher.feature.workspaces.data.DeskRepository
 import com.wh01s17.launcher.feature.workspaces.data.FileDeskStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import java.io.File
@@ -84,6 +90,32 @@ class AppContainer(
      * inicio y lo lee la tabla de `Super + K`; sólo en el hilo principal.
      */
     var superKeyDelivered: Boolean = false
+
+    /** Pomodoro y metrónomo: un estado para el tile, la barra y el servicio (plan.md §7 Hito 7). */
+    val pomodoro: PomodoroRepository by lazy {
+        PomodoroRepository(File(File(appContext.filesDir, "state"), "pomodoro.properties"), processScope)
+    }
+    val metronome: MetronomeRepository by lazy { MetronomeRepository(File(File(appContext.filesDir, "state"), "metronome.properties")) }
+
+    /** Lo que necesitan los widgets propios de wh01s17. */
+    val audioSpectrum: AudioSpectrum by lazy { AudioSpectrum(appContext) }
+
+    /** Si el visualizador tiene el permiso de micrófono; lo actualiza la pantalla de inicio. */
+    val audioPermission = MutableStateFlow(false)
+
+    /** Lo pone la pantalla de inicio: lanza el diálogo de permiso de micrófono. */
+    var requestAudioPermission: () -> Unit = {}
+
+    val nativeWidgets: NativeWidgetSources by lazy {
+        NativeWidgetSources(
+            MediaSource(appContext),
+            pomodoro,
+            metronome,
+            clockSource,
+            audioSpectrum,
+            audioPermission,
+        ) { requestAudioPermission() }
+    }
 
     /** Los widgets del sistema en tiles (plan.md §7 Hito 7). */
     val widgetHost: WidgetHost by lazy { WidgetHost(appContext) }
