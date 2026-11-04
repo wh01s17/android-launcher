@@ -21,6 +21,10 @@ class ConfigRepositoryTest {
         override fun readUserConfig(): String? = if (failToRead) throw IOException("disk") else user
 
         override fun readDefaultConfig() = default
+
+        override fun writeUserConfig(text: String) {
+            user = text
+        }
     }
 
     private val source = FakeSource()
@@ -134,6 +138,8 @@ class ConfigRepositoryTest {
                     override fun readUserConfig(): String? = source.readUserConfig()
 
                     override fun readDefaultConfig() = source.default.also { defaultReads++ }
+
+                    override fun writeUserConfig(text: String) = source.writeUserConfig(text)
                 }
             val repo = ConfigRepository(counting, StandardTestDispatcher(testScheduler))
             val jobs = List(3) { backgroundScope.launch { repo.reload() } }

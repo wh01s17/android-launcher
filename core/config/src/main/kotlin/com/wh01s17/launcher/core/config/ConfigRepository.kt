@@ -16,6 +16,19 @@ interface ConfigSource {
 
     /** La config de fábrica, empaquetada en la app. Bloqueante. */
     fun readDefaultConfig(): String
+
+    /** Sustituye el `launcher.json` del usuario de forma atómica (editor de atajos). Bloqueante. */
+    fun writeUserConfig(text: String)
+}
+
+/** Resultado de [ConfigRepository.editBindings]. */
+sealed interface EditResult {
+    data object Saved : EditResult
+
+    /** No se escribió nada: el archivo del usuario tiene errores, no se pudo leer o escribir, o el resultado no sería válido. */
+    data class Refused(
+        val errors: List<ConfigError>,
+    ) : EditResult
 }
 
 /**
@@ -48,6 +61,37 @@ class ConfigRepository(
         }
 
     private val reloadLock = Mutex()
+
+    /**
+     * Aplica un cambio del editor de atajos sobre el archivo del usuario y recarga. Nunca escribe
+     * sobre un `launcher.json` con errores (se perderían cambios a medio hacer) ni un resultado que
+     * no se pueda leer.
+     */
+    suspend fun editBindings(edit: BindingEdit): EditResult =
+        reloadLock.withLock {
+            val result = withContext(ioDispatcher) { writeEdit(edit) }
+            if (result == EditResult.Saved) mutableState.value = withContext(ioDispatcher) { load(mutableState.value.config) }
+            result
+        }
+
+    private fun writeEdit(edit: BindingEdit): EditResult =
+        try {
+            val userText = source.readUserConfig()
+            val current =
+                when (val parsed = userText?.let { ConfigParser.parse(it, defaults) }) {
+                    null -> defaults
+                    is ParseResult.Success -> parsed.config
+                    is ParseResult.Failure -> return EditResult.Refused(parsed.errors)
+                }
+            val bindings = if (edit == BindingEdit.ResetAll) defaults.bindings else BindingsEditor.apply(current.bindings, edit)
+            val text = BindingsEditor.write(userText, defaults.bindings, bindings)
+            when (val check = ConfigParser.parse(text, defaults)) {
+                is ParseResult.Failure -> EditResult.Refused(check.errors)
+                is ParseResult.Success -> EditResult.Saved.also { source.writeUserConfig(text) }
+            }
+        } catch (e: IOException) {
+            EditResult.Refused(listOf(ConfigError("launcher.json", "no se pudo guardar: ${e.message}")))
+        }
 
     /** La config de fábrica no cambia mientras la app corre: se lee y se parsea una vez. */
     private val defaults: LauncherConfig by lazy { parseDefaults() }
