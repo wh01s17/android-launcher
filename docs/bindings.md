@@ -93,6 +93,7 @@ Quedan fuera, con su motivo (plan.md §3):
 | `menu.apps` / `menu.system` | — | El menú en Apps / Sistema; si ya está ahí, lo cierra |
 | `notifications.open` | — | Cortina del sistema (necesita *Gestos wh01s17*) |
 | `shortcuts.show` | — | Tabla de atajos (`Super + K`; también menú → Aprender → Atajos) |
+| `terminal.open` | — | Abre `apps.terminal` (`Super + Return`; de fábrica `com.termux`) |
 | `audio.volume` | `step` −10…10 | Volumen multimedia, con el panel del sistema |
 | `workspace.focus` | `id` 1–10 | Va al escritorio |
 | `workspace.next` / `workspace.previous` | — | Siguiente/anterior con tiles |
@@ -128,8 +129,10 @@ siguiente/anterior; `SUPER + flechas` foco; `SUPER + SHIFT + flechas` intercambi
 `SUPER (+ SHIFT) + MINUS/EQUAL` tamaño; `SUPER + W/T/J/F/L`; `SUPER + ALT (+ SHIFT) + TAB` y
 `SUPER + CTRL + ←/→` grupo; dos dedos a los lados, escritorio siguiente/anterior.
 
-Fuera de esta tarea: `Super + Return` (terminal) y `Super + K` (tabla) tienen tarea propia en el
-Hito 6; `Super + S` y los atajos de media, Hito 8; `Super + Ctrl + Space` (fondos), Hito 10.
+`SUPER + K` abre la tabla y `SUPER + RETURN` la terminal. La terminal es `apps.terminal`: un
+paquete (`"com.termux"`, su actividad principal) o una actividad (`"com.termux/.app.TermuxActivity"`).
+
+Fuera del Hito 6: `Super + S` y los atajos de media, Hito 8; `Super + Ctrl + Space` (fondos), Hito 10.
 
 ## Reservadas por el sistema
 
