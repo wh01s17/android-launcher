@@ -924,7 +924,11 @@ multitáctil). Guía: [`docs/bindings.md`](docs/bindings.md).
 
 ### Hito 7 — Widgets (L)
 
-- [ ] `AppWidgetHost` y selector de widgets del sistema como tiles.
+- [x] `AppWidgetHost` y selector de widgets del sistema como tiles. `TileContent.Widget` (id en
+      `workspaces.json`), `WidgetHost`/`WhWidgetHostView` (mantener pulsado → edición, sin toques en
+      edición, tamaño en dp) y selector propio en `feature/widgets`; `LocalWidgetRenderer` para que
+      `feature/workspaces` los pinte; `WidgetFlow` (enlace con el diálogo del sistema y configuración)
+      y limpieza de ids sin tile en la app. «+ widget» en edición y en el menú. Probado en el Redmi.
 - [ ] Widgets nativos wh01s17: reloj/calendario, pomodoro (estados y colores
       de `docs/pomodoro.md`: trabajo `#ff6b66`, descanso corto `#84c959`,
       largo `#45d9ea`), metrónomo (bpm, compás, subdivisión), uso del sistema.
@@ -1168,6 +1172,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-04 | `apps.terminal` acepta un paquete (abre su actividad principal) y de fábrica es `com.termux` | La actividad de Termux (`.app.TermuxActivity`) no es la del ejemplo de §6.1; con el paquete no hace falta saberla |
 | 2026-11-04 | Ajustes de las franjas en `navigation-edges.properties` (un escritor: el launcher) con aviso a `:nav`; con el modo *gestos wh01s17* activo, *inicio* se fuerza en el servicio además de en la UI | Mismo patrón que las preferencias del modo (§11.1); sin *inicio* y sin botones no se saldría de una app |
 | 2026-11-04 | La animación de vuelta al launcher es propia (`onRestart`) y usa `animations.workspaces` | HyperOS no anima la vuelta con un launcher ajeno; reutilizar la curva evita otra sección de config |
+| 2026-11-04 | Selector de widgets propio (lista de `AppWidgetManager.installedProviders`), no `ACTION_APPWIDGET_PICK` | El del sistema no existe en todos los fabricantes y no sigue el tema; el propio agrupa por app y muestra el tamaño mínimo |
+| 2026-11-04 | `feature/workspaces` pinta los widgets mediante `LocalWidgetRenderer`, que pone la app con la implementación de `feature/widgets` | Ningún feature depende de otro (§5.2) |
+| 2026-11-04 | Los ids de widget sin tile se liberan comparando `AppWidgetHost.getAppWidgetIds()` con los tiles (salvo el que se está añadiendo) | Quitar, mover a otro escritorio o un enlace cancelado no necesitan avisar a nadie; el resultado siempre cuadra |
+| 2026-11-04 | La vista del widget vigila los toques antes que el widget para reconocer «mantener pulsado» y no recibe toques en edición | Como Launcher3: entrar en edición desde un widget con botones o listas, y poder arrastrar su tile |
 | 2026-11-04 | Búsqueda sin autocorrección del IME | SwiftKey modificaba nombres escritos durante la prueba ADB; las consultas de apps y comandos deben conservarse literalmente |
 
 ### 11.2 Riesgos
@@ -1194,10 +1202,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-04:** 52 de 75 tareas marcadas (69 % del plan completo);
+- **Balance al 2026-11-04:** 53 de 75 tareas marcadas (71 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
   Quedan los Hitos 7–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 7 (sin empezar). **Hitos 0–6 terminados**; versión `0.2.0`. Los
+- **Hito en curso:** Hito 7 (1 de 4 tareas). **Hitos 0–6 terminados**; versión `0.2.0`. Los
   cierres y sus pruebas siguen en §13.
 - **Última tarea completada:** matriz de `docs/xiaomi.md` con las tres capas; **Hito 6 cerrado**.
   En el Redmi, por ADB: atajos con `ALT` en lugar de `SUPER` (Meta nunca llega a la app; `ALT + TAB`
@@ -1206,8 +1214,8 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 - **Incidencia de la sesión (resuelta):** la primera versión de la animación de vuelta cerraba el
   launcher al volver; HyperOS mostró el selector de launcher. Se cerró sin elegir, se reafirmó el
   rol HOME de `com.wh01s17.launcher.debug` y se corrigió (§13).
-- **Siguiente tarea:** Hito 7, `AppWidgetHost` y selector de widgets del sistema como tiles
-  (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
+- **Siguiente tarea:** Hito 7, widgets nativos wh01s17 (reloj/calendario, pomodoro, metrónomo,
+  uso del sistema) como `TileContent.Native` (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
   Bluetooth y los gestos de dos dedos a mano; medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj.
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
@@ -1238,6 +1246,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-04 | 7 | Widgets del sistema en tiles: `TileContent.Widget`/`TileInfo.Widget` (`TileInfo` pasa a `App \| Widget`), `WidgetRenderer` + `LocalWidgetRenderer`, `feature/widgets` (`WidgetHost`, `WhWidgetHostView`, `WidgetView`, `WidgetPicker`, `installedWidgets`, `<queries>` de `APPWIDGET_UPDATE`), `WidgetFlow` y `HomeWidgets` en la app, «+ widget» y entrada de menú. En el Redmi: selector con los widgets instalados, diálogo de enlace del sistema (aceptado sólo para ese widget), «Tiempo de uso» en un tile, tocarlo abre Bienestar digital, mantenerlo entra en edición, quitarlo libera el id (`widgets.size=0`). Escritorio 5 usado para la prueba; los demás intactos | `feature/widgets/`, `feature/workspaces/`, `app/widgets/` |
 | 2026-11-04 | 6 | **Hito 6 terminado; `0.2.0`.** Matriz de `docs/xiaomi.md` con las tres capas en el Redmi: capa 1 con los botones reales, capa 3 con y sin botones, capas 2 + 3 tras `adb reboot` (servicio enlazado y botones ocultos solos; atrás, inicio, recientes) y columna de animación de vuelta. Pantalla encendida con USB sólo durante las pruebas (`stay_on_while_plugged_in` vuelto a `0`); modo *gestos wh01s17* y ajustes de franjas de fábrica restaurados | `docs/xiaomi.md`, `plan.md`, `CHANGELOG.md`, `app/build.gradle.kts` |
 | 2026-11-04 | 6 | Capa 3 refinada: `EdgeSettings` (cada gesto, grosor, sensibilidad) con `homeEnabled`/`recentsEnabled` en el reconocedor, `NavigationFiles.readEdges/writeEdges`, `edgesChangedAction` y `EdgeStripOverlay.reconfigure`; sección «gestos de borde» en Compatibilidad. `HomeReturn` (animación de vuelta) y `HomeCommands` (comandos fuera de `MainActivity`). En el Redmi: apagar atrás izquierdo lo desactiva al momento, atrás/inicio/recientes con los ajustes nuevos. La primera versión de `HomeReturn` cerraba el launcher al volver (`Animatable` fuera de la composición, sin reloj de fotogramas): Android mostró el selector de launcher; se cerró sin elegir, se reafirmó el rol HOME y se corrigió animando en la composición. 5 pruebas nuevas | `core/system/navigation/`, `feature/settings/compat/EdgeSection.kt`, `app/ui/HomeReturn.kt`, `app/HomeCommands.kt` |
 | 2026-11-04 | 6 | Terminal: `LauncherCommand.OpenTerminal` (`SUPER + RETURN`), `apps.terminal` en la config, `AppCatalog.find` (paquete o actividad, perfil personal primero). La actividad de Termux es `.app.TermuxActivity`, no `.HomeActivity` como decía §6.1 (corregido). Recién instalada, la primera pulsación fallaba porque el índice no había cargado: ahora se espera. 2 pruebas nuevas; probado en el Redmi | `core/apps/model/AppCatalog.kt`, `core/config/`, `app/MainActivity.kt` |

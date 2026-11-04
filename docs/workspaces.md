@@ -26,6 +26,7 @@ la distribución. La barra de herramientas actúa sobre el tile con el foco:
 | Botón | Equivale a | Qué hace |
 | --- | --- | --- |
 | `+ app` | — | Abre el selector del menú para elegir una app; se añade al escritorio actual |
+| `+ widget` | — | Abre el selector de widgets (también menú → Acciones → Añadir widget). Android pide permiso para enlazarlo la primera vez y algunos widgets se configuran antes de añadirse |
 | `split` | `Super + J` | Invierte el split del tile (sólo en dwindle) |
 | `flotar` | `Super + T` | Flotante ↔ mosaico |
 | `completa` | `Super + F` | Pantalla completa (sólo se ve ese tile) |
@@ -94,3 +95,12 @@ actualización o un perfil de trabajo en pausa no borran la distribución.
 - `feature/workspaces`: modelo (`DeskTest`, `DeskCodecTest`), guardado (`DeskRepositoryTest`),
   ViewModel y la UI (`WorkspacesScreenTest`: capturas a 407 dp y gestos del modo edición).
   `./gradlew :feature:workspaces:recordRoborazziDebug` regraba las capturas.
+
+## Widgets
+
+Un tile puede ser un widget del sistema (Hito 7). Fuera del modo edición el widget recibe sus
+toques (botones, listas) y mantenerlo pulsado entra en edición; en edición se arrastra como
+cualquier tile. Quitar el tile libera el widget en Android. Si la app del widget se desinstala, el
+tile se queda con «widget no disponible». En `files/state/workspaces.json` se guarda como
+`{"id": 7, "widget": 35}` (el id del widget en el `AppWidgetHost` del launcher).
+
