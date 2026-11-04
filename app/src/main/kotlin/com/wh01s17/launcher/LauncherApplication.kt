@@ -2,6 +2,7 @@ package com.wh01s17.launcher
 
 import android.app.Application
 import com.wh01s17.launcher.di.AppContainer
+import kotlinx.coroutines.launch
 
 /**
  * Corre en dos procesos: el del launcher y el de navegación (`:nav`, el servicio de accesibilidad).
@@ -14,6 +15,9 @@ class LauncherApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
-        if (getProcessName() == packageName) container.navigationWatchdog.start()
+        if (getProcessName() == packageName) {
+            container.navigationWatchdog.start()
+            container.processScope.launch { container.configRepository.reload() }
+        }
     }
 }

@@ -14,7 +14,10 @@ android {
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:apps"))
+    implementation(project(":core:config"))
+    implementation(project(":core:input"))
     implementation(project(":core:system"))
+    implementation(project(":feature:bar"))
     implementation(project(":feature:menu"))
     implementation(project(":feature:settings"))
     implementation(libs.androidx.lifecycle.viewmodel.compose)

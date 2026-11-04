@@ -1,6 +1,9 @@
 package com.wh01s17.launcher.di
 
 import android.content.Context
+import com.wh01s17.launcher.bar.BarNotices
+import com.wh01s17.launcher.bar.OneTimeHints
+import com.wh01s17.launcher.bar.ProvisionalWorkspaces
 import com.wh01s17.launcher.core.apps.AppRepository
 import com.wh01s17.launcher.core.apps.LauncherAppRepository
 import com.wh01s17.launcher.core.apps.actions.AppActions
@@ -8,9 +11,24 @@ import com.wh01s17.launcher.core.apps.actions.LauncherAppActions
 import com.wh01s17.launcher.core.apps.icons.AppIconLoader
 import com.wh01s17.launcher.core.apps.icons.LauncherIconLoader
 import com.wh01s17.launcher.core.apps.source.AndroidLauncherAppsGateway
+import com.wh01s17.launcher.core.config.AndroidConfigSource
+import com.wh01s17.launcher.core.config.ConfigRepository
+import com.wh01s17.launcher.core.input.DefaultLauncherCommandBus
+import com.wh01s17.launcher.core.input.LauncherCommandBus
 import com.wh01s17.launcher.core.system.navigation.NavigationWatchdog
+import com.wh01s17.launcher.core.system.navigation.NotificationShade
 import com.wh01s17.launcher.core.system.oem.xiaomi.AndroidCompatibilityGateway
 import com.wh01s17.launcher.core.system.oem.xiaomi.CompatibilityGateway
+import com.wh01s17.launcher.core.system.status.AudioSource
+import com.wh01s17.launcher.core.system.status.BatterySource
+import com.wh01s17.launcher.core.system.status.BluetoothSource
+import com.wh01s17.launcher.core.system.status.ClockSource
+import com.wh01s17.launcher.core.system.status.DoNotDisturbSource
+import com.wh01s17.launcher.core.system.status.NetworkSource
+import com.wh01s17.launcher.core.system.status.SystemClockSource
+import com.wh01s17.launcher.feature.bar.BarSources
+import com.wh01s17.launcher.feature.bar.defaultBarRegistry
+import com.wh01s17.launcher.feature.bar.module.BarModuleRegistry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -41,4 +59,32 @@ class AppContainer(
     val navigationWatchdog: NavigationWatchdog by lazy { NavigationWatchdog(appContext) }
 
     val compatibilityGateway: CompatibilityGateway by lazy { AndroidCompatibilityGateway(appContext, navigationWatchdog) }
+
+    /** Todos los comandos del launcher pasan por aquí (plan.md §5.3). */
+    val commandBus: LauncherCommandBus = DefaultLauncherCommandBus()
+
+    val configRepository: ConfigRepository by lazy { ConfigRepository(AndroidConfigSource(appContext), Dispatchers.IO) }
+
+    val clockSource: ClockSource by lazy { SystemClockSource(appContext) }
+
+    val barSources: BarSources by lazy {
+        BarSources(
+            battery = BatterySource(appContext),
+            network = NetworkSource(appContext),
+            bluetooth = BluetoothSource(appContext),
+            audio = AudioSource(appContext),
+            doNotDisturb = DoNotDisturbSource(appContext),
+        )
+    }
+
+    val barRegistry: BarModuleRegistry by lazy { defaultBarRegistry(clockSource) }
+
+    val barNotices: BarNotices by lazy { BarNotices(appContext, configRepository.state, compatibilityGateway) }
+
+    /** Hasta el Hito 4 no hay workspaces reales. */
+    val workspaces = ProvisionalWorkspaces()
+
+    val notificationShade: NotificationShade by lazy { NotificationShade(appContext, navigationWatchdog) }
+
+    val oneTimeHints: OneTimeHints by lazy { OneTimeHints(appContext) }
 }
