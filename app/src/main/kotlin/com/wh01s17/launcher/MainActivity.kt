@@ -1,7 +1,9 @@
 package com.wh01s17.launcher
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
@@ -31,9 +34,10 @@ import com.wh01s17.launcher.core.input.WorkspaceCommand
 import com.wh01s17.launcher.feature.bar.Bar
 import com.wh01s17.launcher.feature.bar.BarViewModel
 import com.wh01s17.launcher.feature.bar.barHeight
-import com.wh01s17.launcher.feature.menu.drawer.AppDrawer
-import com.wh01s17.launcher.feature.menu.drawer.AppDrawerViewModel
-import com.wh01s17.launcher.feature.menu.drawer.DrawerIntent
+import com.wh01s17.launcher.feature.menu.panel.LauncherMenu
+import com.wh01s17.launcher.feature.menu.panel.MenuViewModel
+import com.wh01s17.launcher.feature.menu.search.MenuSearchViewModel
+import com.wh01s17.launcher.feature.menu.search.SearchIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesViewModel
 import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
@@ -43,13 +47,24 @@ import android.graphics.Color as AndroidColor
 
 /**
  * Pantalla de inicio (rol HOME): los escritorios en mosaico (Hito 4), la barra encima (Hito 3) y el
- * drawer provisional de apps (Hito 2), que también elige la app de un tile nuevo.
+ * menú y paleta unificados (Hito 5), también usados para seleccionar apps para tiles.
  */
 class MainActivity : ComponentActivity() {
     private val container get() = (application as LauncherApplication).container
 
-    private val drawer: AppDrawerViewModel by viewModels {
-        viewModelFactory { initializer { AppDrawerViewModel(container.appRepository, container.appActions) } }
+    private val search: MenuSearchViewModel by viewModels {
+        viewModelFactory {
+            initializer {
+                MenuSearchViewModel(container.appRepository, container.appActions, container.usageRepository, container.menuCommands)
+            }
+        }
+    }
+
+    private val menu: MenuViewModel by viewModels()
+    private val appVersion by lazy { packageManager.getPackageInfo(packageName, 0).versionName.orEmpty() }
+
+    private val menuController by lazy {
+        MenuController(this, menu, search, container.notificationShade, container.commandBus::send, ::openNotificationShade)
     }
 
     private val bar: BarViewModel by viewModels {
@@ -89,38 +104,55 @@ class MainActivity : ComponentActivity() {
             },
         )
         handleCommands()
-        setContent {
-            WhTheme {
-                val state by drawer.state.collectAsStateWithLifecycle()
-                val barState by bar.state.collectAsStateWithLifecycle()
-                val workspacesState by workspaces.state.collectAsStateWithLifecycle()
-                val config by container.configRepository.state.collectAsStateWithLifecycle()
-                Box(Modifier.fillMaxSize().background(WhTheme.colors.background)) {
-                    // Los escritorios ocupan lo que dejan la barra y los insets (la exclusive zone de
-                    // la barra en Hyprland): ningún tile queda debajo.
-                    WorkspacesScreen(
-                        state = workspacesState,
-                        iconLoader = container.iconLoader,
-                        onIntent = workspaces::onIntent,
-                        onCommand = workspaces::onCommand,
-                        onAddTile = { drawer.onIntent(DrawerIntent.OpenPicker) },
-                        onOpenMenu = { drawer.onIntent(DrawerIntent.Open) },
-                        onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
-                        modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(top = barHeight()),
+        setContent { HomeContent() }
+    }
+
+    @Composable
+    private fun HomeContent() {
+        WhTheme {
+            val state by search.state.collectAsStateWithLifecycle()
+            val menuPage by menu.page.collectAsStateWithLifecycle()
+            val barState by bar.state.collectAsStateWithLifecycle()
+            val workspacesState by workspaces.state.collectAsStateWithLifecycle()
+            val config by container.configRepository.state.collectAsStateWithLifecycle()
+            Box(Modifier.fillMaxSize().background(WhTheme.colors.background)) {
+                // Los escritorios ocupan lo que dejan la barra y los insets (la exclusive zone de
+                // la barra en Hyprland): ningún tile queda debajo.
+                WorkspacesScreen(
+                    state = workspacesState,
+                    iconLoader = container.iconLoader,
+                    onIntent = workspaces::onIntent,
+                    onCommand = workspaces::onCommand,
+                    onAddTile = menuController::pick,
+                    onOpenMenu = menuController::open,
+                    onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
+                    modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(top = barHeight()),
+                )
+                // La barra va debajo de la barra de estado del sistema (plan.md §5.5). Hasta que
+                // se lee la config no hay barra que pintar.
+                config.config?.let { launcherConfig ->
+                    Bar(
+                        config = launcherConfig.bar,
+                        registry = container.barRegistry,
+                        state = barState,
+                        onCommand = bar::send,
+                        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
                     )
-                    // La barra va debajo de la barra de estado del sistema (plan.md §5.5). Hasta que
-                    // se lee la config no hay barra que pintar.
-                    config.config?.let { launcherConfig ->
-                        Bar(
-                            config = launcherConfig.bar,
-                            registry = container.barRegistry,
-                            state = barState,
-                            onCommand = bar::send,
-                            modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
-                        )
-                    }
-                    AppDrawer(state, container.iconLoader, drawer::onIntent)
                 }
+                LauncherMenu(
+                    page = menuPage,
+                    onNavigate = {
+                        search.onIntent(SearchIntent.ClearQuery)
+                        menu.navigate(it)
+                    },
+                    onBack = menuController::back,
+                    onClose = menuController::close,
+                    onAction = menuController::execute,
+                    search = state,
+                    iconLoader = container.iconLoader,
+                    onSearch = search::onIntent,
+                    version = appVersion,
+                )
             }
         }
     }
@@ -132,10 +164,12 @@ class MainActivity : ComponentActivity() {
     private fun handleCommands() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { drawer.picks.collect { workspaces.addApp(it.key) } }
+                launch { search.picks.collect { workspaces.addApp(it.key) } }
+                launch { search.closed.collect { menu.close() } }
+                launch { search.commands.collect(menuController::execute) }
                 container.commandBus.commands.collect { command ->
                     when (command) {
-                        LauncherCommand.OpenMenu -> drawer.onIntent(DrawerIntent.Open)
+                        LauncherCommand.OpenMenu -> menuController.open()
                         LauncherCommand.OpenNotificationShade -> openNotificationShade()
                         is WorkspaceCommand -> workspaces.onCommand(command)
                     }
@@ -172,11 +206,23 @@ class MainActivity : ComponentActivity() {
         container.processScope.launch { container.desk.flush() }
     }
 
+    /**
+     * Escape también funciona en modo táctil, cuando Compose no conserva un nodo con foco.
+     * AndroidX core marca su override como interno; este es el callback público de Activity.
+     */
+    @SuppressLint("RestrictedApi")
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode != KeyEvent.KEYCODE_ESCAPE) return super.dispatchKeyEvent(event)
+        if (menu.page.value == null) return super.dispatchKeyEvent(event)
+        if (event.action == KeyEvent.ACTION_UP && !event.isCanceled) menuController.back()
+        return true
+    }
+
     /** Pulsar Inicio estando ya en el launcher vuelve a la pantalla limpia. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
-            drawer.onIntent(DrawerIntent.Close)
+            menuController.close()
             workspaces.onIntent(WorkspacesIntent.ExitEdit)
         }
     }

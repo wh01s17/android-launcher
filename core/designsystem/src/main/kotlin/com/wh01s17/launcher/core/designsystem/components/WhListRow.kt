@@ -54,6 +54,7 @@ fun WhListRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
+    keyboardSelected: Boolean = false,
     enabled: Boolean = true,
     leadingIcon: WhGlyph? = null,
     trailingText: String? = null,
@@ -69,6 +70,7 @@ fun WhListRow(
         onClick = onClick,
         modifier = modifier,
         selected = selected,
+        keyboardSelected = keyboardSelected,
         enabled = enabled,
         leading = leadingIcon?.let { glyph -> { tint -> WhIcon(glyph, tint = tint, size = iconSize) } },
         trailingText = trailingText,
@@ -90,6 +92,7 @@ fun WhListRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
+    keyboardSelected: Boolean = false,
     enabled: Boolean = true,
     leading: (@Composable (contentColor: Color) -> Unit)? = null,
     trailingText: String? = null,
@@ -104,7 +107,7 @@ fun WhListRow(
     val metrics = rowMetrics(size)
     val spacing = WhTheme.spacing
     val shape = WhTheme.borders.shape
-    val focused = state == WhControlState.Focus
+    val focused = state == WhControlState.Focus || keyboardSelected
     val background = if (highlighted) menu.selectedBackground else Color.Transparent
     val (borderWidth, borderColor) =
         when {

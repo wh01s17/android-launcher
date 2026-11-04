@@ -393,7 +393,7 @@ android-launcher/
 ├── feature/
 │   ├── workspaces/           # pager de workspaces, lienzo de tiles, modo edición
 │   ├── bar/                  # barra y registro de módulos
-│   ├── menu/                 # menú wh01s17 / paleta de comandos / drawer de apps
+│   ├── menu/                 # menú wh01s17 / paleta / selector de apps
 │   ├── scratchpad/           # workspace especial superpuesto
 │   ├── widgets/              # AppWidgetHost + widgets nativos (reloj, pomodoro, metrónomo)
 │   ├── settings/             # ajustes, atajos (Super+K), importar/exportar config
@@ -862,15 +862,27 @@ persisten tras reiniciar el teléfono.
 
 ### Hito 5 — Menú wh01s17 y paleta de comandos (M)
 
-- [ ] Panel del menú con submenús de §5.6 y sus iconos pixel.
-- [ ] Búsqueda unificada: apps + comandos + ajustes del sistema
-      (`Settings.ACTION_*`) + atajos de app.
-- [ ] Ranking por uso (DataStore) y recencia.
-- [ ] Navegación por teclado completa.
-- [ ] Sustituye al drawer provisional del Hito 2.
+- [x] Panel del menú con submenús de §5.6 e iconos pixel; `feature/menu/panel`.
+      Incluye versión instalada, ayuda, acciones y accesos a Android; bloqueo, cortina y
+      diálogo de apagado usan accesibilidad opcional, con explicación si falta.
+- [x] Búsqueda unificada: apps, comandos (incluidos todos los `WorkspaceCommand`),
+      ajustes del sistema y atajos habilitados de apps. Índice y ranking fuera del hilo UI;
+      perfiles y catálogo actualizados, consulta conservada en errores.
+- [x] Ranking por frecuencia y recencia en DataStore Preferences, esquema 1 y archivo
+      independiente de la config. Sólo cuenta acciones aceptadas; recuperación de corrupción,
+      IO y persistencia tras recrear el proceso probadas.
+- [x] Navegación completa por teclado: flechas, Enter, Escape, Tab/Shift+Tab y contextual
+      con Shift+F10/Menú; foco cian, desplazamiento hasta la selección y manejo previo al IME.
+      Edición inmediata sin perder letras; Enter espera resultados de su consulta, nunca los anteriores.
+- [x] Retirado el drawer provisional: menú, Apps, búsqueda y selector de tiles comparten
+      superficie. Se conservan info, desinstalación confirmada y atajos contextuales.
 
 **Terminado cuando:** cualquier acción del launcher es alcanzable desde el
-menú. **Fin del MVP (Hitos 0–5)** → etiquetar `v0.1.0`.
+menú. **Fin del MVP (Hitos 0–5)** → `v0.1.0` (versionName `0.1.0`, versionCode `100`).
+Comprobado con `./gradlew check assembleDebug`, 21 pruebas en `feature/menu` y tres
+capturas Roborazzi. En el Redmi: apps, ajustes, atajos, contextual, selector,
+comandos de escritorio, flechas y diálogo de apagado; ranking idéntico tras recrear UI.
+Revisión de cierre realizada y hallazgos corregidos; guía y matriz en [`docs/menu.md`](docs/menu.md).
 
 ### Hito 6 — Teclado físico y gestos configurables (M)
 
@@ -1115,6 +1127,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-03 | `AppIcon` pasa a `core/apps` (con Compose) y recibe tamaño y tinte | Lo usan el drawer y los tiles, y un `feature` no puede depender de otro |
 | 2026-11-03 | El drawer tiene un modo selección (`DrawerIntent.OpenPicker`, `picks`) para el `+ app` del modo edición | Reutiliza la búsqueda difusa; la app une los dos módulos (§5.2) |
 | 2026-11-03 | El catálogo de iconos tiene su captura propia, con la ventana más alta | Con 70 glifos la captura de 904 dp se cortaba y los nuevos quedaban fuera de la comparación |
+| 2026-11-04 | DataStore Preferences 1.3.0 para ranking de uso (esquema 1, archivo propio); versión estable del 2026-10-21, verificada en [AndroidX](https://developer.android.com/jetpack/androidx/releases/datastore) | Escrituras serializadas, persistencia independiente de la config y recuperación de corrupción; una instancia por archivo, en IO |
+| 2026-11-04 | Menú y selector comparten un índice de apps, comandos y atajos; se retira el drawer provisional | Una superficie y un recorrido de teclado, conservando perfiles y acciones contextuales |
+| 2026-11-04 | El contextual intercepta teclas de navegación en su propia ventana y restaura el callback al cerrarse | En HyperOS, Escape puede llegar al diálogo sin nodo Compose con foco; la prueba física detectó el caso que no reproducía Robolectric |
+| 2026-11-04 | Búsqueda sin autocorrección del IME | SwiftKey modificaba nombres escritos durante la prueba ADB; las consultas de apps y comandos deben conservarse literalmente |
 
 ### 11.2 Riesgos
 
@@ -1140,28 +1156,32 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-04:** 40 de 75 tareas marcadas (53,3 % del plan completo);
-  para el MVP, 40 de 45 (88,9 %). Son casillas, no una medida del esfuerzo.
-  Quedan el Hito 5 para `v0.1.0` y los Hitos 6–11 para completar el alcance;
-  el Hito 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 5 (sin empezar). **Hitos 0–4 terminados** (el 3, revisado con Opus y con
-  sus hallazgos corregidos; el 4, hecho con Opus y con su *Terminado cuando* comprobado en el Redmi:
-  cinco escritorios reordenados siguen idénticos tras `adb reboot`).
-- **Última tarea completada:** los escritorios (`feature/workspaces`, guía en `docs/workspaces.md`).
-  Probados en el Redmi: añadir, bordes, swap, mover de escritorio, flotar, master, pantalla
-  completa, abrir apps, Inicio y persistencia tras matar el proceso y tras reiniciar.
-  `./gradlew check` en verde.
-- **Siguiente tarea:** el Hito 5 (menú wh01s17, **Sonnet 5.5 · `high`**, §0); al cerrarlo, revisión
-  con Opus. Pendientes sin bloquear: medir en release la primera carga del índice
-  (≈ 3,4 s en debug), el opt-in de
-  `BLUETOOTH_CONNECT` y la persistencia del formato alterno del reloj (escribir la config).
+- **Balance al 2026-11-04:** 45 de 75 tareas marcadas (60 % del plan completo);
+  MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
+  Quedan los Hitos 6–11; el 9 es experimental y no bloquea la 1.0.
+- **Hito en curso:** Hito 6 (sin empezar). **Hitos 0–5 terminados**. El Hito 5 se cerró
+  con revisión de código, controles completos y pruebas ADB en el Redmi; los cierres anteriores
+  y sus pruebas siguen en §13.
+- **Última tarea completada:** menú/paleta unificados y ranking persistente (Hito 5).
+  `./gradlew check assembleDebug` en verde: 21 pruebas de menú, tres capturas de referencia,
+  índice mixto, escritura rápida, activación pendiente, teclado, persistencia y corrupción.
+  En el Redmi: apps y atajos reales de Calculadora, Wi-Fi, contextual, selector, comandos de
+  escritorios, flechas y diálogo de apagado cancelado. El historial queda idéntico tras matar
+  sólo la UI y reabrir; el escritorio original y sus tiles se conservaron. Guía: `docs/menu.md`.
+- **Revisión del Hito 5:** corregidos el cursor/letras con resultados asíncronos, las consultas
+  y modos cruzados al ejecutar, la cancelación de Enter pendiente al editar, Escape sin foco
+  Compose en HyperOS, el tratamiento previo al IME, el contextual sobre resultados ocultos,
+  la recuperación del aviso de historial y las llamadas repetidas a PackageManager al escribir.
+- **Siguiente tarea:** Hito 6, `KeyBindingResolver` y `GestureBindingResolver` leyendo `bindings`
+  (modelo/esfuerzo en §0). No está empezado. Pendientes sin bloquear: medir en release la primera
+  carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj.
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
   launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio → `ajustes`),
   activar el modo. El permiso `WRITE_SECURE_SETTINGS` ya está concedido a la app debug.
 - **Bloqueos:** ninguno.
-- **Launcher predeterminado del Redmi:** `com.miui.home` con gestos
-  (`force_fsg_nav_bar = 1`, `navigation_mode = 2`), restaurado el 2026-11-03 tras las
-  pruebas. Cambiar a wh01s17 es decisión del usuario (pasos arriba).
+- **Launcher predeterminado del Redmi:** `com.wh01s17.launcher.debug` con gestos
+  (`force_fsg_nav_bar = 1`, `navigation_mode = 2`), observado al empezar y al terminar
+  las pruebas ADB del 2026-11-04; no se cambió el rol HOME durante esta sesión.
 - **Dispositivo objetivo:** Redmi Note 13 Pro 5G, HyperOS
   `OS2.0.204.0.VNRMIXM` (ROM global), Android 15 / API 35, sin más
   actualizaciones. ADB funciona desde el PC de desarrollo, con
@@ -1171,7 +1191,8 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   funciona. Se restauró `0` (3 botones). La capa 3 pasa a ser la navegación
   principal (Hito 2). Observaciones, ajustes y matriz de pruebas en
   [`docs/xiaomi.md`](docs/xiaomi.md).
-- **Versión publicada:** ninguna.
+- **Versión del MVP:** `0.1.0` (etiqueta `v0.1.0` al cerrar). APK debug instalado y probado;
+  firma y distribución de APK release siguen en el Hito 11. Historial en `CHANGELOG.md`.
 
 ---
 
@@ -1181,6 +1202,9 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-04 | 5 | **Hito 5 terminado; MVP 0.1.0.** Paleta unificada (apps/comandos/ajustes/atajos), DataStore 1.3.0, teclado y contextual, selector integrado y retirada del drawer. Revisión de cierre: edición inmediata, Enter pendiente ligado a consulta/modo, IME y Escape en HyperOS. 21 pruebas y tres capturas; `check assembleDebug` en verde. ADB: búsqueda, apps, atajos, ajustes, ranking tras recrear UI, selector, escritorios, flechas y apagado cancelado. Escritorio y gestos conservados | `feature/menu/`, `app/MenuController.kt`, `core/system/navigation/`, `docs/menu.md`, `CHANGELOG.md` |
+| 2026-11-04 | 5 | Prueba ADB del panel en el Redmi: nueve submenús/Atrás, Escape, gesto, cierre exterior, Apps, selector, Wi-Fi e Inicio. Corregido Escape al soltar con respaldo en Activity; prueba de regresión. HOME y gestos conservados, servicio enlazado y sin crashes del launcher; capturas y resultados documentados | `app/MainActivity.kt`, `feature/menu/`, `docs/menu.md`, `docs/screenshots/` |
+| 2026-11-04 | 5 | Panel wh01s17 con submenús e iconos pixel, acciones del escritorio y accesos a ajustes Android/Play Store; barra y gesto abren el panel. Apps conserva el drawer provisional. Pruebas de navegación, Escape y horizontal; dos capturas Roborazzi; `./gradlew check assembleDebug` en verde. Guía de menú. Pendiente búsqueda unificada y validación en el Redmi | `feature/menu/panel/`, `app/MenuActions.kt`, `docs/menu.md` |
 | 2026-11-04 | 4 / documentación | Actualizado el README con las funciones implementadas y enlaces a las guías; balance de avance en §12 y formato de reloj de fábrica corregido en la guía de barra. Trabajo completo de escritorios preparado para el repositorio; `./gradlew check assembleDebug` en verde | `README.md`, `docs/bar.md`, `plan.md`, `feature/workspaces/` |
 | 2026-11-03 | 4 | Cierre del Hito 4 en el Redmi: cinco escritorios (dwindle, master, flotante, grupo de tres reordenado y con el borde movido) siguen idénticos tras `adb reboot` (mismo `workspaces.json` byte a byte). Gestos wh01s17 tras reiniciar: servicio enlazado y botones ocultos solos; Inicio y Atrás funcionan. Se anotó que `am force-stop` desactiva el servicio. Tiles de prueba quitados | `docs/xiaomi.md`, `plan.md` |
 | 2026-11-03 | 4 | Escritorios: `feature/workspaces` (`Desk`, `DeskCodec`, `DeskRepository`, `WorkspacesViewModel`, pager con la curva de `animations.workspaces`, tiles, modo edición con asas de borde, tira de escritorios, flotantes y barra de herramientas), `WorkspaceCommand` en `core/input`, `general`/`animations` en la config, `persistent` en `core.workspaces`, drawer en modo selección, `AppIcon` en `core/apps`. Motor: `dividers`/`moveDivider`, `resizeBy`, master con `new_status = "master"`. 25 pruebas nuevas en el módulo (4 capturas), 8 en el motor, 4 en la config. Probado en el Redmi: añadir, borde, swap, mover al 3, flotar, master, pantalla completa, abrir app, Inicio y persistencia tras `force-stop` | `feature/workspaces/`, `core/tiling/Divider.kt`, `core/config/GeneralSections.kt`, `docs/workspaces.md` |

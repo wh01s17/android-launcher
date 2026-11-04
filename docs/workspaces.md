@@ -11,7 +11,7 @@ Un tile es un *lanzador vivo* (plan.md §2.2): tocarlo abre la app, no la incrus
 | Tocar un tile | Lo enfoca y abre la app (la ventana crece desde el tile) | Lo enfoca |
 | Mantener pulsado un tile | Entra en edición con ese tile enfocado | — |
 | Mantener pulsado un hueco | Entra en edición | Entra en edición |
-| Tocar un hueco | Abre el menú (drawer de apps) | Sale de edición |
+| Tocar un hueco | Abre el menú wh01s17 | Sale de edición |
 | Deslizar a los lados | Cambia de escritorio | Desactivado (para poder arrastrar) |
 | Deslizar hacia arriba | Abre el menú | — |
 | Arrastrar un tile sobre otro | — | Los intercambia |
@@ -25,7 +25,7 @@ la distribución. La barra de herramientas actúa sobre el tile con el foco:
 
 | Botón | Equivale a | Qué hace |
 | --- | --- | --- |
-| `+ app` | — | Abre el drawer para elegir una app; se añade al escritorio actual |
+| `+ app` | — | Abre el selector del menú para elegir una app; se añade al escritorio actual |
 | `split` | `Super + J` | Invierte el split del tile (sólo en dwindle) |
 | `flotar` | `Super + T` | Flotante ↔ mosaico |
 | `completa` | `Super + F` | Pantalla completa (sólo se ve ese tile) |

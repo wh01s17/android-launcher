@@ -5,7 +5,7 @@ package com.wh01s17.launcher.core.input
  * llama a los ViewModels ajenos directamente. La lista crece con cada hito.
  */
 sealed interface LauncherCommand {
-    /** Abrir el menú (por ahora, el drawer provisional de apps; el menú wh01s17 llega en el Hito 5). */
+    /** Abrir el menú y la paleta unificados (Hito 5). */
     data object OpenMenu : LauncherCommand
 
     /** Abrir la cortina de notificaciones del sistema (necesita el servicio de accesibilidad). */

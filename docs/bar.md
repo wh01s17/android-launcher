@@ -53,7 +53,7 @@ Colores: `#RGB`, `#RRGGBB` o `#RRGGBBAA`.
 
 | `id` | Qué muestra | Clases | Por defecto |
 | --- | --- | --- | --- |
-| `core.menu` | Botón del menú; abre el drawer de apps (el menú wh01s17 llega en el Hito 5) | — | verde |
+| `core.menu` | Botón del menú; abre el panel wh01s17 (`menu.md`), con Apps y submenús | — | verde |
 | `core.workspaces` | Números `1`–`persistent` (por defecto `5`, como el shell) más los que tienen tiles y el activo; los demás vacíos no se muestran. El 10 se llama `0`. Activo en verde con subrayado, ocupados en el color del texto, vacíos al 35 %. Tocar cambia de escritorio | — | — |
 | `wh01s17.clock` | Hora y fecha. Tocar: calendario. Mantener: alterna `format` y `formatAlt` | — | `format` `HH:mm` |
 | `wh01s17.indicators` | No molestar (luna). Sólo ocupa sitio si hay algo activo | `dnd` | — |

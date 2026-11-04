@@ -29,6 +29,8 @@ import com.wh01s17.launcher.feature.bar.BarSources
 import com.wh01s17.launcher.feature.bar.WorkspaceBarState
 import com.wh01s17.launcher.feature.bar.defaultBarRegistry
 import com.wh01s17.launcher.feature.bar.module.BarModuleRegistry
+import com.wh01s17.launcher.feature.menu.data.DataStoreUsageRepository
+import com.wh01s17.launcher.feature.menu.panel.searchCommands
 import com.wh01s17.launcher.feature.workspaces.data.DeskRepository
 import com.wh01s17.launcher.feature.workspaces.data.FileDeskStorage
 import kotlinx.coroutines.CoroutineScope
@@ -58,6 +60,16 @@ class AppContainer(
     }
 
     val iconLoader: AppIconLoader by lazy { LauncherIconLoader(appContext, launcherAppsGateway, Dispatchers.IO) }
+
+    val usageRepository by lazy {
+        DataStoreUsageRepository.create(
+            File(appContext.filesDir, "menu-usage.preferences_pb"),
+            CoroutineScope(
+                processScope.coroutineContext + Dispatchers.IO,
+            ),
+        )
+    }
+    val menuCommands get() = searchCommands { appContext.getString(it) }
 
     val appActions: AppActions by lazy { LauncherAppActions(appContext, launcherAppsGateway) }
 

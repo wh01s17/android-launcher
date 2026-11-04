@@ -71,6 +71,12 @@ cada tabla.
     en el teléfono. Para evitarlo:
     `-Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true`.
 
+12. (2026-11-04) En la prueba ADB del menú se observó que `uiautomator dump`
+    suspende momentáneamente el servicio y cambia los insets; tras terminar, la
+    vigilancia vuelve a enlazar el servicio y oculta los botones. Las coordenadas
+    del XML pueden no coincidir con la pantalla estable. Se ajustaron los toques
+    mediante capturas; detalles y resultados en [`menu.md`](menu.md).
+
 **Conclusión:** la capa 2 sola no sirve en este equipo. La navegación con
 gestos depende de la capa 3 (accesibilidad) y la capa 2 sólo se usa para
 ocultar los botones mientras la capa 3 está viva (modo *gestos wh01s17*).

@@ -14,14 +14,24 @@ class NotificationShade(
     private val watchdog: NavigationWatchdog,
 ) {
     /** `true` si se pidió al servicio; `false` si no está activo (el llamador avisa al usuario). */
-    fun open(): Boolean {
+    fun open(): Boolean = request(action(context))
+
+    fun lockScreen(): Boolean = request(lockAction(context))
+
+    fun powerDialog(): Boolean = request(powerAction(context))
+
+    private fun request(action: String): Boolean {
         if (!watchdog.isNavigationServiceRunning()) return false
-        context.sendBroadcast(Intent(action(context)).setPackage(context.packageName))
+        context.sendBroadcast(Intent(action).setPackage(context.packageName))
         return true
     }
 
     companion object {
         /** Acción de la difusión; el servicio la escucha. */
+        fun lockAction(context: Context) = "${context.packageName}.LOCK_SCREEN"
+
+        fun powerAction(context: Context) = "${context.packageName}.POWER_DIALOG"
+
         fun action(context: Context) = "${context.packageName}.OPEN_NOTIFICATION_SHADE"
     }
 }

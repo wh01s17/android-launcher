@@ -54,6 +54,8 @@ class WhNavigationService : AccessibilityService() {
             ) {
                 when (intent.action) {
                     XiaomiGestureCompat.modeChangedAction(context) -> decide { compat.controller.onNavigationReady(it) }
+                    NotificationShade.lockAction(context) -> performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
+                    NotificationShade.powerAction(context) -> performGlobalAction(GLOBAL_ACTION_POWER_DIALOG)
                     NotificationShade.action(context) -> performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS)
                     else -> refreshLayout()
                 }
@@ -77,6 +79,8 @@ class WhNavigationService : AccessibilityService() {
                 addAction(Intent.ACTION_USER_PRESENT)
                 addAction(XiaomiGestureCompat.modeChangedAction(this@WhNavigationService))
                 addAction(NotificationShade.action(this@WhNavigationService))
+                addAction(NotificationShade.lockAction(this@WhNavigationService))
+                addAction(NotificationShade.powerAction(this@WhNavigationService))
             }
         // Los avisos del modo y de la cortina vienen del propio launcher (mismo UID): no hace falta exportar.
         ContextCompat.registerReceiver(this, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
