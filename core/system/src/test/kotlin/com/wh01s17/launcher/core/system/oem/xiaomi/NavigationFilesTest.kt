@@ -1,5 +1,7 @@
 package com.wh01s17.launcher.core.system.oem.xiaomi
 
+import com.wh01s17.launcher.core.system.navigation.EdgeSensitivity
+import com.wh01s17.launcher.core.system.navigation.EdgeSettings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -38,5 +40,23 @@ class NavigationFilesTest {
         assertNull(files.readStatus())
         File(folder.root, "navigation-mode.properties").writeText("enabled=\\u12")
         assertEquals(GestureModePrefs(), files.readPrefs())
+    }
+
+    @Test
+    fun `edge settings round trip and odd values fall back`() {
+        val files = NavigationFiles(folder.root)
+        assertEquals(EdgeSettings(), files.readEdges())
+        val edges =
+            EdgeSettings(
+                backLeft = false,
+                recents = false,
+                sideThicknessDp = 20,
+                bottomThicknessDp = 10,
+                sensitivity = EdgeSensitivity.High,
+            )
+        files.writeEdges(edges)
+        assertEquals(edges, files.readEdges())
+        File(folder.root, "navigation-edges.properties").writeText("home=maybe\nsensitivity=Turbo\nsideThicknessDp=x\n")
+        assertEquals(EdgeSettings(), files.readEdges())
     }
 }

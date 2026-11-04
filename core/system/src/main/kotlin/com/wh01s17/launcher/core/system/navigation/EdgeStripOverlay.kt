@@ -55,6 +55,11 @@ internal class EdgeStripOverlay(
         return false
     }
 
+    /** Nuevos umbrales (sensibilidad, gestos activos): cada franja cancela su gesto y usa los nuevos. */
+    fun reconfigure() {
+        for ((edge, view) in views) view.replaceRecognizer(EdgeGestureRecognizer(edge, configFor(edge)))
+    }
+
     fun update(layout: Map<Edge, StripRect?>) {
         for ((edge, view) in views) {
             if (!view.isAttachedToWindow) continue
@@ -107,7 +112,7 @@ internal class EdgeStripOverlay(
 @SuppressLint("ViewConstructor")
 internal class EdgeStripView(
     context: Context,
-    private val recognizer: EdgeGestureRecognizer,
+    private var recognizer: EdgeGestureRecognizer,
     private val onAction: (NavAction) -> Unit,
 ) : View(context) {
     private val holdCheck =
@@ -133,6 +138,11 @@ internal class EdgeStripView(
     fun cancelGesture() {
         removeCallbacks(holdCheck)
         recognizer.cancel()
+    }
+
+    fun replaceRecognizer(next: EdgeGestureRecognizer) {
+        cancelGesture()
+        recognizer = next
     }
 
     private fun scheduleHoldCheck() {

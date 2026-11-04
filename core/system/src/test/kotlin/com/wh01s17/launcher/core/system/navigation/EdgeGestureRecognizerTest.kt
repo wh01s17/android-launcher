@@ -96,4 +96,21 @@ class EdgeGestureRecognizerTest {
         r.cancel()
         assertNull(r.up(150f, 500f, 20))
     }
+
+    /** Sube desde abajo y se queda quieto [holdMillis] antes de soltar. */
+    private fun EdgeGestureRecognizer.upAndHold(holdMillis: Long): NavAction? {
+        down(500f, 2000f, 0)
+        for (i in 1..10) move(500f, 2000f - 15f * i, i * 10L)
+        checkHold(100L + holdMillis)
+        return up(500f, 1850f, 100L + holdMillis)
+    }
+
+    @Test
+    fun `home and recents can be turned off separately`() {
+        val noRecents = EdgeGestureRecognizer(Edge.Bottom, config.copy(recentsEnabled = false))
+        assertEquals("without recents, holding is still home", NavAction.Home, noRecents.upAndHold(400))
+        val noHome = EdgeGestureRecognizer(Edge.Bottom, config.copy(homeEnabled = false))
+        assertNull("without home, a quick swipe does nothing", noHome.upAndHold(0))
+        assertEquals(NavAction.Recents, noHome.upAndHold(400))
+    }
 }

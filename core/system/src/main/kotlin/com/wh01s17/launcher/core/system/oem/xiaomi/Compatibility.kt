@@ -10,6 +10,7 @@ import android.os.FileObserver
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import com.wh01s17.launcher.core.system.navigation.EdgeSettings
 import com.wh01s17.launcher.core.system.navigation.NavigationWatchdog
 
 /** Todo lo que muestra el asistente de compatibilidad (plan.md §5.9), en un instante. */
@@ -28,6 +29,8 @@ data class CompatibilitySnapshot(
     val status: NavigationStatus?,
     /** Última vez que la vigilancia tuvo que devolver los botones (en este arranque del launcher). */
     val lastRestoreAtMillis: Long?,
+    /** Ajustes de las franjas tal como los guardó el usuario (sin forzar *inicio*). */
+    val edges: EdgeSettings = EdgeSettings(),
 )
 
 /** Lo que el asistente puede leer y cambiar; un doble lo sustituye en las pruebas. */
@@ -36,6 +39,9 @@ interface CompatibilityGateway {
     fun snapshot(): CompatibilitySnapshot
 
     fun setModeEnabled(enabled: Boolean)
+
+    /** Guarda los ajustes de las franjas y avisa a `:nav`, que los aplica al momento. */
+    fun setEdges(edges: EdgeSettings)
 
     /** Avisa cuando cambian los ajustes de navegación o los servicios de accesibilidad. */
     fun observe(onChange: () -> Unit): AutoCloseable
@@ -63,9 +69,15 @@ class AndroidCompatibilityGateway(
             prefs = compat.files.readPrefs(),
             status = compat.files.readStatus(),
             lastRestoreAtMillis = watchdog.lastRestoreAtMillis,
+            edges = compat.files.readEdges(),
         )
 
     override fun setModeEnabled(enabled: Boolean) = watchdog.setModeEnabled(enabled)
+
+    override fun setEdges(edges: EdgeSettings) {
+        compat.files.writeEdges(edges)
+        appContext.sendBroadcast(Intent(XiaomiGestureCompat.edgesChangedAction(appContext)).setPackage(appContext.packageName))
+    }
 
     override fun observe(onChange: () -> Unit): AutoCloseable {
         val observer =

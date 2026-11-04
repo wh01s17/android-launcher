@@ -19,22 +19,34 @@ internal class NavigationGeometry(
 ) {
     private val density get() = context.resources.displayMetrics.density
 
-    fun configFor(edge: Edge): EdgeGestureConfig {
-        val trigger = if (edge == Edge.Bottom) HOME_TRIGGER_DP else BACK_TRIGGER_DP
-        return EdgeGestureConfig(triggerDistancePx = trigger * density, stillSlopPx = STILL_SLOP_DP * density)
+    fun configFor(
+        edge: Edge,
+        settings: EdgeSettings,
+    ): EdgeGestureConfig {
+        val trigger = (if (edge == Edge.Bottom) HOME_TRIGGER_DP else BACK_TRIGGER_DP) * settings.sensitivity.distanceFactor
+        return EdgeGestureConfig(
+            triggerDistancePx = trigger * density,
+            stillSlopPx = STILL_SLOP_DP * density,
+            homeEnabled = settings.home,
+            recentsEnabled = settings.recents,
+        )
     }
 
     /** [windows] son las ventanas visibles (`AccessibilityService.getWindows`), para ver el teclado. */
-    fun layoutInput(windows: List<AccessibilityWindowInfo>): EdgeLayoutInput {
+    fun layoutInput(
+        windows: List<AccessibilityWindowInfo>,
+        settings: EdgeSettings,
+    ): EdgeLayoutInput {
         val (width, height, statusBar) = screenGeometry()
         return EdgeLayoutInput(
             screenWidth = width,
             screenHeight = height,
-            sideThicknessPx = (SIDE_THICKNESS_DP * density).roundToInt(),
-            bottomThicknessPx = (BOTTOM_THICKNESS_DP * density).roundToInt(),
+            sideThicknessPx = (settings.sideThicknessDp * density).roundToInt(),
+            bottomThicknessPx = (settings.bottomThicknessDp * density).roundToInt(),
             topExclusionPx = statusBar,
             imeTop = imeTop(windows),
             suspended = context.getSystemService(KeyguardManager::class.java)?.isKeyguardLocked == true,
+            enabled = settings.edges,
         )
     }
 
@@ -61,9 +73,7 @@ internal class NavigationGeometry(
             ?.let { window -> Rect().also(window::getBoundsInScreen).top }
 
     private companion object {
-        // Valores de partida; el Hito 6 los hace configurables (plan.md §7).
-        const val SIDE_THICKNESS_DP = 14f
-        const val BOTTOM_THICKNESS_DP = 16f
+        // Recorrido con sensibilidad normal; el grosor sale de [EdgeSettings].
         const val BACK_TRIGGER_DP = 32f
         const val HOME_TRIGGER_DP = 40f
         const val STILL_SLOP_DP = 8f

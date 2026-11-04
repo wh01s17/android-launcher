@@ -30,6 +30,10 @@ data class EdgeGestureConfig(
     val triggerDistancePx: Float,
     val stillSlopPx: Float,
     val recentsHoldMillis: Long = DEFAULT_RECENTS_HOLD_MILLIS,
+    /** Borde inferior: subir y soltar → *inicio*. */
+    val homeEnabled: Boolean = true,
+    /** Borde inferior: subir y mantener → *recientes*. Sin él no hay espera: suelta y es *inicio*. */
+    val recentsEnabled: Boolean = true,
 ) {
     companion object {
         const val DEFAULT_RECENTS_HOLD_MILLIS = 300L
@@ -69,7 +73,7 @@ class EdgeGestureRecognizer(
 
     /** Gesto inferior armado, aún sin recientes: sólo entonces cuenta mantener el dedo. */
     private val waitingForHold: Boolean
-        get() = tracking && edge == Edge.Bottom && (armed && !recentsArmed)
+        get() = tracking && edge == Edge.Bottom && config.recentsEnabled && (armed && !recentsArmed)
 
     fun down(
         x: Float,
@@ -124,7 +128,8 @@ class EdgeGestureRecognizer(
                 !armed -> null
                 edge != Edge.Bottom -> NavAction.Back
                 recentsArmed -> NavAction.Recents
-                else -> NavAction.Home
+                config.homeEnabled -> NavAction.Home
+                else -> null
             }
         cancel()
         return action

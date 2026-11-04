@@ -41,6 +41,9 @@ class WhNavigationService : AccessibilityService() {
     private var overlay: EdgeStripOverlay? = null
     private var stopping = false
 
+    /** Ajustes de las franjas ya «efectivos»: con los botones ocultos, *inicio* siempre activo. */
+    private var edges = EdgeSettings()
+
     private val forceFsgObserver =
         object : ContentObserver(handler) {
             override fun onChange(selfChange: Boolean) = decide { compat.controller.onForceFsgChanged(it) }
@@ -53,7 +56,11 @@ class WhNavigationService : AccessibilityService() {
                 intent: Intent,
             ) {
                 when (intent.action) {
-                    XiaomiGestureCompat.modeChangedAction(context) -> decide { compat.controller.onNavigationReady(it) }
+                    XiaomiGestureCompat.modeChangedAction(context) -> {
+                        refreshLayout(reloadEdges = true)
+                        decide { compat.controller.onNavigationReady(it) }
+                    }
+                    XiaomiGestureCompat.edgesChangedAction(context) -> refreshLayout(reloadEdges = true)
                     NotificationShade.lockAction(context) -> performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
                     NotificationShade.powerAction(context) -> performGlobalAction(GLOBAL_ACTION_POWER_DIALOG)
                     NotificationShade.action(context) -> performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS)
@@ -65,8 +72,9 @@ class WhNavigationService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         compat = XiaomiGestureCompat(this)
-        val strips = EdgeStripOverlay(this, getSystemService(WindowManager::class.java), geometry::configFor, ::perform)
-        if (!strips.attach(layoutStrips(geometry.layoutInput(windows)))) {
+        edges = compat.effectiveEdges()
+        val strips = EdgeStripOverlay(this, getSystemService(WindowManager::class.java), { geometry.configFor(it, edges) }, ::perform)
+        if (!strips.attach(layoutStrips(geometry.layoutInput(windows, edges)))) {
             // Sin franjas no hay capa 3: los botones no se tocan.
             Log.w(TAG, "edge strips could not be added")
             return
@@ -78,6 +86,7 @@ class WhNavigationService : AccessibilityService() {
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_USER_PRESENT)
                 addAction(XiaomiGestureCompat.modeChangedAction(this@WhNavigationService))
+                addAction(XiaomiGestureCompat.edgesChangedAction(this@WhNavigationService))
                 addAction(NotificationShade.action(this@WhNavigationService))
                 addAction(NotificationShade.lockAction(this@WhNavigationService))
                 addAction(NotificationShade.powerAction(this@WhNavigationService))
@@ -151,12 +160,21 @@ class WhNavigationService : AccessibilityService() {
         Log.i(TAG, "action: $action ok=$done")
     }
 
-    private fun refreshLayout() {
+    /** Recoloca las franjas; con [reloadEdges], antes relee sus ajustes (grosor, gestos, sensibilidad). */
+    private fun refreshLayout(reloadEdges: Boolean = false) {
         if (stopping) return
-        overlay?.update(layoutStrips(geometry.layoutInput(windows)))
+        if (reloadEdges) {
+            edges = compat.effectiveEdges()
+            overlay?.reconfigure()
+            Log.i(TAG, "edges: $edges")
+        }
+        overlay?.update(layoutStrips(geometry.layoutInput(windows, edges)))
     }
 
     private companion object {
         const val TAG = "WhNavigation"
     }
 }
+
+/** Con el modo *gestos wh01s17* activado los botones pueden estar ocultos: *inicio* no se apaga. */
+private fun XiaomiGestureCompat.effectiveEdges(): EdgeSettings = files.readEdges().effective(buttonsHidden = files.readPrefs().enabled)

@@ -32,6 +32,9 @@ class XiaomiGestureCompat(
     companion object {
         /** Acción del aviso "cambió el modo" del launcher al proceso de navegación. */
         fun modeChangedAction(context: Context) = "${context.packageName}.NAVIGATION_MODE_CHANGED"
+
+        /** Aviso "cambiaron los ajustes de las franjas" ([com.wh01s17.launcher.core.system.navigation.EdgeSettings]). */
+        fun edgesChangedAction(context: Context) = "${context.packageName}.NAVIGATION_EDGES_CHANGED"
     }
 }
 
