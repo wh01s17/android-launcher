@@ -99,4 +99,14 @@
     <string name="gesture_two_down">Dos dedos ↓</string>
     <string name="gesture_double_tap">Doble toque en un hueco</string>
     <string name="gesture_double_tap_tile">Doble toque en un tile</string>
+    <string name="shortcuts_editor_current">Ahora: %1$s</string>
+    <string name="shortcuts_editor_press">Pulsa la nueva combinación…</string>
+    <string name="shortcuts_editor_gesture">Los gestos no se capturan: puedes quitarlo, o cambiarlo en launcher.json.</string>
+    <string name="shortcuts_editor_taken">Ya es de «%1$s»: al guardar, lo pierde.</string>
+    <string name="shortcuts_editor_save">guardar</string>
+    <string name="shortcuts_editor_remove">quitar</string>
+    <string name="shortcuts_editor_cancel">cancelar</string>
+    <string name="shortcuts_edit_hint">Toca un atajo para cambiarlo. Los cambios se guardan en launcher.json.</string>
+    <string name="shortcuts_reset">restablecer los de fábrica</string>
+    <string name="shortcuts_edit_failed">No se guardó: %1$s</string>
 </resources>
