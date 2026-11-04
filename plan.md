@@ -834,8 +834,12 @@ servicio de accesibilidad devuelve los botones.
 
 ### Hito 4 — Motor de tiling y workspaces (L) — núcleo del proyecto
 
-- [ ] `core/tiling`: dwindle, master, foco direccional, resize, float,
-      fullscreen, grupos; serialización. Tests de propiedades (R7).
+- [x] `core/tiling`: dwindle, master, foco direccional, resize, float,
+      fullscreen, grupos; serialización. Tests de propiedades (R7). `Workspace` inmutable,
+      `layout()` en píxeles enteros, historial de foco (al cerrar vuelve al anterior), grupos al
+      pasar de `maxTiles`, `WorkspaceCodec` (JSON validado). 12 000 operaciones aleatorias por
+      ejecución sin solapes, cubriendo el área exacta, `remove(insert(x)) == x` y JSON reversible;
+      cobertura 97,9 % (`koverVerify` ≥ 90 % en `check`).
 - [ ] `feature/workspaces`: `HorizontalPager` de workspaces con animación
       slide/easeOutQuint; persistencia del workspace actual.
 - [ ] Render de tiles: app (icono grande + nombre + badge de notificaciones),
@@ -1087,6 +1091,12 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-03 | Bluetooth sólo distingue encendido/apagado hasta que exista el opt-in de `BLUETOOTH_CONNECT`; no se declara el permiso | R8: sin permisos peligrosos sin flujo explicado; «conectado» se activará con los ajustes |
 | 2026-11-03 | `ACCESS_NETWORK_STATE` declarado en `core/system` | Permiso normal que exige `registerDefaultNetworkCallback`; no hay `INTERNET` (R9) |
 | 2026-11-03 | «Una vez» del aviso de la cortina se guarda en un `SharedPreferences` propio | Es un dato de UI, no config; evita añadir DataStore sólo para esto (DataStore llega con el ranking de uso, Hito 5) |
+| 2026-11-03 | Huecos del tiling: `Gaps.inner` es la distancia entre dos tiles (en Hyprland, 2 × `gaps_in`) y el borde se dibuja dentro del tile | Así el motor sólo reparte píxeles; quien lo llama pasa `2 × gapsIn` |
+| 2026-11-03 | Split dwindle sin orientación fija (`null` = por el lado largo, como Hyprland sin `preserve_split`); `toggleSplit` la fija | Girar la pantalla reorganiza solo, y `Super + J` sigue disponible |
+| 2026-11-03 | Master usa el orden de las hojas del árbol dwindle (no una lista aparte) | Un único modelo: cambiar de layout, intercambiar o cerrar no desincroniza dos estructuras |
+| 2026-11-03 | Historial de foco en `Workspace`: al cerrar el tile con foco, vuelve al último enfocado | Como `focus_on_close` de Hyprland; además hace que `remove(insert(x)) == x` valga siempre |
+| 2026-11-03 | Pruebas de propiedades con `kotlin.random` y semilla fija, sin Kotest ni jqwik | Reproducibles y sin dependencias nuevas; 200 secuencias × 60 pasos por propiedad |
+| 2026-11-03 | detekt `ReturnCount` con `excludeGuardClauses: true` | Las guardas iniciales son la forma más clara de las operaciones del motor |
 | 2026-11-03 | El catálogo de iconos tiene su captura propia, con la ventana más alta | Con 70 glifos la captura de 904 dp se cortaba y los nuevos quedaban fuera de la comparación |
 
 ### 11.2 Riesgos
@@ -1113,14 +1123,14 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Hito en curso:** Hito 3 hecho; **falta la revisión con el modelo principal** (§0: `/code-review`
-  con Opus) antes de darlo por cerrado. **Hitos 0, 1 y 2 terminados.**
+- **Hito en curso:** Hito 4: motor de tiling (`core/tiling`) hecho. **Hitos 0–3 terminados** (el 3,
+  revisado con Opus y con sus hallazgos corregidos).
 - **Última tarea completada:** la barra (`feature/bar`, `core/config`, `core/input`,
   `core/system/status`). Probada en el Redmi: estados en vivo (volumen, No molestar, red, hora),
   calendario, formatos, escritorios, config válida/inválida/borrada y cortina con y sin el
   servicio. `./gradlew check` en verde.
-- **Siguiente tarea:** revisar el Hito 3 y empezar el Hito 4 (motor de tiling, **Opus 5.5 ·
-  `xhigh`**, §0). Pendientes sin bloquear: medir en release la primera carga del índice
+- **Siguiente tarea:** Hito 4, `feature/workspaces` (pager con slide/easeOutQuint y
+  persistencia del workspace actual) sobre `core/tiling` (**Opus 5.5 · `xhigh`**, §0). Pendientes sin bloquear: medir en release la primera carga del índice
   (≈ 3,4 s en debug), probar los gestos tras reiniciar el teléfono (`docs/xiaomi.md`), el opt-in de
   `BLUETOOTH_CONNECT` y la persistencia del formato alterno del reloj (escribir la config).
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
@@ -1149,6 +1159,8 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-03 | 4 | Motor de tiling `core/tiling` (Kotlin puro): dwindle y master, foco direccional, intercambio, resize por bordes, toggleSplit, flotantes, pantalla completa, grupos, historial de foco y `WorkspaceCodec`. 35 pruebas (distribuciones de referencia, operaciones y propiedades); cobertura 97,9 % con `koverVerify` en `check` | `core/tiling/` |
+| 2026-11-03 | 3 | **Hito 3 terminado** tras la revisión con Opus (`/code-review`). Corregido: una `bar` parcial ya no vacía la barra (se combina clave a clave con la de fábrica), el aviso «se rindió» llega al escribirse el archivo de estado (`FileObserver`), recargas de config en fila y fábrica parseada una vez, sin colores hex en `default-launcher.json` (R6), red sin parpadeo inicial ni `onLost` ajenos, Bluetooth escucha conexiones siempre, medidas de barra y calendario escalan con la fuente, gesto con el `onCommand` vigente | `core/config/`, `core/system/`, `core/designsystem/`, `feature/bar/`, `docs/bar.md` |
 | 2026-11-03 | 3 | **Barra.** `core/config` (parser con errores por ruta, repositorio que conserva la última config buena, `default-launcher.json`), `core/input` (comandos y bus), `core/system/status` (batería, red, Bluetooth, audio, No molestar, reloj como `Flow` fríos), `feature/bar` (módulos, `classColors`/`dimClasses`/`brackets`, layout con `centerAnchor`, calendario, formato Qt), cortina por accesibilidad, avisos y capturas Roborazzi. 12 glifos nuevos; `barHeight` corregido a `size-horizontal`; el R6 deja fuera los tests. En el Redmi: todos los indicadores cambian en vivo; teléfono restaurado | `feature/bar/`, `core/config/`, `core/input/`, `core/system/.../status/`, `docs/bar.md` |
 | 2026-11-03 | 2 | **Hito 2 terminado.** Capa 3 (`WhNavigationService` en `:nav`, franjas de borde, reconocedor puro, teclado y bloqueo), capa 2 (`GestureModeController`, `NavigationFiles`, `NavigationWatchdog` con enlace a `:nav`, `AccessibilityReviver`), asistente Ajustes → Compatibilidad, `NavigationWatchdogTest` (instrumentado). En el Redmi: atrás/inicio/recientes con y sin botones; matar `:nav` → botones en 66 ms y servicio revivido en 760 ms; «Forzar detención» documentado como límite. Teléfono restaurado a `com.miui.home` con gestos | `core/system/`, `feature/settings/`, `app/`, `docs/xiaomi.md` |
 | 2026-11-03 | 2 | Acciones de app (`LauncherAppActions`: lanzar desde el icono, info, desinstalar, atajos), `core/fuzzy` (`FuzzyIndex`, `FuzzyMatcher`, benchmark), drawer provisional (`AppDrawerViewModel` + Compose, 7 pruebas), `HomeScreen`; `WhListRow` con título enriquecido, `leading` y `onLongClick`. Probado en el Redmi: búsqueda, Enter, toque, menú, info, diálogo de desinstalar (cancelado), suspensión en vivo (`pm suspend`) y atajos como HOME temporal; se restauró `com.miui.home` y `force_fsg_nav_bar = 1` | `core/apps/actions/`, `core/fuzzy/`, `feature/menu/`, `app/` |
