@@ -71,22 +71,22 @@ internal fun WorkspacePage(
     iconLoader: AppIconLoader,
     onIntent: (WorkspacesIntent) -> Unit,
     onOpenMenu: () -> Unit,
-    onGesture: (Gesture) -> Unit,
+    gestures: PageGestures,
     modifier: Modifier = Modifier,
 ) {
     val editing = state.editing
-    BoxWithConstraints(modifier.fillMaxSize().then(if (editing) Modifier else Modifier.verticalSwipes(onGesture))) {
+    BoxWithConstraints(modifier.fillMaxSize().then(if (editing) Modifier else Modifier.verticalSwipes(gestures.onGesture))) {
         val area = Rect(0, 0, constraints.maxWidth, constraints.maxHeight)
         val gaps = style.gaps(LocalDensity.current)
         val result = remember(workspace, area, gaps) { layout(workspace, area, gaps) }
         var drag by remember { mutableStateOf<TileDrag?>(null) }
         val stripHeight = with(LocalDensity.current) { WhTheme.spacing.touchTarget.roundToPx() }
         val canvas = PageCanvas(area, area.inset(gaps.outer), stripHeight, number)
-        Background(editing, onIntent, onOpenMenu)
+        Background(editing, gestures, onIntent, onOpenMenu)
         if (workspace.isEmpty) EmptyHint(number, Modifier.align(Alignment.Center))
         for ((tile, rect) in result.visible) {
             key(tile) {
-                Tile(tile, rect, workspace, result, state, style, iconLoader, canvas, drag, { drag = it }, onIntent)
+                Tile(tile, rect, workspace, result, state, style, iconLoader, canvas, drag, { drag = it }, gestures, onIntent)
             }
         }
         if (editing) DividerHandles(workspace, area, gaps, onIntent, Modifier.zIndex(Z_EDIT))
@@ -111,6 +111,12 @@ internal fun WorkspacePage(
     }
 }
 
+/** Los gestos asignados en `bindings` ([bound]) y a quién avisar cuando se reconoce uno. */
+internal class PageGestures(
+    val bound: Set<Gesture>,
+    val onGesture: (Gesture) -> Unit,
+)
+
 /** Lo que un tile necesita saber del lienzo para soltarse. */
 internal class PageCanvas(
     val area: Rect,
@@ -131,12 +137,13 @@ private fun Tile(
     canvas: PageCanvas,
     drag: TileDrag?,
     onDrag: (TileDrag?) -> Unit,
+    gestures: PageGestures,
     onIntent: (WorkspacesIntent) -> Unit,
 ) {
     val floating = tile in result.floating
     val dragging = drag?.tile == tile
-    val gestures = rememberTileGestures(tile, rect, floating, result, canvas, state.editing, onDrag, onIntent)
-    Box(Modifier.placeAt(rect).zIndex(if (floating) Z_FLOATING else 0f).then(gestures)) {
+    val touch = rememberTileGestures(tile, rect, floating, result, canvas, state.editing, onDrag, gestures, onIntent)
+    Box(Modifier.placeAt(rect).zIndex(if (floating) Z_FLOATING else 0f).then(touch)) {
         if (dragging) {
             TileGhost(style)
         } else {
@@ -171,6 +178,7 @@ private fun rememberTileGestures(
     canvas: PageCanvas,
     editing: Boolean,
     onDrag: (TileDrag?) -> Unit,
+    gestures: PageGestures,
     onIntent: (WorkspacesIntent) -> Unit,
 ): Modifier {
     val view = LocalView.current
@@ -184,6 +192,8 @@ private fun rememberTileGestures(
     val tap = { onIntent(WorkspacesIntent.TapTile(tile, bounds?.let { LaunchOrigin(view, it.toAndroidRect()) })) }
     val longPress = { onIntent(WorkspacesIntent.LongPressTile(tile)) }
     var current by remember { mutableStateOf<TileDrag?>(null) }
+    // Sólo con un atajo asignado: esperar el segundo toque retrasa abrir la app.
+    val doubleTap = !editing && Gesture.DoubleTapTile in gestures.bound
     val base =
         Modifier
             .onGloballyPositioned { bounds = it.boundsInRoot() }
@@ -198,8 +208,20 @@ private fun rememberTileGestures(
                         true
                     }
                 }
-            }.pointerInput(tile, editing) {
-                detectTapGestures(onTap = { tap() }, onLongPress = if (editing) null else { _ -> longPress() })
+            }.pointerInput(tile, editing, doubleTap) {
+                detectTapGestures(
+                    onTap = { tap() },
+                    onDoubleTap =
+                        if (doubleTap) {
+                            { _ ->
+                                onIntent(WorkspacesIntent.SelectTab(tile))
+                                gestures.onGesture(Gesture.DoubleTapTile)
+                            }
+                        } else {
+                            null
+                        },
+                    onLongPress = if (editing) null else { _ -> longPress() },
+                )
             }
     if (!editing) return base
     return base.pointerInput(tile) {
@@ -290,13 +312,18 @@ private fun ResizeCorner(
     )
 }
 
-/** El fondo: tocarlo abre el menú (o sale de edición); mantenerlo entra en edición. */
+/**
+ * El fondo: tocarlo abre el menú (o sale de edición); mantenerlo entra en edición. El doble toque
+ * sólo se espera si tiene atajo.
+ */
 @Composable
 private fun Background(
     editing: Boolean,
+    gestures: PageGestures,
     onIntent: (WorkspacesIntent) -> Unit,
     onOpenMenu: () -> Unit,
 ) {
+    val doubleTap = !editing && Gesture.DoubleTap in gestures.bound
     val openLabel = stringResource(R.string.workspace_open_menu)
     val editLabel = stringResource(R.string.workspace_edit)
     Box(
@@ -311,9 +338,10 @@ private fun Background(
                     onIntent(WorkspacesIntent.LongPressBackground)
                     true
                 }
-            }.pointerInput(editing) {
+            }.pointerInput(editing, doubleTap) {
                 detectTapGestures(
                     onTap = { if (editing) onIntent(WorkspacesIntent.ExitEdit) else onOpenMenu() },
+                    onDoubleTap = if (doubleTap) { _ -> gestures.onGesture(Gesture.DoubleTap) } else null,
                     onLongPress = { onIntent(WorkspacesIntent.LongPressBackground) },
                 )
             },

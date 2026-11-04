@@ -66,9 +66,12 @@ fun WorkspacesScreen(
     onAddTile: () -> Unit,
     onOpenMenu: () -> Unit,
     onGesture: (Gesture) -> Unit,
+    boundGestures: Set<Gesture>,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val latestOnGesture by rememberUpdatedState(onGesture)
+    val gestures = remember(boundGestures) { PageGestures(boundGestures) { latestOnGesture(it) } }
     BackHandler(enabled = state.editing) { onIntent(WorkspacesIntent.ExitEdit) }
     MessageToast(state.message, onIntent)
     var canvasHeight by remember { mutableIntStateOf(0) }
@@ -83,7 +86,7 @@ fun WorkspacesScreen(
                 iconLoader,
                 onIntent,
                 onOpenMenu,
-                onGesture,
+                gestures,
                 Modifier.fillMaxSize().graphicsLayer {
                     scaleX = scale
                     scaleY = scale
@@ -114,7 +117,7 @@ private fun WorkspacePager(
     iconLoader: AppIconLoader,
     onIntent: (WorkspacesIntent) -> Unit,
     onOpenMenu: () -> Unit,
-    onGesture: (Gesture) -> Unit,
+    gestures: PageGestures,
     modifier: Modifier,
 ) {
     val style = rememberTilingStyle(state.general)
@@ -141,12 +144,12 @@ private fun WorkspacePager(
     }
     HorizontalPager(
         state = pager,
-        modifier = modifier.onSizeChanged { size = it },
+        modifier = modifier.onSizeChanged { size = it }.twoFingerSwipes(enabled = !state.editing, onGesture = gestures.onGesture),
         userScrollEnabled = !state.editing,
         flingBehavior = PagerDefaults.flingBehavior(state = pager, snapAnimationSpec = spec),
         key = { it },
     ) { page ->
-        WorkspacePage(state.workspaces[page], page + Desk.FIRST, state, style, iconLoader, onIntent, onOpenMenu, onGesture)
+        WorkspacePage(state.workspaces[page], page + Desk.FIRST, state, style, iconLoader, onIntent, onOpenMenu, gestures)
     }
 }
 

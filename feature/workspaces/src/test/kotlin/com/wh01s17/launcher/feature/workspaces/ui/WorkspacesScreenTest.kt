@@ -117,6 +117,7 @@ class WorkspacesScreenTest {
                         onAddTile = {},
                         onOpenMenu = {},
                         onGesture = {},
+                        boundGestures = emptySet(),
                         onOpenSettings = {},
                     )
                 }
