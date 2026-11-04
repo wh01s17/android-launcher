@@ -26,6 +26,7 @@ import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.feature.widgets.R
 import com.wh01s17.launcher.feature.widgets.host.WidgetProvider
 import com.wh01s17.launcher.feature.widgets.host.installedWidgets
+import com.wh01s17.launcher.feature.widgets.native.NativeWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -37,6 +38,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun WidgetPicker(
     onPick: (WidgetProvider) -> Unit,
+    onPickNative: (NativeWidget) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -56,12 +58,7 @@ fun WidgetPicker(
                 ),
         ) {
             WhText(stringResource(R.string.widget_picker_title), style = WhTheme.typography.title, color = WhTheme.colors.accent)
-            val list = providers
-            when {
-                list == null -> Unit
-                list.isEmpty() -> WhText(stringResource(R.string.widget_picker_empty), color = WhTheme.colors.darkForeground)
-                else -> ProviderList(list, onPick)
-            }
+            ProviderList(providers.orEmpty(), onPick, onPickNative)
         }
     }
 }
@@ -71,18 +68,16 @@ fun WidgetPicker(
 private fun ProviderList(
     providers: List<WidgetProvider>,
     onPick: (WidgetProvider) -> Unit,
+    onPickNative: (NativeWidget) -> Unit,
 ) {
     val groups = providers.groupBy { it.appLabel }
     LazyColumn(Modifier.fillMaxWidth()) {
+        item(key = "native") { Header(stringResource(R.string.native_section)) }
+        items(NativeWidget.entries, key = { "native:${it.id}" }) { widget ->
+            WhListRow(title = stringResource(widget.label), onClick = { onPickNative(widget) })
+        }
         for ((app, widgets) in groups) {
-            item(key = "app:$app") {
-                WhText(
-                    "-- $app --",
-                    Modifier.padding(top = WhTheme.spacing.panelGap),
-                    style = WhTheme.typography.caption,
-                    color = WhTheme.colors.darkForeground,
-                )
-            }
+            item(key = "app:$app") { Header(app) }
             items(widgets, key = { "${it.info.provider.flattenToShortString()}@${it.info.profile.hashCode()}" }) { provider ->
                 WhListRow(
                     title = provider.label,
@@ -92,4 +87,14 @@ private fun ProviderList(
             }
         }
     }
+}
+
+@Composable
+private fun Header(text: String) {
+    WhText(
+        "-- $text --",
+        Modifier.padding(top = WhTheme.spacing.panelGap),
+        style = WhTheme.typography.caption,
+        color = WhTheme.colors.darkForeground,
+    )
 }

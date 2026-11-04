@@ -5,4 +5,6 @@ plugins {
 
 dependencies {
     implementation(project(":core:designsystem"))
+    implementation(project(":core:system"))
+    implementation(libs.androidx.lifecycle.runtime.compose)
 }
