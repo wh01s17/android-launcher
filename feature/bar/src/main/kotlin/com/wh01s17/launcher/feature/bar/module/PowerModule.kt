@@ -7,12 +7,13 @@ import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.icons.WhGlyph
 import com.wh01s17.launcher.core.designsystem.icons.WhIcons
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
+import com.wh01s17.launcher.core.input.LauncherCommand
 import com.wh01s17.launcher.core.system.status.BatteryState
 import com.wh01s17.launcher.feature.bar.R
 
 /**
  * `wh01s17.power`: batería. Clases: `charging`, `full`, `low` (≤ 20 %), `critical` (≤ 10 %) y
- * `power-save`. Por defecto `charging` va en verde, `low` en amarillo y `critical` en rojo; con
+ * `power-save`. Mantenerlo pulsado abre el menú de sistema. Por defecto `charging` va en verde, `low` en amarillo y `critical` en rojo; con
  * `classColors` se cambia. Sin batería (una tablet) no pinta nada.
  */
 internal class PowerModule : BarModule {
@@ -36,7 +37,8 @@ internal class PowerModule : BarModule {
                 battery.charging -> stringResource(R.string.bar_battery_charging, percent)
                 else -> stringResource(R.string.bar_battery, percent)
             } + if (battery.powerSave) stringResource(R.string.bar_battery_power_save) else ""
-        BarItem(style, contentDescription = description) {
+        // Mantener pulsado abre el menú de sistema, como `Super + Escape` (plan.md §3).
+        BarItem(style, contentDescription = description, onLongClick = { context.onCommand(LauncherCommand.OpenSystemMenu) }) {
             WhIcon(glyphOf(battery, percent))
             WhText("$percent%", maxLines = 1)
         }
