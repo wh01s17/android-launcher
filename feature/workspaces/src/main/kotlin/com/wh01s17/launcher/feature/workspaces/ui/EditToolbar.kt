@@ -30,6 +30,7 @@ internal fun EditToolbar(
     onOpenSettings: () -> Unit,
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
+    onAddWidget: () -> Unit = {},
 ) {
     val spacing = WhTheme.spacing
     val focused = workspace.focused
@@ -44,6 +45,7 @@ internal fun EditToolbar(
             verticalArrangement = Arrangement.spacedBy(spacing.controlGap),
         ) {
             Action(stringResource(R.string.edit_add), onClick = onAddTile)
+            Action(stringResource(R.string.edit_add_widget), onClick = onAddWidget)
             Action(
                 stringResource(R.string.edit_split),
                 enabled = tiled && workspace.layout == TilingLayout.Dwindle && workspace.slots > 1,

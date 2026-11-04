@@ -102,6 +102,7 @@ internal fun WorkspacePage(
                 iconLoader = iconLoader,
                 onSelectTab = {},
                 modifier = Modifier.placeAt(preview).zIndex(Z_DRAG).alpha(DRAG_ALPHA),
+                editing = true,
             )
             if (!current.resize) {
                 val hovered = stripCellAt(current.pointer, area.width, stripHeight, Desk.COUNT)
@@ -157,6 +158,8 @@ private fun Tile(
                 iconLoader = iconLoader,
                 onSelectTab = { onIntent(WorkspacesIntent.SelectTab(it)) },
                 modifier = Modifier.fillMaxSize(),
+                editing = state.editing,
+                onLongPress = { onIntent(WorkspacesIntent.LongPressTile(tile)) },
             )
         }
         if (state.editing && floating && !dragging) {

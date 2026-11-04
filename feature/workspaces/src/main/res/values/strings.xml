@@ -10,6 +10,7 @@
     <string name="tile_edit">Editar</string>
     <string name="tile_drop_here">Soltar en el escritorio %1$s</string>
     <string name="edit_add">+ app</string>
+    <string name="edit_add_widget">+ widget</string>
     <string name="edit_split">split</string>
     <string name="edit_float">flotar</string>
     <string name="edit_fullscreen">completa</string>
@@ -21,4 +22,5 @@
     <string name="message_paused">El perfil de trabajo está en pausa.</string>
     <string name="message_paused_requested">El perfil de trabajo está en pausa: se pidió reanudarlo.</string>
     <string name="message_failed">No se pudo abrir.</string>
+    <string name="tile_widget">widget</string>
 </resources>

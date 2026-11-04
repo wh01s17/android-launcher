@@ -130,9 +130,9 @@ class WorkspacesViewModelTest {
             vm.settle(this)
             val state = vm.state.value
             assertEquals(listOf(TileId(1), TileId(2)), state.workspaces[0].tiles)
-            assertEquals(TileInfo(termux.key, termux), state.tiles[TileId(1)])
+            assertEquals(TileInfo.App(termux.key, termux), state.tiles[TileId(1)])
             // El perfil de trabajo está en pausa: el tile se ve, atenuado.
-            assertEquals(TileInfo(teams.key, teams, unavailable = true), state.tiles[TileId(2)])
+            assertEquals(TileInfo.App(teams.key, teams, unavailable = true), state.tiles[TileId(2)])
         }
 
     @Test

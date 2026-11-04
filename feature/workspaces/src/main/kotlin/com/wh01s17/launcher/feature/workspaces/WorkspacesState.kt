@@ -14,15 +14,23 @@ import com.wh01s17.launcher.core.tiling.TileId
 import com.wh01s17.launcher.core.tiling.Workspace
 import com.wh01s17.launcher.feature.workspaces.model.Desk
 
-/** Lo que pinta un tile: su app, si sigue instalada, y si se puede abrir ahora. */
+/** Lo que pinta un tile. */
 @Immutable
-data class TileInfo(
-    val key: AppKey,
-    /** `null` si la app ya no está instalada (o el índice de apps aún no se leyó). */
-    val app: AppEntry?,
-    /** Perfil de trabajo en pausa o app suspendida: se ve atenuada. */
-    val unavailable: Boolean = false,
-)
+sealed interface TileInfo {
+    /** Una app: si sigue instalada y si se puede abrir ahora. */
+    data class App(
+        val key: AppKey,
+        /** `null` si la app ya no está instalada (o el índice de apps aún no se leyó). */
+        val app: AppEntry?,
+        /** Perfil de trabajo en pausa o app suspendida: se ve atenuada. */
+        val unavailable: Boolean = false,
+    ) : TileInfo
+
+    /** Un widget del sistema: lo pinta el [com.wh01s17.launcher.feature.workspaces.ui.WidgetRenderer] de la app. */
+    data class Widget(
+        val appWidgetId: Int,
+    ) : TileInfo
+}
 
 enum class WorkspaceMessage { NotInstalled, ProfilePaused, ProfileResumeRequested, LaunchFailed }
 

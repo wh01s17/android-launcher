@@ -97,12 +97,14 @@ object DeskCodec {
                             put("user", content.key.userSerial)
                         },
                     )
+                is TileContent.Widget -> put("widget", content.appWidgetId)
             }
         }
 
     private fun decodeTile(element: JsonElement): Pair<TileId, TileContent> {
         val json = element as? JsonObject ?: fail("tiles must be objects")
         val id = (json["id"] as? JsonPrimitive)?.longOrNull ?: fail("a tile has no id")
+        (json["widget"] as? JsonPrimitive)?.takeIf { !it.isString }?.intOrNull?.let { return TileId(id) to TileContent.Widget(it) }
         val app = json["app"] as? JsonObject ?: fail("tile $id has no content")
         val key =
             AppKey(

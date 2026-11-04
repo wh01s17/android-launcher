@@ -34,6 +34,13 @@ class DeskCodecTest {
     }
 
     @Test
+    fun `widget tiles keep their id`() {
+        val desk = Desk().add(app("termux")).add(TileContent.Widget(42))
+        assertEquals(DeskCodec.DecodeResult.Success(desk), roundTrip(desk))
+        assertTrue(DeskCodec.encode(desk).toString().contains("\"widget\":42"))
+    }
+
+    @Test
     fun `random desks round trip`() {
         repeat(SEEDS) { seed ->
             val random = Random(seed)

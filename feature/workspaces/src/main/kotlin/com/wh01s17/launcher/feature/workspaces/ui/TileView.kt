@@ -58,6 +58,8 @@ internal fun TileView(
     iconLoader: AppIconLoader,
     onSelectTab: (TileId) -> Unit,
     modifier: Modifier = Modifier,
+    editing: Boolean = false,
+    onLongPress: () -> Unit = {},
 ) {
     Column(
         modifier
@@ -66,13 +68,35 @@ internal fun TileView(
             .whBorder(active = focused, shape = style.shape, width = style.border),
     ) {
         if (tabs != null) GroupTabs(tabs, shown, onSelectTab)
-        TileBody(info, appsLoaded, iconLoader, Modifier.fillMaxWidth().weight(1f))
+        val body = Modifier.fillMaxWidth().weight(1f)
+        when (info) {
+            is TileInfo.Widget -> WidgetBody(info, editing, onLongPress, body)
+            else -> TileBody(info as TileInfo.App?, appsLoaded, iconLoader, body)
+        }
+    }
+}
+
+/** Un widget: lo pinta la app ([LocalWidgetRenderer]); sin ella, sólo su nombre genérico. */
+@Composable
+private fun WidgetBody(
+    info: TileInfo.Widget,
+    editing: Boolean,
+    onLongPress: () -> Unit,
+    modifier: Modifier,
+) {
+    val renderer = LocalWidgetRenderer.current
+    if (renderer != null) {
+        renderer.Content(info.appWidgetId, interactive = !editing, onLongPress = onLongPress, modifier = modifier)
+    } else {
+        Box(modifier, contentAlignment = Alignment.Center) {
+            WhText(stringResource(R.string.tile_widget), style = WhTheme.typography.bodySmall, color = WhTheme.colors.darkForeground)
+        }
     }
 }
 
 @Composable
 private fun TileBody(
-    info: TileInfo?,
+    info: TileInfo.App?,
     appsLoaded: Boolean,
     iconLoader: AppIconLoader,
     modifier: Modifier,
@@ -134,7 +158,7 @@ private fun GroupTabs(
                 contentAlignment = Alignment.Center,
             ) {
                 WhText(
-                    info?.app?.label ?: info?.key?.packageName.orEmpty(),
+                    tabLabel(info),
                     Modifier.padding(horizontal = spacing.controlGap),
                     style = WhTheme.typography.caption,
                     color = if (active) colors.accent else colors.darkForeground,
@@ -154,6 +178,14 @@ private fun GroupTabs(
         }
     }
 }
+
+@Composable
+private fun tabLabel(info: TileInfo?): String =
+    when (info) {
+        is TileInfo.App -> info.app?.label ?: info.key.packageName
+        is TileInfo.Widget -> stringResource(R.string.tile_widget)
+        null -> ""
+    }
 
 /** Una celda vacía para el mismo hueco mientras se arrastra un tile (deja ver el sitio que deja). */
 @Composable

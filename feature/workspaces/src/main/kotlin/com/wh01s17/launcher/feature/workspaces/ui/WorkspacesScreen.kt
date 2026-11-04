@@ -64,6 +64,7 @@ fun WorkspacesScreen(
     onIntent: (WorkspacesIntent) -> Unit,
     onCommand: (WorkspaceCommand) -> Unit,
     onAddTile: () -> Unit,
+    onAddWidget: () -> Unit,
     onOpenMenu: () -> Unit,
     onGesture: (Gesture) -> Unit,
     boundGestures: Set<Gesture>,
@@ -104,6 +105,7 @@ fun WorkspacesScreen(
                 workspace = state.workspaces[state.current - Desk.FIRST],
                 onCommand = onCommand,
                 onAddTile = onAddTile,
+                onAddWidget = onAddWidget,
                 onOpenSettings = onOpenSettings,
                 onDone = { onIntent(WorkspacesIntent.ExitEdit) },
             )

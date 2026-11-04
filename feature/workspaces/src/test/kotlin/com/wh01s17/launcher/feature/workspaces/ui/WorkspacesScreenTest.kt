@@ -89,7 +89,7 @@ class WorkspacesScreenTest {
         val tiles =
             desk.contents.mapValues { (_, content) ->
                 val key = (content as TileContent.App).key
-                TileInfo(key, apps.firstOrNull { it.key == key })
+                TileInfo.App(key, apps.firstOrNull { it.key == key })
             }
         return WorkspacesUiState(
             loaded = true,
@@ -115,6 +115,7 @@ class WorkspacesScreenTest {
                         onIntent = { intents += it },
                         onCommand = { commands += it },
                         onAddTile = {},
+                        onAddWidget = {},
                         onOpenMenu = {},
                         onGesture = {},
                         boundGestures = emptySet(),

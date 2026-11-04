@@ -89,6 +89,9 @@ class WorkspacesViewModel(
     /** Añade un tile con [app] al escritorio actual (desde el selector de apps del modo edición). */
     fun addApp(app: AppKey) = desk.update { it.add(TileContent.App(app)) }
 
+    /** Añade un widget ya enlazado (y configurado) al escritorio actual. */
+    fun addWidget(appWidgetId: Int) = desk.update { it.add(TileContent.Widget(appWidgetId)) }
+
     fun onIntent(intent: WorkspacesIntent) {
         when (intent) {
             is WorkspacesIntent.PageSettled -> desk.update { it.focusWorkspace(intent.workspace) }
@@ -149,13 +152,14 @@ class WorkspacesViewModel(
     ) {
         current { it.focus(tile) }
         val info = state.value.tiles[tile]
-        if (editing.value || info == null) return
+        // Un widget recibe sus propios toques; aquí sólo llega el de las apps.
+        if (editing.value || info !is TileInfo.App) return
         message.value = launch(info, origin)
     }
 
     /** Abre la app del tile; devuelve el aviso si no se pudo (o `null` si se abrió). */
     private fun launch(
-        info: TileInfo,
+        info: TileInfo.App,
         origin: LaunchOrigin?,
     ): WorkspaceMessage? {
         // Sin app: desinstalada si el índice ya se leyó; si no, aún no se sabe y no se avisa.
@@ -194,8 +198,9 @@ class WorkspacesViewModel(
                     is TileContent.App -> {
                         val app = apps[content.key]
                         val paused = catalog.profile(content.key.userSerial)?.available == false
-                        TileInfo(content.key, app, unavailable = app != null && (paused || app.suspended))
+                        TileInfo.App(content.key, app, unavailable = app != null && (paused || app.suspended))
                     }
+                    is TileContent.Widget -> TileInfo.Widget(content.appWidgetId)
                 }
             }
         }
