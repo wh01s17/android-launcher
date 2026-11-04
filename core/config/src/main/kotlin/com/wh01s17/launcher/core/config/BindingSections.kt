@@ -7,6 +7,7 @@ import com.wh01s17.launcher.core.input.binding.CommandCatalog
 import com.wh01s17.launcher.core.input.binding.CommandParse
 import com.wh01s17.launcher.core.input.binding.Gesture
 import com.wh01s17.launcher.core.input.binding.KeyChord
+import com.wh01s17.launcher.core.input.binding.KeyModifier
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -144,4 +145,32 @@ internal object BindingSections {
         }
         return values.takeIf { it.size == args.size }
     }
+
+    /** `keyboard.superAlternative`: `ALT`, `CTRL` o `none`. Lo que falta conserva [defaults]. */
+    fun readKeyboard(
+        element: JsonElement?,
+        defaults: KeyboardConfig,
+        errors: MutableList<ConfigError>,
+    ): KeyboardConfig {
+        if (element != null && element !is JsonObject) errors += ConfigError("keyboard", "debe ser un objeto")
+        val path = "keyboard.superAlternative"
+        val name = (element as? JsonObject)?.let { ConfigValues.readString(it["superAlternative"], path, errors) }
+        return if (name == null) defaults else KeyboardConfig(readAlternative(name, path, errors))
+    }
+
+    private fun readAlternative(
+        name: String,
+        path: String,
+        errors: MutableList<ConfigError>,
+    ): KeyModifier? {
+        if (name.equals(UNBIND, ignoreCase = true)) return null
+        val modifier = SUPER_ALTERNATIVES.firstOrNull { it.configName.equals(name, ignoreCase = true) }
+        if (modifier == null) {
+            errors += ConfigError(path, "«$name» no es válido; opciones: ${SUPER_ALTERNATIVES.joinToString { it.configName }}, $UNBIND")
+        }
+        return modifier
+    }
+
+    /** `SHIFT` no sirve: con el menú abierto es escribir mayúsculas. */
+    private val SUPER_ALTERNATIVES = listOf(KeyModifier.Alt, KeyModifier.Ctrl)
 }

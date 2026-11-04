@@ -11,6 +11,7 @@ import com.wh01s17.launcher.core.input.binding.Gesture
 import com.wh01s17.launcher.core.input.binding.GestureBindingResolver
 import com.wh01s17.launcher.core.input.binding.KeyBindingResolver
 import com.wh01s17.launcher.core.input.binding.KeyChord
+import com.wh01s17.launcher.core.input.binding.KeyModifier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -69,7 +70,11 @@ class BindingSectionsTest {
         assertEquals(LauncherCommand.OpenNotificationShade, GestureBindingResolver(bindings).resolve(Gesture.SwipeDown))
         assertEquals(WorkspaceCommand.FocusWorkspace(2), commandFor(bindings, "SUPER + 2"))
         assertEquals(factory.bindings.size - 1 + 2, bindings.size)
-        assertEquals("a replaced binding keeps its place", 1, bindings.indexOfFirst { it.trigger == keys("SUPER + 1") })
+        assertEquals(
+            "a replaced binding keeps its place",
+            factory.bindings.indexOfFirst { it.trigger == keys("SUPER + 1") },
+            bindings.indexOfFirst { it.trigger == keys("SUPER + 1") },
+        )
         assertEquals(factory.bindings, success("""{"version":1}""").bindings)
     }
 
@@ -79,7 +84,9 @@ class BindingSectionsTest {
             listOf(
                 "bindings[0]" to "necesita «keys» o «gesture» (sólo uno)",
                 "bindings[1].keys" to "«HYPER» no es un modificador; opciones: SUPER, CTRL, ALT, SHIFT",
-                "bindings[2].gesture" to "«pinch» no es un gesto; opciones: swipe-up, swipe-down",
+                "bindings[2].gesture" to
+                    "«pinch» no es un gesto; opciones: swipe-up, swipe-down, two-finger-swipe-left, two-finger-swipe-right, " +
+                    "two-finger-swipe-up, two-finger-swipe-down, double-tap, double-tap-tile",
                 "bindings[3].command" to "falta",
                 "bindings[4].args.id" to "debe estar entre 1 y 10",
                 "bindings[5].args" to "«none» no lleva argumentos",
@@ -105,5 +112,18 @@ class BindingSectionsTest {
             ),
         )
         assertEquals(listOf("bindings" to "debe ser una lista"), errors("""{"version":1,"bindings":{}}"""))
+    }
+
+    @Test
+    fun `alt plays super by default and the user can switch it to ctrl or turn it off`() {
+        assertEquals(KeyModifier.Alt, factory.keyboard.superAlternative)
+        assertEquals(KeyModifier.Ctrl, success("""{"version":1,"keyboard":{"superAlternative":"ctrl"}}""").keyboard.superAlternative)
+        assertNull(success("""{"version":1,"keyboard":{"superAlternative":"none"}}""").keyboard.superAlternative)
+        assertEquals(KeyModifier.Alt, success("""{"version":1,"keyboard":{}}""").keyboard.superAlternative)
+        assertEquals(
+            listOf("keyboard.superAlternative" to "«SHIFT» no es válido; opciones: ALT, CTRL, none"),
+            errors("""{"version":1,"keyboard":{"superAlternative":"SHIFT"}}"""),
+        )
+        assertEquals(listOf("keyboard" to "debe ser un objeto"), errors("""{"version":1,"keyboard":"ALT"}"""))
     }
 }
