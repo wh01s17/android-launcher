@@ -104,3 +104,15 @@ cualquier tile. Quitar el tile libera el widget en Android. Si la app del widget
 tile se queda con «widget no disponible». En `files/state/workspaces.json` se guarda como
 `{"id": 7, "widget": 35}` (el id del widget en el `AppWidgetHost` del launcher).
 
+### Widgets propios (wh01s17)
+
+En el selector, la sección «wh01s17» añade widgets propios, guardados como `{"native": "tidal"}`:
+
+| Widget | Qué hace |
+| --- | --- |
+| TIDAL (tidalamp nova) | Carátula, tiempo, canción, avance (tocar salta) y ⏮ ⏯ ■ ⏭. Pide el acceso a notificaciones (sólo lee la sesión de música). Tocar «▍ tidalamp» cambia de paleta (las de tidalamp; *phosphor* de fábrica) |
+| Pomodoro | Sistemas de `pomodoro.sh` (40/10, 25/5, 50/10, 90/20), iniciar/pausar, saltar, reiniciar, ±1 min; sigue contando con la app cerrada |
+| Metrónomo | 40–240 BPM, tap tempo, compás y subdivisiones de `wh01s17.metronome`; acento en el primer tiempo |
+| Reloj y calendario | Hora, fecha y la semana de lunes a domingo |
+| Uso del sistema | RAM y almacenamiento, en amarillo por encima del 80 % |
+

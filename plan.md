@@ -929,9 +929,15 @@ multitáctil). Guía: [`docs/bindings.md`](docs/bindings.md).
       edición, tamaño en dp) y selector propio en `feature/widgets`; `LocalWidgetRenderer` para que
       `feature/workspaces` los pinte; `WidgetFlow` (enlace con el diálogo del sistema y configuración)
       y limpieza de ids sin tile en la app. «+ widget» en edición y en el menú. Probado en el Redmi.
-- [ ] Widgets nativos wh01s17: reloj/calendario, pomodoro (estados y colores
+- [x] Widgets nativos wh01s17: reloj/calendario, pomodoro (estados y colores
       de `docs/pomodoro.md`: trabajo `#ff6b66`, descanso corto `#84c959`,
       largo `#45d9ea`), metrónomo (bpm, compás, subdivisión), uso del sistema.
+      `TileContent.Native(id)`; motores en `core/system/timer` (`Pomodoro`/`PomodoroRepository`
+      con los cuatro sistemas de `pomodoro.sh`, `MetronomeMath`/`MetronomePlayer` con las voces de
+      `metronome-engine.py` sobre `AudioTrack`); widgets en `feature/widgets/native` y sección
+      «wh01s17» del selector. Además, a petición del usuario, **TIDAL** con el tema *nova* de
+      tidalamp y sus paletas (phosphor de fábrica; tocar el título cambia), sobre `MediaSource`
+      y el acceso a notificaciones opt-in. Pendiente: oír el metrónomo en el Redmi.
 - [ ] Módulos de barra correspondientes (`pomodoro`, `wh01s17.metronome`).
 - [ ] Servicio en primer plano sólo para pomodoro/metrónomo activos.
 
@@ -1176,6 +1182,11 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-04 | `feature/workspaces` pinta los widgets mediante `LocalWidgetRenderer`, que pone la app con la implementación de `feature/widgets` | Ningún feature depende de otro (§5.2) |
 | 2026-11-04 | Los ids de widget sin tile se liberan comparando `AppWidgetHost.getAppWidgetIds()` con los tiles (salvo el que se está añadiendo) | Quitar, mover a otro escritorio o un enlace cancelado no necesitan avisar a nadie; el resultado siempre cuadra |
 | 2026-11-04 | La vista del widget vigila los toques antes que el widget para reconocer «mantener pulsado» y no recibe toques en edición | Como Launcher3: entrar en edición desde un widget con botones o listas, y poder arrastrar su tile |
+| 2026-11-04 | Pomodoro y metrónomo viven en `core/system/timer` (no en `feature/widgets`) | Los comparten el tile, el módulo de barra y el servicio en primer plano (Hito 7); un feature no depende de otro |
+| 2026-11-04 | El pomodoro guarda cuándo termina la fase (reloj de pared) y se persiste en `files/state/pomodoro.properties` | No se desfasa aunque la UI no mire y sobrevive a que HyperOS cierre el proceso |
+| 2026-11-04 | El metrónomo escribe cada tiempo entero en un `AudioTrack` en stream | El reloj del audio marca el ritmo, como `metronome-engine.py`; un temporizador derivaría |
+| 2026-11-04 | `WhNotificationListener` (acceso a notificaciones, opt-in) se declara ya para leer la sesión de TIDAL; no lee notificaciones | Android sólo da `MediaSessionManager.getActiveSessions` a quien lo tiene (R8: el widget explica y ofrece activarlo) |
+| 2026-11-04 | Widget de TIDAL con el tema *nova* de tidalamp; paletas de tidalamp copiadas a `core/designsystem/palette` | Petición del usuario; R6 exige que los colores salgan del sistema de diseño. *phosphor* es la de wh01s17 y la de fábrica |
 | 2026-11-04 | Búsqueda sin autocorrección del IME | SwiftKey modificaba nombres escritos durante la prueba ADB; las consultas de apps y comandos deben conservarse literalmente |
 
 ### 11.2 Riesgos
@@ -1202,10 +1213,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-04:** 53 de 75 tareas marcadas (71 % del plan completo);
+- **Balance al 2026-11-04:** 54 de 75 tareas marcadas (72 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
   Quedan los Hitos 7–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 7 (1 de 4 tareas). **Hitos 0–6 terminados**; versión `0.2.0`. Los
+- **Hito en curso:** Hito 7 (2 de 4 tareas). **Hitos 0–6 terminados**; versión `0.2.0`. Los
   cierres y sus pruebas siguen en §13.
 - **Última tarea completada:** matriz de `docs/xiaomi.md` con las tres capas; **Hito 6 cerrado**.
   En el Redmi, por ADB: atajos con `ALT` en lugar de `SUPER` (Meta nunca llega a la app; `ALT + TAB`
@@ -1214,8 +1225,8 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 - **Incidencia de la sesión (resuelta):** la primera versión de la animación de vuelta cerraba el
   launcher al volver; HyperOS mostró el selector de launcher. Se cerró sin elegir, se reafirmó el
   rol HOME de `com.wh01s17.launcher.debug` y se corrigió (§13).
-- **Siguiente tarea:** Hito 7, widgets nativos wh01s17 (reloj/calendario, pomodoro, metrónomo,
-  uso del sistema) como `TileContent.Native` (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
+- **Siguiente tarea:** Hito 7, módulos de barra `pomodoro` y `wh01s17.metronome` sobre
+  `PomodoroRepository`/`MetronomeRepository` (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
   Bluetooth y los gestos de dos dedos a mano; medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj.
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
@@ -1246,6 +1257,8 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-04 | 7 | Widget de TIDAL al tema *nova* (petición del usuario), paleta y forma del analizador elegibles (`fine` de fábrica; `bars`, `mirror`, `curve`), visualizador con `AudioSpectrum` (`Visualizer` de la mezcla, permiso de micrófono opt-in) y contenido alineado arriba. Lo que parecía un tile perdido en el escritorio 3 eran cambios del propio usuario con el teléfono en la mano (confirmado); mi «restauración» los deshizo y se dejó todo como él lo tenía. Aun así se endureció el pager: `PageSettled` sólo tras un arrastre y tocar un tile hace actual su escritorio (prueba de regresión). Metrónomo: puntos del color de su sonido, tocarlos alterna «marcar el 1»/«todos iguales», leyenda con las voces; encabezados nova («▍ pomodoro») y widgets alineados arriba; tocar la carátula abre TIDAL | `feature/widgets/native/`, `core/system/media/AudioSpectrum.kt`, `app/widgets/HomeWidgets.kt` |
+| 2026-11-04 | 7 | Widgets nativos: `core/system/timer` (pomodoro puro + repositorio persistente, metrónomo puro + `AudioTrack`), `core/system/media` (`MediaSource`, `WhNotificationListener`), `TileContent.Native`, `feature/widgets/native` (TIDAL, pomodoro, metrónomo, reloj, uso; estilos `Retro` y `Nova`), `TidalampPalettes` en `core/designsystem` (16 paletas de tidalamp). En el Redmi: acceso a notificaciones concedido por ADB con permiso del usuario, TIDAL sonando con carátula, tiempo, canción, avance y pausa desde el widget; paleta cambiada y devuelta a phosphor; tiles de TIDAL y pomodoro en el escritorio 5. 8 pruebas nuevas | `core/system/timer/`, `core/system/media/`, `feature/widgets/native/`, `core/designsystem/palette/` |
 | 2026-11-04 | 7 | Widgets del sistema en tiles: `TileContent.Widget`/`TileInfo.Widget` (`TileInfo` pasa a `App \| Widget`), `WidgetRenderer` + `LocalWidgetRenderer`, `feature/widgets` (`WidgetHost`, `WhWidgetHostView`, `WidgetView`, `WidgetPicker`, `installedWidgets`, `<queries>` de `APPWIDGET_UPDATE`), `WidgetFlow` y `HomeWidgets` en la app, «+ widget» y entrada de menú. En el Redmi: selector con los widgets instalados, diálogo de enlace del sistema (aceptado sólo para ese widget), «Tiempo de uso» en un tile, tocarlo abre Bienestar digital, mantenerlo entra en edición, quitarlo libera el id (`widgets.size=0`). Escritorio 5 usado para la prueba; los demás intactos | `feature/widgets/`, `feature/workspaces/`, `app/widgets/` |
 | 2026-11-04 | 6 | **Hito 6 terminado; `0.2.0`.** Matriz de `docs/xiaomi.md` con las tres capas en el Redmi: capa 1 con los botones reales, capa 3 con y sin botones, capas 2 + 3 tras `adb reboot` (servicio enlazado y botones ocultos solos; atrás, inicio, recientes) y columna de animación de vuelta. Pantalla encendida con USB sólo durante las pruebas (`stay_on_while_plugged_in` vuelto a `0`); modo *gestos wh01s17* y ajustes de franjas de fábrica restaurados | `docs/xiaomi.md`, `plan.md`, `CHANGELOG.md`, `app/build.gradle.kts` |
 | 2026-11-04 | 6 | Capa 3 refinada: `EdgeSettings` (cada gesto, grosor, sensibilidad) con `homeEnabled`/`recentsEnabled` en el reconocedor, `NavigationFiles.readEdges/writeEdges`, `edgesChangedAction` y `EdgeStripOverlay.reconfigure`; sección «gestos de borde» en Compatibilidad. `HomeReturn` (animación de vuelta) y `HomeCommands` (comandos fuera de `MainActivity`). En el Redmi: apagar atrás izquierdo lo desactiva al momento, atrás/inicio/recientes con los ajustes nuevos. La primera versión de `HomeReturn` cerraba el launcher al volver (`Animatable` fuera de la composición, sin reloj de fotogramas): Android mostró el selector de launcher; se cerró sin elegir, se reafirmó el rol HOME y se corrigió animando en la composición. 5 pruebas nuevas | `core/system/navigation/`, `feature/settings/compat/EdgeSection.kt`, `app/ui/HomeReturn.kt`, `app/HomeCommands.kt` |
