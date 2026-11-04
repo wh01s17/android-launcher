@@ -106,7 +106,7 @@ plan.md | Fuente única de verdad del proyecto para agentes; dividirlo obligarí
 ```
 | R4 | Una función ≤ 80 líneas; un `@Composable` ≤ 120 líneas. | detekt (`LongMethod`). |
 | R5 | El código y sus identificadores en inglés; documentación, plan y textos de UI por defecto en español (con `strings.xml` para traducir). Commits en inglés con Conventional Commits, como en `~/dotfiles`. | Revisión. |
-| R6 | Los colores, tipografías y medidas sólo salen de los *tokens* del tema (§4). Prohibido escribir `Color(0xFF…)` o `dp` mágicos fuera de `:core:designsystem`. | detekt regla propia o `grep` en CI. |
+| R6 | Los colores, tipografías y medidas sólo salen de los *tokens* del tema (§4). Prohibido escribir `Color(0xFF…)` o `dp` mágicos fuera de `:core:designsystem`. Los tests quedan fuera: sus colores son datos de prueba. | detekt regla propia o `grep` en CI. |
 | R7 | El motor de tiling (`:core:tiling`) es Kotlin puro (JVM), sin dependencias de Android, y con cobertura de tests ≥ 90 %. | Kover en CI. |
 | R8 | Nada de permisos peligrosos sin un flujo de *opt-in* explicado al usuario. El launcher funciona sin ellos (degradación elegante). | Revisión + test manual de §9. |
 | R9 | Sin red ni telemetría. La app no declara `INTERNET`. | `lint` + revisión del manifest. |
@@ -469,10 +469,11 @@ o por un `LauncherCommandBus` definido en `core/input`.
   `outline`, `layout.left/center/right` con `{ "id": "...", ...opciones }`.
 - Interfaz `BarModule { id; @Composable Content(settings, onCommand) }`
   registrada en un `BarModuleRegistry`. Un archivo por módulo.
-- Módulos del MVP: `core.menu`, `core.workspaces` (`[1] [2] …`, activo en
-  `#ff6b66`, ocupados en `foreground`, vacíos en `darkForeground`),
-  `wh01s17.clock` (`ddd d MMM HH:mm:ss`, alterno `d MMMM 'W'ww yyyy`, semana
-  inicia lunes), `wh01s17.indicators` (notificaciones, no molestar),
+- Módulos del MVP: `core.menu`, `core.workspaces` (sólo los números, como el shell: activo en
+  verde `accent` con un subrayado corto, ocupados en `foreground`, vacíos al 35 %; el `#ff6b66`
+  de `bar.active` no se usa en los escritorios, ver §11.1),
+  `wh01s17.clock` (por defecto en el teléfono `HH:mm` y alterno `ddd d MMM`; el formato del
+  escritorio, `ddd d MMM HH:mm:ss`, no cabe a 407 dp junto al resto; semana inicia lunes), `wh01s17.indicators` (notificaciones, no molestar),
   `wh01s17.power` (batería), `wh01s17.network`, `wh01s17.bluetooth`,
   `wh01s17.audio`.
 - Módulos posteriores: `pomodoro`, `wh01s17.metronome`, `media`,
@@ -813,13 +814,21 @@ servicio de accesibilidad devuelve los botones.
 
 ### Hito 3 — Barra (M)
 
-- [ ] `BarModule`, `BarModuleRegistry`, parseo de `bar` desde la config.
-- [ ] Módulos: menú, workspaces, reloj (+ popup calendario semanal lunes),
-      batería, red, Bluetooth, audio, indicadores.
-- [ ] `classColors`, `dimClasses`, `brackets`, `transparent`, `outline`.
-- [ ] Repositorios de `core/system` como `Flow` con ciclo de vida.
-- [ ] Gesto: deslizar la barra hacia abajo → cortina del sistema (si
-      accesibilidad concedida; si no, no hace nada y lo indica una vez).
+- [x] `BarModule`, `BarModuleRegistry`, parseo de `bar` desde la config. `core/config`
+      (`ConfigParser` con errores por ruta, `ConfigRepository` que conserva la última config
+      buena, `default-launcher.json`), `core/input` (`LauncherCommand` y su bus) y
+      `feature/bar`. Se aplica al volver al inicio.
+- [x] Módulos: menú, workspaces, reloj (+ popup calendario semanal lunes),
+      batería, red, Bluetooth, audio, indicadores. Escritorios provisionales hasta el Hito 4;
+      Bluetooth «conectado» y el contador de notificaciones, pendientes de permisos opt-in
+      (Hito 8 y ajustes). Guía en `docs/bar.md`.
+- [x] `classColors`, `dimClasses`, `brackets`, `transparent`, `outline`. Con las reglas de
+      `StatusModule.qml`; `centerAnchor` mantiene el reloj centrado.
+- [x] Repositorios de `core/system` como `Flow` con ciclo de vida. `status/`: batería, red,
+      Bluetooth, audio, No molestar y reloj; sólo escuchan mientras la barra se ve.
+- [x] Gesto: deslizar la barra hacia abajo → cortina del sistema (si
+      accesibilidad concedida; si no, no hace nada y lo indica una vez). `NotificationShade`
+      pide `GLOBAL_ACTION_NOTIFICATIONS` al servicio en `:nav` con una difusión interna.
 
 **Terminado cuando:** la barra refleja el estado real y cambia en vivo.
 
@@ -1069,6 +1078,16 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-03 | Estado entre procesos en archivos de un solo escritor (`NavigationFiles`, temporal + `rename`) | `SharedPreferences` no se sincroniza entre procesos |
 | 2026-11-03 | La capa 3 declara `canRetrieveWindowContent` sólo para ver si el teclado está abierto; nunca lee contenido | Sin ella `getWindows()` no da la ventana del IME y las franjas taparían el teclado |
 | 2026-11-03 | AndroidX Test runner 1.7.0 y ext-junit 1.3.0 (`connectedDebugAndroidTest`) | Últimas estables, alineadas con `androidx.test:core` 1.7.0 |
+| 2026-11-03 | El escritorio activo en la barra va en verde `accent` con subrayado, no en `#ff6b66` (`bar.active`) | Es lo que dibuja `Workspaces.qml` del shell (verificado con una captura); el plan describía el token, no el módulo |
+| 2026-11-03 | Una barra superior mide `size-horizontal` (36 px × 1,25 = 45 dp; el área táctil sube a 48 dp), no `size-vertical` | Es el eje transversal de una barra horizontal en `Style.qml`; en Hito 1 se había tomado el otro |
+| 2026-11-03 | Relleno de los módulos 5 dp (el shell, 8,5 px) y reloj por defecto `HH:mm` | Con las medidas del shell no caben menú, cinco escritorios, reloj y cinco módulos en 407 dp (se vio en las capturas) |
+| 2026-11-03 | Los avisos de la barra son un icono rojo/amarillo (la descripción la lee TalkBack), no texto | En 407 dp no cabe `[ config ]` junto al resto de módulos |
+| 2026-11-03 | `core/config` lee con `Json.parseToJsonElement` y validación propia, sin el plugin de serialización | Da errores con la ruta (`bar.layout.left[2].id`) y deja a cada módulo sus opciones libres |
+| 2026-11-03 | R6 no revisa `src/test` ni `src/androidTest` | Sus `#RRGGBB` y `Color(0x…)` son datos de prueba (config de usuario de ejemplo, valores esperados) |
+| 2026-11-03 | Bluetooth sólo distingue encendido/apagado hasta que exista el opt-in de `BLUETOOTH_CONNECT`; no se declara el permiso | R8: sin permisos peligrosos sin flujo explicado; «conectado» se activará con los ajustes |
+| 2026-11-03 | `ACCESS_NETWORK_STATE` declarado en `core/system` | Permiso normal que exige `registerDefaultNetworkCallback`; no hay `INTERNET` (R9) |
+| 2026-11-03 | «Una vez» del aviso de la cortina se guarda en un `SharedPreferences` propio | Es un dato de UI, no config; evita añadir DataStore sólo para esto (DataStore llega con el ranking de uso, Hito 5) |
+| 2026-11-03 | El catálogo de iconos tiene su captura propia, con la ventana más alta | Con 70 glifos la captura de 904 dp se cortaba y los nuevos quedaban fuera de la comparación |
 
 ### 11.2 Riesgos
 
@@ -1094,14 +1113,16 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Hito en curso:** Hito 3 (sin empezar). **Hitos 0, 1 y 2 terminados.**
-- **Última tarea completada:** navegación propia (capa 3), modo *gestos wh01s17* con
-  vigilancia y reactivación (capa 2) y asistente de Compatibilidad. Probado en el Redmi
-  con botones visibles y ocultos; `NavigationWatchdogTest` en verde.
-- **Siguiente tarea:** Hito 3, barra (`BarModule`, registro, parseo de `bar`). Modelo
-  recomendado en §0: Sonnet 5.5 · `high`. Pendientes del Hito 2 sin bloquear: medir en
-  release la primera carga del índice (≈ 3,4 s en debug) y probar los gestos tras un
-  reinicio del teléfono (columna «Tras reinicio» de `docs/xiaomi.md`).
+- **Hito en curso:** Hito 3 hecho; **falta la revisión con el modelo principal** (§0: `/code-review`
+  con Opus) antes de darlo por cerrado. **Hitos 0, 1 y 2 terminados.**
+- **Última tarea completada:** la barra (`feature/bar`, `core/config`, `core/input`,
+  `core/system/status`). Probada en el Redmi: estados en vivo (volumen, No molestar, red, hora),
+  calendario, formatos, escritorios, config válida/inválida/borrada y cortina con y sin el
+  servicio. `./gradlew check` en verde.
+- **Siguiente tarea:** revisar el Hito 3 y empezar el Hito 4 (motor de tiling, **Opus 5.5 ·
+  `xhigh`**, §0). Pendientes sin bloquear: medir en release la primera carga del índice
+  (≈ 3,4 s en debug), probar los gestos tras reiniciar el teléfono (`docs/xiaomi.md`), el opt-in de
+  `BLUETOOTH_CONNECT` y la persistencia del formato alterno del reloj (escribir la config).
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
   launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio),
   activar el modo. El permiso `WRITE_SECURE_SETTINGS` ya está concedido a la app debug.
@@ -1128,6 +1149,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-03 | 3 | **Barra.** `core/config` (parser con errores por ruta, repositorio que conserva la última config buena, `default-launcher.json`), `core/input` (comandos y bus), `core/system/status` (batería, red, Bluetooth, audio, No molestar, reloj como `Flow` fríos), `feature/bar` (módulos, `classColors`/`dimClasses`/`brackets`, layout con `centerAnchor`, calendario, formato Qt), cortina por accesibilidad, avisos y capturas Roborazzi. 12 glifos nuevos; `barHeight` corregido a `size-horizontal`; el R6 deja fuera los tests. En el Redmi: todos los indicadores cambian en vivo; teléfono restaurado | `feature/bar/`, `core/config/`, `core/input/`, `core/system/.../status/`, `docs/bar.md` |
 | 2026-11-03 | 2 | **Hito 2 terminado.** Capa 3 (`WhNavigationService` en `:nav`, franjas de borde, reconocedor puro, teclado y bloqueo), capa 2 (`GestureModeController`, `NavigationFiles`, `NavigationWatchdog` con enlace a `:nav`, `AccessibilityReviver`), asistente Ajustes → Compatibilidad, `NavigationWatchdogTest` (instrumentado). En el Redmi: atrás/inicio/recientes con y sin botones; matar `:nav` → botones en 66 ms y servicio revivido en 760 ms; «Forzar detención» documentado como límite. Teléfono restaurado a `com.miui.home` con gestos | `core/system/`, `feature/settings/`, `app/`, `docs/xiaomi.md` |
 | 2026-11-03 | 2 | Acciones de app (`LauncherAppActions`: lanzar desde el icono, info, desinstalar, atajos), `core/fuzzy` (`FuzzyIndex`, `FuzzyMatcher`, benchmark), drawer provisional (`AppDrawerViewModel` + Compose, 7 pruebas), `HomeScreen`; `WhListRow` con título enriquecido, `leading` y `onLongClick`. Probado en el Redmi: búsqueda, Enter, toque, menú, info, diálogo de desinstalar (cancelado), suspensión en vivo (`pm suspend`) y atajos como HOME temporal; se restauró `com.miui.home` y `force_fsg_nav_bar = 1` | `core/apps/actions/`, `core/fuzzy/`, `feature/menu/`, `app/` |
 | 2026-11-03 | 2 | Iconos: `IconStyle` (`monochrome`/`original`/`pixelated`), `IconRenderer`, `IconCache` LRU en bytes, `LauncherIconLoader` con insignia de perfil; `AppEntry.iconStamp`. 9 pruebas con Robolectric (píxeles reales) | `core/apps/.../icons/` |

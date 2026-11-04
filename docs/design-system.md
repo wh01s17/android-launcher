@@ -60,6 +60,13 @@ Los valores se leen con `WhTheme.colors`, `WhTheme.spacing`, etc. (R6: nunca lit
   borde de hover con el relleno de `pressed-fill-alpha`, que es lo único que define el TOML.
 - **`Color` guarda el alfa en 8 bits:** 0,70 se lee 0,702. Las pruebas comparan con 0,005.
 
+## Barra
+
+Las medidas de la barra (`barHeight`, `barItemPaddingX`, `barWorkspaceWidth`, subrayado y `gridCell`)
+salen de `WhSpacing`. Una barra superior usa `size-horizontal` (36 px) y no `size-vertical`. El
+relleno de los módulos (5 dp) es menor que el del shell (8,5 px): con él no cabe la barra a 407 dp.
+Ver [`bar.md`](bar.md).
+
 ## Galería y capturas
 
 La galería (`WhGallery`) vive en `src/debug` del módulo: sólo existe en builds debug.
@@ -86,7 +93,7 @@ shell (`~/.local/share/wh01s17/shell`: `plugins/menu/Menu.qml`,
 | --- | --- | --- | --- |
 | Paleta | `colors.toml` | Los 19 swatches con su hex; una prueba compara los valores | ✓ |
 | Tipografía | Departure Mono | Departure Mono, escala ×1,25 | ✓ |
-| Iconos | Pixelarticons en code points Nerd Font | 56 glifos; una prueba comprueba que la fuente los trae | ✓ |
+| Iconos | Pixelarticons en code points Nerd Font | 70 glifos (la captura del catálogo tiene su propia ventana, más alta); una prueba comprueba que la fuente los trae | ✓ |
 | Módulos entre corchetes | `[ texto ]`, corchetes en `muted` | `WhBracketLabel`: igual, colores de `classColors` | ✓ |
 | Borde activo | Gradiente `#84c959ee → #45d9eaee`, extremos de `gradientEndpoints` | Misma fórmula (`gradientLine`): en el menú, alto, el verde queda arriba y el cian abajo; en la notificación, ancha, a izquierda y derecha | ✓ |
 | Estados de control | `shell.controls.toml` | Cinco estados con sus alfas (prueba) | ✓ |
