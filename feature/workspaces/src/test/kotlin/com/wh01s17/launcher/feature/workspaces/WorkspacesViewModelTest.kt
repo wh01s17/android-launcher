@@ -252,6 +252,29 @@ class WorkspacesViewModelTest {
             assertEquals(listOf(2, 2), tops)
         }
 
+    /**
+     * Regresión del Redmi (2026-11-04): con `current` en otro escritorio que el visible, mantener un
+     * tile y pulsar «quitar» borraba el tile enfocado del escritorio equivocado.
+     */
+    @Test
+    fun `holding a tile makes its workspace current, so closing removes that tile`() =
+        runTest(dispatcher) {
+            val (vm, desk) = viewModel()
+            vm.onCommand(WorkspaceCommand.FocusWorkspace(3))
+            vm.addApp(termux.key)
+            vm.onCommand(WorkspaceCommand.FocusWorkspace(5))
+            vm.addApp(notes.key)
+            vm.onCommand(WorkspaceCommand.FocusWorkspace(3))
+            vm.settle(this)
+            vm.onIntent(WorkspacesIntent.LongPressTile(TileId(2)))
+            vm.onCommand(WorkspaceCommand.CloseTile)
+            vm.settle(this)
+            val after = desk.state.value!!
+            assertEquals(5, after.current)
+            assertEquals("the visible tile goes", emptyList<TileId>(), after.workspace(5).tiles)
+            assertEquals("the other workspace keeps its tile", listOf(TileId(1)), after.workspace(3).tiles)
+        }
+
     @Test
     fun `toggles, layout, groups and closing act on the focused tile`() =
         runTest(dispatcher) {

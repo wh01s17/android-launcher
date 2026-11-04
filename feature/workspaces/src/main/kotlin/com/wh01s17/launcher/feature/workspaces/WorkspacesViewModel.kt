@@ -92,13 +92,16 @@ class WorkspacesViewModel(
     /** Añade un widget ya enlazado (y configurado) al escritorio actual. */
     fun addWidget(appWidgetId: Int) = desk.update { it.add(TileContent.Widget(appWidgetId)) }
 
+    /** Añade un widget propio ([TileContent.Native]) al escritorio actual. */
+    fun addNative(id: String) = desk.update { it.add(TileContent.Native(id)) }
+
     fun onIntent(intent: WorkspacesIntent) {
         when (intent) {
             is WorkspacesIntent.PageSettled -> desk.update { it.focusWorkspace(intent.workspace) }
             is WorkspacesIntent.TapTile -> tap(intent.tile, intent.origin)
-            is WorkspacesIntent.SelectTab -> current { it.focus(intent.tile) }
+            is WorkspacesIntent.SelectTab -> focusTile(intent.tile)
             is WorkspacesIntent.LongPressTile -> {
-                current { it.focus(intent.tile) }
+                focusTile(intent.tile)
                 editing.value = true
             }
             WorkspacesIntent.LongPressBackground -> editing.value = true
@@ -150,7 +153,7 @@ class WorkspacesViewModel(
         tile: TileId,
         origin: LaunchOrigin?,
     ) {
-        current { it.focus(tile) }
+        focusTile(tile)
         val info = state.value.tiles[tile]
         // Un widget recibe sus propios toques; aquí sólo llega el de las apps.
         if (editing.value || info !is TileInfo.App) return
@@ -173,6 +176,14 @@ class WorkspacesViewModel(
     }
 
     private fun current(transform: (Workspace) -> Workspace) = desk.update { it.updateCurrent(transform) }
+
+    /**
+     * Enfoca [tile] y hace actual **su** escritorio: lo que el usuario toca es lo que se ve, así que
+     * las acciones siguientes («quitar», «añadir», atajos) van a ese escritorio aunque `current`
+     * se hubiera quedado en otro.
+     */
+    private fun focusTile(tile: TileId) =
+        desk.update { d -> d.workspaceOf(tile)?.let { w -> d.focusWorkspace(w).update(w) { it.focus(tile) } } ?: d }
 
     /** Operaciones que dependen de dónde cae cada tile: sin medidas del lienzo aún, no hacen nada. */
     private fun geometry(transform: (Workspace, CanvasMetrics) -> Workspace) {
@@ -201,6 +212,7 @@ class WorkspacesViewModel(
                         TileInfo.App(content.key, app, unavailable = app != null && (paused || app.suspended))
                     }
                     is TileContent.Widget -> TileInfo.Widget(content.appWidgetId)
+                    is TileContent.Native -> TileInfo.Native(content.id)
                 }
             }
         }

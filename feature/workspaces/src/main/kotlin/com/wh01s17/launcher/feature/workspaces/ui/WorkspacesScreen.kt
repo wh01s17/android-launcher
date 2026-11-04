@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
@@ -131,9 +132,20 @@ private fun WorkspacePager(
         val target = state.current - Desk.FIRST
         if (pager.currentPage != target || pager.currentPageOffsetFraction != 0f) pager.animateScrollToPage(target, animationSpec = spec)
     }
-    // …y uno que viene del dedo se guarda como el actual cuando el pager se para.
+    // …y uno que viene del dedo se guarda como el actual cuando el pager se para. Sólo tras un
+    // arrastre: la página inicial (al recrearse la UI) o la de una animación pedida desde el
+    // estado podían devolver un escritorio viejo y pisar el actual; entonces «quitar» o «añadir»
+    // actuaban sobre otro escritorio que el que se ve (se perdió un tile en el Redmi).
+    val dragged by pager.interactionSource.collectIsDraggedAsState()
+    var fromFinger by remember { mutableStateOf(false) }
+    LaunchedEffect(dragged) { if (dragged) fromFinger = true }
     LaunchedEffect(pager) {
-        snapshotFlow { pager.settledPage }.collect { latestOnIntent(WorkspacesIntent.PageSettled(it + Desk.FIRST)) }
+        snapshotFlow { pager.settledPage }.collect { page ->
+            if (fromFinger) {
+                fromFinger = false
+                latestOnIntent(WorkspacesIntent.PageSettled(page + Desk.FIRST))
+            }
+        }
     }
     val density = LocalDensity.current
     var size by remember { mutableStateOf(IntSize.Zero) }
