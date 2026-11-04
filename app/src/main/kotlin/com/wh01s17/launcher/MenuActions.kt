@@ -31,6 +31,7 @@ internal class MenuActions(
                 true
             }
             MenuAction.Settings -> open(Intent(activity, SettingsActivity::class.java))
+            MenuAction.Shortcuts -> open(SettingsActivity.shortcuts(activity))
             MenuAction.InstallApps -> open(activity.packageManager.getLaunchIntentForPackage("com.android.vending"))
             MenuAction.Lock -> requestAccessibility(navigationActions.lockScreen())
             MenuAction.PowerDialog -> requestAccessibility(navigationActions.powerDialog())

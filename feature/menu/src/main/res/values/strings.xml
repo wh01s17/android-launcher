@@ -18,6 +18,7 @@
     <string name="menu_title">wh01s17</string>
     <string name="menu_apps">Apps</string>
     <string name="menu_learn">Aprender</string>
+    <string name="menu_shortcuts">Atajos (Super + K)</string>
     <string name="menu_trigger">Acciones</string>
     <string name="menu_style">Estilo</string>
     <string name="menu_setup">Configurar</string>

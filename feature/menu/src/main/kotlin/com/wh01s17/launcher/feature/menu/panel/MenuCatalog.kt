@@ -45,6 +45,7 @@ enum class MenuAction {
     Notifications,
     Lock,
     PowerDialog,
+    Shortcuts,
     GoWorkspace1,
     GoWorkspace2,
     GoWorkspace3,
@@ -109,7 +110,8 @@ internal fun menuEntries(page: MenuPage): List<MenuEntry> =
         MenuPage.Install -> listOf(MenuEntry(R.string.menu_store, WhIcons.Plus, action = MenuAction.InstallApps))
         MenuPage.Remove -> listOf(MenuEntry(R.string.menu_choose_app, WhIcons.Apps, action = MenuAction.Apps))
         MenuPage.System -> systemEntries()
-        MenuPage.Apps, MenuPage.Learn, MenuPage.Update, MenuPage.About -> emptyList()
+        MenuPage.Learn -> listOf(MenuEntry(R.string.menu_shortcuts, WhIcons.Keyboard, action = MenuAction.Shortcuts))
+        MenuPage.Apps, MenuPage.Update, MenuPage.About -> emptyList()
     }
 
 private fun triggerEntries() =

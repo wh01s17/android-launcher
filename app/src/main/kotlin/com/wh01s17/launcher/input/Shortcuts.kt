@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 internal class Shortcuts(
     private val config: StateFlow<ConfigState>,
+    private val onSuperSeen: () -> Unit = {},
     private val send: (LauncherCommand) -> Unit,
 ) {
     private var source: LauncherConfig? = null
@@ -26,13 +27,6 @@ internal class Shortcuts(
     private var heldKey: Int? = null
 
     /**
-     * Si alguna vez llegó un evento con Meta en este proceso. En Android 15 (Redmi y emulador) no
-     * llega ninguno; un teclado o un sistema que sí lo entregue hace válidos los atajos con `SUPER`.
-     */
-    var superDelivered: Boolean = false
-        private set
-
-    /**
      * `true` si [event] es (o termina) un atajo y no debe seguir hacia la UI. Mantener la tecla sólo
      * repite los cambios de tamaño y de volumen, como `binde` en Hyprland; las demás repeticiones se
      * consumen.
@@ -41,7 +35,8 @@ internal class Shortcuts(
         event: KeyEvent,
         typing: Boolean,
     ): Boolean {
-        if (event.metaState and KeyEvent.META_META_ON != 0) superDelivered = true
+        // En Android 15 (Redmi y emulador) no llega ninguno; si llega, los atajos con `SUPER` valen tal cual.
+        if (event.metaState and KeyEvent.META_META_ON != 0) onSuperSeen()
         return when (event.action) {
             KeyEvent.ACTION_DOWN -> onKeyDown(event, typing)
             KeyEvent.ACTION_UP -> (event.keyCode == heldKey).also { if (it) heldKey = null }

@@ -6,6 +6,8 @@ plugins {
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:system"))
+    implementation(project(":core:config"))
+    implementation(project(":core:input"))
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.android)

@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
 
     /** Un atajo de escritorio con el menú abierto lo cierra antes, para ver lo que hace. */
     private val shortcuts by lazy {
-        Shortcuts(container.configRepository.state) { command ->
+        Shortcuts(container.configRepository.state, onSuperSeen = { container.superKeyDelivered = true }) { command ->
             if (command is WorkspaceCommand && menu.page.value != null) menuController.close()
             container.commandBus.send(command)
         }
@@ -193,6 +193,7 @@ class MainActivity : ComponentActivity() {
             LauncherCommand.OpenAppsMenu -> menuController.toggle(MenuPage.Apps)
             LauncherCommand.OpenSystemMenu -> menuController.toggle(MenuPage.System)
             LauncherCommand.OpenNotificationShade -> openNotificationShade()
+            LauncherCommand.ShowShortcuts -> startActivity(SettingsActivity.shortcuts(this))
             is LauncherCommand.AdjustVolume -> adjustVolume(command.steps)
             is WorkspaceCommand -> workspaces.onCommand(command)
         }

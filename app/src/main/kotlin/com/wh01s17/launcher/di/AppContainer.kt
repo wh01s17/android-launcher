@@ -78,6 +78,12 @@ class AppContainer(
 
     val compatibilityGateway: CompatibilityGateway by lazy { AndroidCompatibilityGateway(appContext, navigationWatchdog) }
 
+    /**
+     * Si en este proceso llegó algún evento con Meta (docs/bindings.md). Lo escribe la pantalla de
+     * inicio y lo lee la tabla de `Super + K`; sólo en el hilo principal.
+     */
+    var superKeyDelivered: Boolean = false
+
     /** Todos los comandos del launcher pasan por aquí (plan.md §5.3). */
     val commandBus: LauncherCommandBus = DefaultLauncherCommandBus()
 
