@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_unavailable">widget no disponible</string>
+    <string name="widget_picker_title">widgets</string>
+    <string name="widget_picker_close">Cerrar el selector de widgets</string>
+    <string name="widget_picker_empty">No hay widgets instalados.</string>
+    <string name="widget_picker_size">%1$d×%2$d dp</string>
+    <string name="widget_bind_denied">Sin permiso para crear widgets: no se añadió.</string>
+</resources>
