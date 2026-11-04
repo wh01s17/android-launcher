@@ -17,6 +17,7 @@ internal class MenuActions(
     private val activity: Activity,
     private val openApps: () -> Unit,
     private val addApp: () -> Unit,
+    private val addWidget: () -> Unit,
     private val onCommand: (LauncherCommand) -> Unit,
     private val navigationActions: NotificationShade,
 ) {
@@ -28,6 +29,10 @@ internal class MenuActions(
             }
             MenuAction.AddApp -> {
                 addApp()
+                true
+            }
+            MenuAction.AddWidget -> {
+                addWidget()
                 true
             }
             MenuAction.Settings -> open(Intent(activity, SettingsActivity::class.java))

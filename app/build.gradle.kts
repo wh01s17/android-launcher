@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":feature:bar"))
     implementation(project(":feature:menu"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:widgets"))
     implementation(project(":feature:workspaces"))
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)

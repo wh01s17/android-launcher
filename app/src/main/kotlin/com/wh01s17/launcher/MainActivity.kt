@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -40,9 +41,11 @@ import com.wh01s17.launcher.feature.menu.search.MenuSearchViewModel
 import com.wh01s17.launcher.feature.menu.search.SearchIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesViewModel
+import com.wh01s17.launcher.feature.workspaces.ui.LocalWidgetRenderer
 import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
 import com.wh01s17.launcher.input.Shortcuts
 import com.wh01s17.launcher.ui.HomeReturn
+import com.wh01s17.launcher.widgets.HomeWidgets
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import android.graphics.Color as AndroidColor
@@ -64,10 +67,18 @@ class MainActivity : ComponentActivity() {
 
     private val menu: MenuViewModel by viewModels()
     private val homeReturn = HomeReturn()
+    private lateinit var widgets: HomeWidgets
     private val appVersion by lazy { packageManager.getPackageInfo(packageName, 0).versionName.orEmpty() }
 
     private val menuController: MenuController by lazy {
-        MenuController(this, menu, search, container.notificationShade, container.commandBus::send, commands::handle)
+        MenuController(
+            this,
+            menu,
+            search,
+            container.notificationShade,
+            container.commandBus::send,
+            commands::handle,
+        ) { widgets.openPicker() }
     }
 
     private val commands: HomeCommands by lazy { HomeCommands(this, container, { menuController }, workspaces::onCommand) }
@@ -117,6 +128,8 @@ class MainActivity : ComponentActivity() {
             },
         )
         handleCommands()
+        // Registra el resultado del diálogo de enlace de widgets: tiene que ser antes de onStart.
+        widgets = HomeWidgets(this, container.widgetHost, container.desk.state, workspaces::addWidget)
         setContent { HomeContent() }
     }
 
@@ -137,18 +150,21 @@ class MainActivity : ComponentActivity() {
             ) {
                 // Los escritorios ocupan lo que dejan la barra y los insets (la exclusive zone de
                 // la barra en Hyprland): ningún tile queda debajo.
-                WorkspacesScreen(
-                    state = workspacesState,
-                    iconLoader = container.iconLoader,
-                    onIntent = workspaces::onIntent,
-                    onCommand = workspaces::onCommand,
-                    onAddTile = menuController::pick,
-                    onOpenMenu = menuController::open,
-                    onGesture = shortcuts::onGesture,
-                    boundGestures = remember(config.config?.bindings) { Shortcuts.boundGestures(config.config) },
-                    onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
-                    modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(top = barHeight()),
-                )
+                CompositionLocalProvider(LocalWidgetRenderer provides widgets.renderer) {
+                    WorkspacesScreen(
+                        state = workspacesState,
+                        iconLoader = container.iconLoader,
+                        onIntent = workspaces::onIntent,
+                        onCommand = workspaces::onCommand,
+                        onAddTile = menuController::pick,
+                        onAddWidget = widgets::openPicker,
+                        onOpenMenu = menuController::open,
+                        onGesture = shortcuts::onGesture,
+                        boundGestures = remember(config.config?.bindings) { Shortcuts.boundGestures(config.config) },
+                        onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
+                        modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(top = barHeight()),
+                    )
+                }
                 // La barra va debajo de la barra de estado del sistema (plan.md §5.5). Hasta que
                 // se lee la config no hay barra que pintar.
                 config.config?.let { launcherConfig ->
@@ -174,6 +190,7 @@ class MainActivity : ComponentActivity() {
                     onSearch = search::onIntent,
                     version = appVersion,
                 )
+                widgets.Picker()
             }
         }
     }
@@ -231,6 +248,17 @@ class MainActivity : ComponentActivity() {
         if (menu.page.value == null) return super.dispatchKeyEvent(event)
         if (event.action == KeyEvent.ACTION_UP && !event.isCanceled) menuController.back()
         return true
+    }
+
+    /** La configuración de un widget nuevo vuelve aquí (`AppWidgetHost` usa la API antigua). */
+    @Deprecated("AppWidgetHost.startAppWidgetConfigureActivityForResult sólo entrega aquí")
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ) {
+        if (!widgets.onConfigureResult(requestCode, resultCode)) super.onActivityResult(requestCode, resultCode, data)
     }
 
     /** Pulsar Inicio estando ya en el launcher vuelve a la pantalla limpia. */

@@ -37,6 +37,7 @@
     <string name="menu_store">Abrir Play Store</string>
     <string name="menu_choose_app">Elegir app</string>
     <string name="menu_add_app">Añadir app al escritorio</string>
+    <string name="menu_add_widget">Añadir widget</string>
     <string name="menu_edit">Editar escritorio</string>
     <string name="menu_floating">Alternar flotante / mosaico</string>
     <string name="menu_split">Alternar división</string>

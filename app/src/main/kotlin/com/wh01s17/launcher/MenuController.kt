@@ -18,12 +18,14 @@ internal class MenuController(
     navigation: NotificationShade,
     onWorkspace: (WorkspaceCommand) -> Unit,
     private val onOther: (LauncherCommand) -> Unit,
+    addWidget: () -> Unit = {},
 ) {
     private val actions =
         MenuActions(
             activity,
             ::openApps,
             ::pick,
+            addWidget,
             onCommand = { command ->
                 when (command) {
                     is WorkspaceCommand -> onWorkspace(command)

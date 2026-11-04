@@ -25,6 +25,7 @@ enum class MenuPage(
 enum class MenuAction {
     Apps,
     AddApp,
+    AddWidget,
     Edit,
     Layout,
     Floating,
@@ -117,6 +118,7 @@ internal fun menuEntries(page: MenuPage): List<MenuEntry> =
 private fun triggerEntries() =
     listOf(
         MenuEntry(R.string.menu_add_app, WhIcons.Plus, action = MenuAction.AddApp),
+        MenuEntry(R.string.menu_add_widget, WhIcons.Plus, action = MenuAction.AddWidget),
         MenuEntry(R.string.menu_edit, WhIcons.Pencil, action = MenuAction.Edit),
         MenuEntry(R.string.menu_layout, WhIcons.Layout, action = MenuAction.Layout),
         MenuEntry(R.string.menu_floating, WhIcons.Monitor, action = MenuAction.Floating),

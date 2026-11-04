@@ -31,6 +31,7 @@ import com.wh01s17.launcher.feature.bar.defaultBarRegistry
 import com.wh01s17.launcher.feature.bar.module.BarModuleRegistry
 import com.wh01s17.launcher.feature.menu.data.DataStoreUsageRepository
 import com.wh01s17.launcher.feature.menu.panel.searchCommands
+import com.wh01s17.launcher.feature.widgets.host.WidgetHost
 import com.wh01s17.launcher.feature.workspaces.data.DeskRepository
 import com.wh01s17.launcher.feature.workspaces.data.FileDeskStorage
 import kotlinx.coroutines.CoroutineScope
@@ -83,6 +84,9 @@ class AppContainer(
      * inicio y lo lee la tabla de `Super + K`; sólo en el hilo principal.
      */
     var superKeyDelivered: Boolean = false
+
+    /** Los widgets del sistema en tiles (plan.md §7 Hito 7). */
+    val widgetHost: WidgetHost by lazy { WidgetHost(appContext) }
 
     /** Todos los comandos del launcher pasan por aquí (plan.md §5.3). */
     val commandBus: LauncherCommandBus = DefaultLauncherCommandBus()
