@@ -10,6 +10,9 @@
         android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- Estado de la red para el módulo de red de la barra (permiso normal; sin INTERNET, plan.md R9). -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application>
         <!--
             Capa 3: gestos de borde. En su propio proceso para que el launcher note al instante si

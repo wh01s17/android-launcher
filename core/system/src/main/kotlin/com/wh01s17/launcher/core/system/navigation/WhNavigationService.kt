@@ -52,10 +52,10 @@ class WhNavigationService : AccessibilityService() {
                 context: Context,
                 intent: Intent,
             ) {
-                if (intent.action == XiaomiGestureCompat.modeChangedAction(context)) {
-                    decide { compat.controller.onNavigationReady(it) }
-                } else {
-                    refreshLayout()
+                when (intent.action) {
+                    XiaomiGestureCompat.modeChangedAction(context) -> decide { compat.controller.onNavigationReady(it) }
+                    NotificationShade.action(context) -> performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS)
+                    else -> refreshLayout()
                 }
             }
         }
@@ -76,8 +76,9 @@ class WhNavigationService : AccessibilityService() {
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_USER_PRESENT)
                 addAction(XiaomiGestureCompat.modeChangedAction(this@WhNavigationService))
+                addAction(NotificationShade.action(this@WhNavigationService))
             }
-        // El aviso del modo viene del propio launcher (mismo UID): no hace falta exportar.
+        // Los avisos del modo y de la cortina vienen del propio launcher (mismo UID): no hace falta exportar.
         ContextCompat.registerReceiver(this, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
         contentResolver.registerContentObserver(Settings.Global.getUriFor(SystemSetting.ForceFsgNavBar.key), false, forceFsgObserver)
         decide { compat.controller.onNavigationReady(it) }
