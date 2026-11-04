@@ -77,6 +77,7 @@ class SettingsActivity : ComponentActivity() {
                 CompatibilityScreen(
                     state = state,
                     onModeChange = compatibility::setModeEnabled,
+                    onEdgesChange = compatibility::setEdges,
                     actions = actions,
                     modifier = Modifier.fillMaxSize().background(WhTheme.colors.background),
                 )

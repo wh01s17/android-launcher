@@ -2,7 +2,6 @@ package com.wh01s17.launcher
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.media.AudioManager
 import android.os.Bundle
 import android.view.KeyEvent
 import android.widget.Toast
@@ -30,15 +29,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.wh01s17.launcher.core.apps.actions.LaunchResult
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
-import com.wh01s17.launcher.core.input.LauncherCommand
 import com.wh01s17.launcher.core.input.WorkspaceCommand
 import com.wh01s17.launcher.feature.bar.Bar
 import com.wh01s17.launcher.feature.bar.BarViewModel
 import com.wh01s17.launcher.feature.bar.barHeight
 import com.wh01s17.launcher.feature.menu.panel.LauncherMenu
-import com.wh01s17.launcher.feature.menu.panel.MenuPage
 import com.wh01s17.launcher.feature.menu.panel.MenuViewModel
 import com.wh01s17.launcher.feature.menu.search.MenuSearchViewModel
 import com.wh01s17.launcher.feature.menu.search.SearchIntent
@@ -46,11 +42,9 @@ import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesViewModel
 import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
 import com.wh01s17.launcher.input.Shortcuts
-import kotlinx.coroutines.flow.first
+import com.wh01s17.launcher.ui.HomeReturn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
-import kotlin.math.abs
 import android.graphics.Color as AndroidColor
 
 /**
@@ -69,11 +63,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private val menu: MenuViewModel by viewModels()
+    private val homeReturn = HomeReturn()
     private val appVersion by lazy { packageManager.getPackageInfo(packageName, 0).versionName.orEmpty() }
 
-    private val menuController by lazy {
-        MenuController(this, menu, search, container.notificationShade, container.commandBus::send, ::handleCommand)
+    private val menuController: MenuController by lazy {
+        MenuController(this, menu, search, container.notificationShade, container.commandBus::send, commands::handle)
     }
+
+    private val commands: HomeCommands by lazy { HomeCommands(this, container, { menuController }, workspaces::onCommand) }
 
     /** Un atajo de escritorio con el menú abierto lo cierra antes, para ver lo que hace. */
     private val shortcuts by lazy {
@@ -131,7 +128,13 @@ class MainActivity : ComponentActivity() {
             val barState by bar.state.collectAsStateWithLifecycle()
             val workspacesState by workspaces.state.collectAsStateWithLifecycle()
             val config by container.configRepository.state.collectAsStateWithLifecycle()
-            Box(Modifier.fillMaxSize().background(WhTheme.colors.background)) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(
+                        WhTheme.colors.background,
+                    ).then(homeReturn.modifier(config.config?.animations?.workspaces)),
+            ) {
                 // Los escritorios ocupan lo que dejan la barra y los insets (la exclusive zone de
                 // la barra en Hyprland): ningún tile queda debajo.
                 WorkspacesScreen(
@@ -185,56 +188,9 @@ class MainActivity : ComponentActivity() {
                 launch { search.picks.collect { workspaces.addApp(it.key) } }
                 launch { search.closed.collect { menu.close() } }
                 launch { search.commands.collect(menuController::execute) }
-                container.commandBus.commands.collect(::handleCommand)
+                container.commandBus.commands.collect(commands::handle)
             }
         }
-    }
-
-    private fun handleCommand(command: LauncherCommand) {
-        when (command) {
-            LauncherCommand.OpenMenu -> menuController.toggle(MenuPage.Root)
-            LauncherCommand.OpenAppsMenu -> menuController.toggle(MenuPage.Apps)
-            LauncherCommand.OpenSystemMenu -> menuController.toggle(MenuPage.System)
-            LauncherCommand.OpenNotificationShade -> openNotificationShade()
-            LauncherCommand.ShowShortcuts -> startActivity(SettingsActivity.shortcuts(this))
-            LauncherCommand.OpenTerminal -> openTerminal()
-            is LauncherCommand.AdjustVolume -> adjustVolume(command.steps)
-            is WorkspaceCommand -> workspaces.onCommand(command)
-        }
-    }
-
-    /**
-     * `Super + Return` (plan.md §3): la app de `apps.terminal`; si no está, lo dice. Justo al arrancar
-     * el índice de apps puede no estar cargado (≈ 3 s en debug): se espera a la primera carga.
-     */
-    private fun openTerminal() {
-        val spec =
-            container.configRepository.state.value.config
-                ?.apps
-                ?.terminal ?: return
-        lifecycleScope.launch {
-            val catalog = withTimeoutOrNull(CATALOG_WAIT_MS) { container.appRepository.catalog.first { it.loaded } }
-            val result = catalog?.find(spec)?.let { container.appActions.launch(it) }
-            if (result !is LaunchResult.Launched) {
-                Toast.makeText(this@MainActivity, getString(R.string.terminal_missing, spec), Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    /** Volumen multimedia con el panel del sistema, como las teclas de volumen del teléfono. */
-    private fun adjustVolume(steps: Int) {
-        val audio = getSystemService(AudioManager::class.java) ?: return
-        val direction = if (steps > 0) AudioManager.ADJUST_RAISE else AudioManager.ADJUST_LOWER
-        repeat(abs(steps)) { audio.adjustStreamVolume(AudioManager.STREAM_MUSIC, direction, AudioManager.FLAG_SHOW_UI) }
-    }
-
-    /**
-     * Sin el servicio de accesibilidad no se puede abrir la cortina: no se hace nada y se explica la
-     * primera vez (plan.md §7, Hito 3), para no repetirlo en cada deslizamiento.
-     */
-    private fun openNotificationShade() {
-        if (container.notificationShade.open()) return
-        if (container.oneTimeHints.shouldShow(HINT_SHADE)) Toast.makeText(this, R.string.shade_needs_service, Toast.LENGTH_LONG).show()
     }
 
     /**
@@ -248,6 +204,12 @@ class MainActivity : ComponentActivity() {
         if (container.navigationWatchdog.check()) {
             Toast.makeText(this, R.string.navigation_buttons_restored, Toast.LENGTH_LONG).show()
         }
+    }
+
+    /** Se vuelve al inicio desde otra app: animación de vuelta (HyperOS no la hace con un launcher ajeno). */
+    override fun onRestart() {
+        super.onRestart()
+        homeReturn.play()
     }
 
     /** Al salir del inicio se guardan ya los escritorios, por si Android cierra el proceso. */
@@ -278,10 +240,5 @@ class MainActivity : ComponentActivity() {
             menuController.close()
             workspaces.onIntent(WorkspacesIntent.ExitEdit)
         }
-    }
-
-    private companion object {
-        const val HINT_SHADE = "notification-shade-needs-service"
-        const val CATALOG_WAIT_MS = 10_000L
     }
 }
