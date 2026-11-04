@@ -13,6 +13,13 @@
     <!-- Estado de la red para el módulo de red de la barra (permiso normal; sin INTERNET, plan.md R9). -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!--
+        Visualizador del widget de TIDAL: `Visualizer` sobre la mezcla de salida. Android lo ata al
+        permiso de micrófono aunque no se grabe nada; se pide sólo al tocar «visualizador» (R8).
+    -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
     <application>
         <!--
             Capa 3: gestos de borde. En su propio proceso para que el launcher note al instante si
@@ -30,6 +37,21 @@
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/wh_navigation_service" />
+        </service>
+
+        <!--
+            Acceso a notificaciones (opt-in, plan.md R8): Android sólo deja leer las sesiones
+            multimedia de otras apps (TIDAL) a quien lo tiene. Hoy no lee notificaciones; el
+            Hito 8 lo usará para los contadores.
+        -->
+        <service
+            android:name=".media.WhNotificationListener"
+            android:exported="true"
+            android:label="@string/media_listener_label"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
         </service>
 
         <service
