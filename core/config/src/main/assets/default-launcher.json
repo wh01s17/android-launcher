@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "bar": {
+    "position": "top",
+    "transparent": true,
+    "outline": false,
+    "centerAnchor": "wh01s17.clock",
+    "layout": {
+      "left": [
+        { "id": "core.menu" },
+        { "id": "core.workspaces" }
+      ],
+      "center": [
+        {
+          "id": "wh01s17.clock",
+          "format": "HH:mm",
+          "formatAlt": "ddd d MMM",
+          "weekStartDay": "monday"
+        }
+      ],
+      "right": [
+        { "id": "wh01s17.indicators" },
+        { "id": "wh01s17.network" },
+        { "id": "wh01s17.bluetooth" },
+        { "id": "wh01s17.audio" },
+        {
+          "id": "wh01s17.power",
+          "classColors": {
+            "charging": "#84c959",
+            "low": "#e8b53f",
+            "critical": "#ff6b66"
+          }
+        }
+      ]
+    }
+  }
+}
