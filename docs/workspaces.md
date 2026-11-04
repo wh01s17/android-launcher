@@ -13,7 +13,7 @@ Un tile es un *lanzador vivo* (plan.md §2.2): tocarlo abre la app, no la incrus
 | Mantener pulsado un hueco | Entra en edición | Entra en edición |
 | Tocar un hueco | Abre el menú wh01s17 | Sale de edición |
 | Deslizar a los lados | Cambia de escritorio | Desactivado (para poder arrastrar) |
-| Deslizar hacia arriba | Abre el menú | — |
+| Deslizar hacia arriba / abajo | Lo que digan `bindings` (de fábrica, arriba abre el menú; ver [bindings.md](bindings.md)) | — |
 | Arrastrar un tile sobre otro | — | Los intercambia |
 | Arrastrar un tile a la tira `[1] … [0]` de arriba | — | Lo lleva a ese escritorio (sin seguirlo) |
 | Arrastrar una asa verde de un borde | — | Cambia el tamaño de los dos lados |

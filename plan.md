@@ -411,7 +411,7 @@ Dependencias permitidas (flecha = "depende de"):
 app → feature/* → core/designsystem, core/config, core/apps, core/system, core/input
 feature/workspaces → core/tiling
 feature/menu → core/fuzzy
-core/config → core/tiling (tipos de layout)
+core/config → core/tiling (tipos de layout), core/input (atajos de `bindings`)
 core/tiling, core/fuzzy → (nada; JVM puro)
 ```
 
@@ -886,7 +886,11 @@ Revisión de cierre realizada y hallazgos corregidos; guía y matriz en [`docs/m
 
 ### Hito 6 — Teclado físico y gestos configurables (M)
 
-- [ ] `KeyBindingResolver` y `GestureBindingResolver` leyendo `bindings`.
+- [x] `KeyBindingResolver` y `GestureBindingResolver` leyendo `bindings`. `core/input/binding`
+      (`KeyChord`, `Gesture`, `CommandCatalog`), `bindings` en la config sumados a los de fábrica
+      (`none` quita uno), atajos de `tiling.lua` de fábrica, `swipe-up`/`swipe-down` en el
+      escritorio y `app/input/Shortcuts`. Guía: [`docs/bindings.md`](docs/bindings.md). En el emulador
+      API 35, `SUPER + …` no llega a la app (ver la tarea siguiente).
 - [ ] Todos los atajos de §3; detección de los reservados por el sistema y
       modificador alternativo configurable.
 - [ ] Pantalla `Super + K` con la tabla de atajos generada.
@@ -1130,6 +1134,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-04 | DataStore Preferences 1.3.0 para ranking de uso (esquema 1, archivo propio); versión estable del 2026-10-21, verificada en [AndroidX](https://developer.android.com/jetpack/androidx/releases/datastore) | Escrituras serializadas, persistencia independiente de la config y recuperación de corrupción; una instancia por archivo, en IO |
 | 2026-11-04 | Menú y selector comparten un índice de apps, comandos y atajos; se retira el drawer provisional | Una superficie y un recorrido de teclado, conservando perfiles y acciones contextuales |
 | 2026-11-04 | El contextual intercepta teclas de navegación en su propia ventana y restaura el callback al cerrarse | En HyperOS, Escape puede llegar al diálogo sin nodo Compose con foco; la prueba física detectó el caso que no reproducía Robolectric |
+| 2026-11-04 | `core/config` depende de `core/input` para leer `bindings` como `Binding` | Los errores de combinación y comando salen con su ruta (`bindings[3].args.id`) al cargar la config, no al pulsar la tecla |
+| 2026-11-04 | `bindings` del usuario se suman a los de fábrica (misma combinación o gesto la sustituye; `"command": "none"` la quita); repetir un disparador en el mismo archivo es error | Como `bindings.lua`, que añade a los atajos por defecto; igual que una `bar` parcial no vacía la barra |
+| 2026-11-04 | Nombres de comando con punto (`workspace.focus`, `tile.move`…) y argumentos en `args` | Sigue el ejemplo de §6.1; el catálogo está en `CommandCatalog` y `docs/bindings.md` |
+| 2026-11-04 | Con el menú abierto sólo se aplican combinaciones con `SUPER`, `CTRL` o `ALT`; mantener la tecla sólo repite `tile.resize` | No robar letras a la búsqueda; repetir como `binde` sólo donde tiene sentido |
 | 2026-11-04 | Búsqueda sin autocorrección del IME | SwiftKey modificaba nombres escritos durante la prueba ADB; las consultas de apps y comandos deben conservarse literalmente |
 
 ### 11.2 Riesgos
@@ -1156,10 +1164,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-04:** 45 de 75 tareas marcadas (60 % del plan completo);
+- **Balance al 2026-11-04:** 46 de 75 tareas marcadas (61 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
   Quedan los Hitos 6–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 6 (sin empezar). **Hitos 0–5 terminados**. El Hito 5 se cerró
+- **Hito en curso:** Hito 6 (1 de 7 tareas). **Hitos 0–5 terminados**. El Hito 5 se cerró
   con revisión de código, controles completos y pruebas ADB en el Redmi; los cierres anteriores
   y sus pruebas siguen en §13.
 - **Última tarea completada:** menú/paleta unificados y ranking persistente (Hito 5).
@@ -1172,8 +1180,12 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   y modos cruzados al ejecutar, la cancelación de Enter pendiente al editar, Escape sin foco
   Compose en HyperOS, el tratamiento previo al IME, el contextual sobre resultados ocultos,
   la recuperación del aviso de historial y las llamadas repetidas a PackageManager al escribir.
-- **Siguiente tarea:** Hito 6, `KeyBindingResolver` y `GestureBindingResolver` leyendo `bindings`
-  (modelo/esfuerzo en §0). No está empezado. Pendientes sin bloquear: medir en release la primera
+- **Hito 6, atajos (2026-11-04):** `bindings` leídos y aplicados; `check assembleDebug` en verde.
+  En el emulador API 35: `F2` y `CTRL + ALT + 3` de un `launcher.json` de usuario cambian de
+  escritorio, pero **ningún evento con Meta llega a la actividad** y `SUPER + TAB` abre Recientes.
+  El Redmi estaba bloqueado: falta probar con teclado físico (`docs/bindings.md`).
+- **Siguiente tarea:** Hito 6, todos los atajos de §3, detección de reservados y modificador
+  alternativo; empezar por confirmar en el Redmi con teclado físico qué hace `SUPER`. Pendientes sin bloquear: medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj.
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
   launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio → `ajustes`),
@@ -1202,6 +1214,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-04 | 6 | Atajos configurables: `core/input/binding` (`KeyChord`, `KeyNames`, `Gesture`, `CommandCatalog`, `KeyBindingResolver`, `GestureBindingResolver`), `bindings` en `core/config` (suma con la fábrica, `none`, errores por ruta), atajos de `tiling.lua` de fábrica, deslizamientos verticales del escritorio como gestos, `Shortcuts` en la app. 12 pruebas nuevas; `check assembleDebug` en verde. Emulador API 35: `F2`/`CTRL + ALT` funcionan, `SUPER` no llega a la app | `core/input/binding/`, `core/config/BindingSections.kt`, `app/input/Shortcuts.kt`, `docs/bindings.md` |
 | 2026-11-04 | 5 | **Hito 5 terminado; MVP 0.1.0.** Paleta unificada (apps/comandos/ajustes/atajos), DataStore 1.3.0, teclado y contextual, selector integrado y retirada del drawer. Revisión de cierre: edición inmediata, Enter pendiente ligado a consulta/modo, IME y Escape en HyperOS. 21 pruebas y tres capturas; `check assembleDebug` en verde. ADB: búsqueda, apps, atajos, ajustes, ranking tras recrear UI, selector, escritorios, flechas y apagado cancelado. Escritorio y gestos conservados | `feature/menu/`, `app/MenuController.kt`, `core/system/navigation/`, `docs/menu.md`, `CHANGELOG.md` |
 | 2026-11-04 | 5 | Prueba ADB del panel en el Redmi: nueve submenús/Atrás, Escape, gesto, cierre exterior, Apps, selector, Wi-Fi e Inicio. Corregido Escape al soltar con respaldo en Activity; prueba de regresión. HOME y gestos conservados, servicio enlazado y sin crashes del launcher; capturas y resultados documentados | `app/MainActivity.kt`, `feature/menu/`, `docs/menu.md`, `docs/screenshots/` |
 | 2026-11-04 | 5 | Panel wh01s17 con submenús e iconos pixel, acciones del escritorio y accesos a ajustes Android/Play Store; barra y gesto abren el panel. Apps conserva el drawer provisional. Pruebas de navegación, Escape y horizontal; dos capturas Roborazzi; `./gradlew check assembleDebug` en verde. Guía de menú. Pendiente búsqueda unificada y validación en el Redmi | `feature/menu/panel/`, `app/MenuActions.kt`, `docs/menu.md` |
