@@ -61,4 +61,18 @@ class GeneralSectionsTest {
         assertEquals(listOf("general" to "debe ser un objeto"), errors("""{"version":1,"general":[]}"""))
         assertEquals(listOf("animations.workspaces" to "debe ser un objeto"), errors("""{"version":1,"animations":{"workspaces":2}}"""))
     }
+
+    @Test
+    fun `the terminal is termux by default and takes a package or an activity`() {
+        assertEquals("com.termux", factory.apps.terminal)
+        assertEquals("org.connectbot", success("""{"version":1,"apps":{"terminal":"org.connectbot"}}""").apps.terminal)
+        assertEquals(
+            "com.termux/.app.TermuxActivity",
+            success("""{"version":1,"apps":{"terminal":"com.termux/.app.TermuxActivity"}}""").apps.terminal,
+        )
+        assertEquals(
+            listOf("apps.terminal" to "debe ser un paquete (com.termux) o una actividad (com.termux/.app.TermuxActivity)"),
+            errors("""{"version":1,"apps":{"terminal":"com.termux/"}}"""),
+        )
+    }
 }

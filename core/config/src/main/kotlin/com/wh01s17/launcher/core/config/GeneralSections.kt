@@ -56,6 +56,23 @@ internal object GeneralSections {
         )
     }
 
+    /** `apps.terminal`: texto no vacío; si es una actividad, `paquete/clase`. Lo que falta conserva [defaults]. */
+    fun readApps(
+        element: JsonElement?,
+        defaults: AppsConfig,
+        errors: MutableList<ConfigError>,
+    ): AppsConfig {
+        val apps = section(element, "apps", errors) ?: return defaults
+        val terminal = ConfigValues.readString(apps["terminal"], "apps.terminal", errors) ?: return defaults
+        val slash = terminal.indexOf('/')
+        val valid = terminal.isNotBlank() && ' ' !in terminal && (slash == -1 || slash in 1 until terminal.lastIndex)
+        if (!valid) {
+            errors +=
+                ConfigError("apps.terminal", "debe ser un paquete (com.termux) o una actividad (com.termux/.app.TermuxActivity)")
+        }
+        return AppsConfig(terminal.takeIf { valid } ?: defaults.terminal)
+    }
+
     /** El objeto de [path], o `null` si falta (sin error) o no es un objeto (con error). */
     private fun section(
         element: JsonElement?,

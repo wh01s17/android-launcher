@@ -14,6 +14,7 @@ class CommandEncodingTest {
             LauncherCommand.OpenSystemMenu,
             LauncherCommand.OpenNotificationShade,
             LauncherCommand.ShowShortcuts,
+            LauncherCommand.OpenTerminal,
             LauncherCommand.AdjustVolume(-2),
             WorkspaceCommand.FocusWorkspace(10),
             WorkspaceCommand.CycleWorkspace(forward = true),

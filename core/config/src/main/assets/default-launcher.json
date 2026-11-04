@@ -39,6 +39,7 @@
     { "keys": "SUPER + ALT + SPACE", "command": "menu.apps" },
     { "keys": "SUPER + ESCAPE", "command": "menu.system" },
     { "keys": "SUPER + K", "command": "shortcuts.show" },
+    { "keys": "SUPER + RETURN", "command": "terminal.open" },
     { "keys": "CTRL + ALT + A", "command": "audio.volume", "args": { "step": 1 } },
     { "keys": "CTRL + ALT + Z", "command": "audio.volume", "args": { "step": -1 } },
     { "keys": "SUPER + 1", "command": "workspace.focus", "args": { "id": 1 } },
@@ -98,5 +99,6 @@
     { "gesture": "two-finger-swipe-left", "command": "workspace.next" },
     { "gesture": "two-finger-swipe-right", "command": "workspace.previous" }
   ],
-  "keyboard": { "superAlternative": "ALT" }
+  "keyboard": { "superAlternative": "ALT" },
+  "apps": { "terminal": "com.termux" }
 }

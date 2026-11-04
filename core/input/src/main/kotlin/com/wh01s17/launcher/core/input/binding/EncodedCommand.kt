@@ -21,6 +21,7 @@ fun LauncherCommand.encode(): EncodedCommand =
         LauncherCommand.OpenSystemMenu -> EncodedCommand("menu.system")
         LauncherCommand.OpenNotificationShade -> EncodedCommand("notifications.open")
         LauncherCommand.ShowShortcuts -> EncodedCommand("shortcuts.show")
+        LauncherCommand.OpenTerminal -> EncodedCommand("terminal.open")
         is LauncherCommand.AdjustVolume -> EncodedCommand("audio.volume", mapOf("step" to steps))
         is WorkspaceCommand.FocusWorkspace -> EncodedCommand("workspace.focus", mapOf("id" to id))
         is WorkspaceCommand.CycleWorkspace -> EncodedCommand(if (forward) "workspace.next" else "workspace.previous")

@@ -36,6 +36,7 @@ object CommandCatalog {
             CommandSpec("menu.system") { LauncherCommand.OpenSystemMenu },
             CommandSpec("notifications.open") { LauncherCommand.OpenNotificationShade },
             CommandSpec("shortcuts.show") { LauncherCommand.ShowShortcuts },
+            CommandSpec("terminal.open") { LauncherCommand.OpenTerminal },
             CommandSpec("audio.volume", "step") { LauncherCommand.AdjustVolume(it.int("step", VOLUME_STEP)) },
             CommandSpec("workspace.focus", "id") { WorkspaceCommand.FocusWorkspace(it.int("id", WORKSPACE)) },
             CommandSpec("workspace.next") { WorkspaceCommand.CycleWorkspace(forward = true) },

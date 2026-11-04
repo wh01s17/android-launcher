@@ -25,6 +25,7 @@ private fun labelOf(command: EncodedCommand): Pair<Int, Array<Any>> {
         "menu.system" -> R.string.cmd_menu_system to emptyArray()
         "notifications.open" -> R.string.cmd_notifications to emptyArray()
         "shortcuts.show" -> R.string.cmd_shortcuts to emptyArray()
+        "terminal.open" -> R.string.cmd_terminal to emptyArray()
         "audio.volume" -> (if ((args["step"] as? Int ?: 0) > 0) R.string.cmd_volume_up else R.string.cmd_volume_down) to emptyArray()
         "workspace.focus" -> R.string.cmd_workspace_focus to arrayOf(id)
         "workspace.next" -> R.string.cmd_workspace_next to emptyArray()

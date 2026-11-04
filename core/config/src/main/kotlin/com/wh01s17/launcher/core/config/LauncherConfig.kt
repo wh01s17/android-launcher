@@ -22,6 +22,13 @@ data class LauncherConfig(
     /** Atajos de teclado y gestos (plan.md §6.4), ya combinados con los de fábrica. */
     val bindings: List<Binding> = emptyList(),
     val keyboard: KeyboardConfig = KeyboardConfig(),
+    val apps: AppsConfig = AppsConfig(),
+)
+
+/** `apps` de `launcher.json` (plan.md §6.1). */
+data class AppsConfig(
+    /** La terminal de `Super + Return`: un paquete o una actividad (`paquete/.Clase`). */
+    val terminal: String? = null,
 )
 
 /**

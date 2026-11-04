@@ -85,7 +85,8 @@ object ConfigParser {
         val animations = GeneralSections.readAnimations(root["animations"], fallback?.animations ?: AnimationsConfig(), errors)
         val bindings = BindingSections.readBindings(root["bindings"], fallback?.bindings.orEmpty(), errors)
         val keyboard = BindingSections.readKeyboard(root["keyboard"], fallback?.keyboard ?: KeyboardConfig(), errors)
-        return if (version != null && bar != null) LauncherConfig(version, bar, general, animations, bindings, keyboard) else null
+        val apps = GeneralSections.readApps(root["apps"], fallback?.apps ?: AppsConfig(), errors)
+        return if (version != null && bar != null) LauncherConfig(version, bar, general, animations, bindings, keyboard, apps) else null
     }
 
     private fun readVersion(
