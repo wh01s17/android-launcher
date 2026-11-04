@@ -1,5 +1,6 @@
 package com.wh01s17.launcher.feature.settings.compat
 
+import com.wh01s17.launcher.core.system.navigation.EdgeSettings
 import com.wh01s17.launcher.core.system.oem.xiaomi.CompatibilityGateway
 import com.wh01s17.launcher.core.system.oem.xiaomi.CompatibilitySnapshot
 import com.wh01s17.launcher.core.system.oem.xiaomi.DeviceInfo
@@ -47,6 +48,10 @@ class CompatibilityViewModelTest {
         override fun setModeEnabled(enabled: Boolean) {
             modeCalls += enabled
             snapshot = snapshot.copy(prefs = snapshot.prefs.copy(enabled = enabled), forceFsgNavBar = if (enabled) 1 else 0)
+        }
+
+        override fun setEdges(edges: EdgeSettings) {
+            snapshot = snapshot.copy(edges = edges)
         }
 
         override fun observe(onChange: () -> Unit): AutoCloseable {
@@ -134,4 +139,28 @@ class CompatibilityViewModelTest {
         assertFalse(state.modeToggleEnabled)
         assertFalse(CompatibilityState().modeToggleEnabled)
     }
+
+    @Test
+    fun `edge settings are saved, but home stays on while the buttons are hidden`() =
+        runTest(dispatcher) {
+            val vm = CompatibilityViewModel(gateway, dispatcher)
+            runCurrent()
+            vm.setEdges { it.copy(home = false, sideThicknessDp = 20) }
+            runCurrent()
+            assertEquals(
+                EdgeSettings(home = false, sideThicknessDp = 20),
+                vm.state.value.snapshot
+                    ?.edges,
+            )
+            gateway.snapshot = gateway.snapshot.copy(prefs = gateway.snapshot.prefs.copy(enabled = true), edges = EdgeSettings())
+            vm.refresh()
+            runCurrent()
+            vm.setEdges { it.copy(home = false, backLeft = false) }
+            runCurrent()
+            assertEquals(
+                EdgeSettings(backLeft = false),
+                vm.state.value.snapshot
+                    ?.edges,
+            )
+        }
 }

@@ -110,4 +110,18 @@
     <string name="shortcuts_edit_hint">Toca un atajo para cambiarlo. Los cambios se guardan en launcher.json.</string>
     <string name="shortcuts_reset">restablecer los de fábrica</string>
     <string name="shortcuts_edit_failed">No se guardó: %1$s</string>
+    <string name="compat_section_edges">gestos de borde</string>
+    <string name="compat_edge_back_left">Atrás desde el borde izquierdo</string>
+    <string name="compat_edge_back_right">Atrás desde el borde derecho</string>
+    <string name="compat_edge_home">Inicio: deslizar desde abajo</string>
+    <string name="compat_edge_home_locked">Con los botones ocultos, Inicio no se puede apagar: sería la única forma de salir de una app.</string>
+    <string name="compat_edge_recents">Recientes: deslizar desde abajo y mantener</string>
+    <string name="compat_edge_side">Grosor de los lados</string>
+    <string name="compat_edge_bottom">Grosor de abajo</string>
+    <string name="compat_edge_dp">%1$d dp</string>
+    <string name="compat_edge_sensitivity">Sensibilidad (cuánto hay que deslizar)</string>
+    <string name="compat_edge_low">baja</string>
+    <string name="compat_edge_normal">normal</string>
+    <string name="compat_edge_high">alta</string>
+    <string name="compat_edge_keyboard">Las franjas se apartan solas con el teclado en pantalla abierto. Los cambios se aplican al momento.</string>
 </resources>

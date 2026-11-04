@@ -17,6 +17,7 @@ import com.wh01s17.launcher.core.designsystem.components.WhButton
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.components.WhToggle
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
+import com.wh01s17.launcher.core.system.navigation.EdgeSettings
 import com.wh01s17.launcher.core.system.oem.xiaomi.CompatibilitySnapshot
 import com.wh01s17.launcher.feature.settings.R
 
@@ -31,6 +32,7 @@ fun CompatibilityScreen(
     onModeChange: (Boolean) -> Unit,
     actions: CompatibilityActions,
     modifier: Modifier = Modifier,
+    onEdgesChange: ((EdgeSettings) -> EdgeSettings) -> Unit = {},
 ) {
     val spacing = WhTheme.spacing
     Column(
@@ -47,6 +49,7 @@ fun CompatibilityScreen(
         val snapshot = state.snapshot ?: return@Column
         DeviceSection(snapshot)
         GesturesSection(state, snapshot, onModeChange, actions.openAccessibility)
+        EdgeSection(snapshot, onEdgesChange)
         BackgroundSection(actions)
         AdbSection(snapshot.packageName, actions.openDeveloperOptions)
         RecoverySection()

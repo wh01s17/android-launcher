@@ -3,6 +3,7 @@ package com.wh01s17.launcher.feature.settings.compat
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wh01s17.launcher.core.system.navigation.EdgeSettings
 import com.wh01s17.launcher.core.system.oem.xiaomi.CompatibilityGateway
 import com.wh01s17.launcher.core.system.oem.xiaomi.CompatibilitySnapshot
 import kotlinx.coroutines.CoroutineDispatcher
@@ -49,6 +50,18 @@ class CompatibilityViewModel(
             val snapshot = withContext(ioDispatcher) { gateway.snapshot() }
             mutableState.value = CompatibilityState(snapshot)
         }
+    }
+
+    /**
+     * Cambia los ajustes de las franjas. Con el modo activado (botones ocultos) *inicio* se queda
+     * encendido: es la única salida de una app (plan.md §5.9).
+     */
+    fun setEdges(change: (EdgeSettings) -> EdgeSettings) {
+        val snapshot = mutableState.value.snapshot ?: return
+        val next = change(snapshot.edges).let { if (snapshot.prefs.enabled) it.copy(home = true) else it }
+        if (next == snapshot.edges) return
+        gateway.setEdges(next)
+        refresh()
     }
 
     fun setModeEnabled(enabled: Boolean) {
