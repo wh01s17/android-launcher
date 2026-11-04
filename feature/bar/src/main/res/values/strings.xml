@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Descripciones de los módulos de la barra para TalkBack (plan.md §5.5, §7 Hito 11). -->
+    <string name="bar_menu">Menú</string>
+    <string name="bar_workspace">Escritorio %1$s</string>
+    <string name="bar_workspace_focused">Escritorio %1$s, actual</string>
+    <string name="bar_workspace_occupied">Escritorio %1$s, con apps</string>
+    <string name="bar_workspace_empty">Escritorio %1$s, vacío</string>
+
+    <string name="bar_battery">Batería al %1$d %%</string>
+    <string name="bar_battery_charging">Batería al %1$d %%, cargando</string>
+    <string name="bar_battery_full">Batería llena</string>
+    <string name="bar_battery_power_save">, ahorro de energía</string>
+
+    <string name="bar_network_none">Sin conexión</string>
+    <string name="bar_network_wifi">Wi-Fi</string>
+    <string name="bar_network_cellular">Datos móviles</string>
+    <string name="bar_network_ethernet">Red por cable</string>
+    <string name="bar_network_other">Red</string>
+    <string name="bar_network_no_internet">, sin acceso a internet</string>
+    <string name="bar_network_vpn">, con VPN</string>
+
+    <string name="bar_bluetooth_off">Bluetooth apagado</string>
+    <string name="bar_bluetooth_on">Bluetooth encendido</string>
+    <string name="bar_bluetooth_connected">Bluetooth conectado</string>
+
+    <string name="bar_audio_muted">Volumen silenciado</string>
+    <string name="bar_audio_level">Volumen al %1$d %%</string>
+
+    <string name="bar_dnd">No molestar activado</string>
+
+    <string name="bar_unknown_module">Módulo desconocido: %1$s</string>
+    <string name="bar_notice_config">config</string>
+
+    <!-- Calendario del reloj. -->
+    <string name="bar_calendar_previous">Mes anterior</string>
+    <string name="bar_calendar_next">Mes siguiente</string>
+    <string name="bar_calendar_today">Ir a hoy</string>
+    <string name="bar_calendar_week">sem</string>
+    <string name="bar_clock_calendar">Abrir calendario</string>
+    <string name="bar_clock_alternate">Cambiar formato de la hora</string>
+</resources>
