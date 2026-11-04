@@ -85,8 +85,16 @@ ocultar los botones mientras la capa 3 está viva (modo *gestos wh01s17*).
 
 `✓` funciona, `✗` no funciona, `—` sin probar.
 
-| Fecha | Launcher | Configuración | Inicio | Atrás | Recientes | Tras reinicio |
-| --- | --- | --- | --- | --- | --- | --- |
+Una fila por capa (plan.md §5.9) y prueba; lo más reciente, arriba. «Vuelta» es la animación al
+volver al launcher: HyperOS no anima la vuelta a un launcher ajeno, y desde el Hito 6 la hace el
+propio wh01s17 (`HomeReturn`, con `animations.workspaces`).
+
+| Fecha | Launcher | Capa / configuración | Inicio | Atrás | Recientes | Vuelta | Tras reinicio |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-11-04 | wh01s17 (Hito 6) | Capas 2 + 3, modo *gestos wh01s17*: botones ocultos | ✓ | ✓ (ambos lados; cada lado se puede apagar en vivo) | ✓ (subir y mantener) | ✓ propia | ✓ (`adb reboot`: servicio enlazado, botones ocultos solos; atrás, inicio y recientes) |
+| 2026-11-04 | wh01s17 (Hito 6) | Capa 3 con botones visibles (modo apagado) | ✓ | ✓ (ambos lados) | — | ✓ propia | — |
+| 2026-11-04 | wh01s17 (Hito 6) | Capa 1: 3 botones (modo apagado; toques en los botones reales) | ✓ | ✓ | ✓ (abre los recientes de `com.miui.home`) | ✓ propia | — |
+| 2026-11-04 | wh01s17 | Capa 2 sola | no aplica | | | | |
 | 2026-11-02 | `bitpit.launcher` | Capa 2 sola (`force_fsg_nav_bar = 1`) | ✗ | ✗ | ✗ | — |
 | 2026-11-02 | `bitpit.launcher` | Capa 1 (3 botones) | ✓ | ✓ | ✓ | — |
 | 2026-11-02 | wh01s17 (Hito 0, pantalla negra) | Capa 1 (3 botones) | ✓ | ✓ (no cierra el launcher) | — | — |
@@ -94,8 +102,13 @@ ocultar los botones mientras la capa 3 está viva (modo *gestos wh01s17*).
 | 2026-11-03 | `com.miui.home` | Capa 3 con botones visibles (`force_fsg_nav_bar = 0`) | ✓ | ✓ (ambos lados) | ✓ | — |
 | 2026-11-03 | wh01s17 (Hito 4) | Modo *gestos wh01s17* tras `adb reboot` y desbloquear | ✓ | ✓ (izquierda) | — | ✓ (servicio enlazado y botones ocultos solos, `force_fsg_nav_bar = 1`) |
 
+«Capa 2 sola» no se puede dar con wh01s17: la vigilancia devuelve los botones si la capa 3 no está
+viva (§5.9). Con otro launcher ajeno ya se vio que no funciona ningún gesto (fila del 2026-11-02).
+
 Gestos simulados con `adb shell input swipe` / `input motionevent`; las acciones salen del log
-`WhNavigation: action: …`. Con el teclado abierto, la franja inferior no recibe toques y las
+`WhNavigation: action: …`. Los ajustes de las franjas (cada gesto, grosor, sensibilidad) están en
+Ajustes → Compatibilidad → gestos de borde y se aplican al momento: apagar *atrás izquierdo* dejó
+ese borde sin acción y el derecho siguió funcionando. Con el teclado abierto, la franja inferior no recibe toques y las
 laterales terminan encima del teclado (y = 1589 en vez de 2664).
 
 ## Vigilancia (modo *gestos wh01s17*)
