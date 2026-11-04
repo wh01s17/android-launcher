@@ -3,6 +3,28 @@
 El proyecto usa [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
+## [0.2.0] — 2026-11-04
+
+Hito 6: teclado físico y gestos configurables.
+
+### Añadido
+
+- Atajos de teclado y gestos en `bindings` de `launcher.json`, sumados a los de fábrica
+  (copiados de `bindings/tiling.lua`); `"none"` quita uno.
+- `ALT` hace de `SUPER` (`keyboard.superAlternative`), porque Android 15 no entrega la tecla Meta.
+- `SUPER + SPACE` / `ALT + SPACE` / `ESCAPE` abren y cierran el menú, el de apps y el de sistema;
+  `CTRL + ALT + A/Z` cambian el volumen; `SUPER + RETURN` abre la terminal (`apps.terminal`).
+- Tabla de atajos (`SUPER + K`) con lo que hay que pulsar en el teléfono y los que no se pueden,
+  y editor que captura una combinación nueva y la guarda en `launcher.json`.
+- Gestos: deslizar arriba/abajo, dos dedos, doble toque (si están asignados) y mantener la batería.
+- Gestos de borde configurables: cada gesto por separado, grosor y sensibilidad, en vivo.
+- Animación propia de vuelta al launcher.
+
+### Corregido
+
+- El menú ya no usa Escape, Tab, flechas ni Enter cuando llevan `ALT`/`CTRL`: `ALT + ESCAPE`
+  volvía atrás en lugar de cerrar.
+
 ## [0.1.0] — 2026-11-04
 
 Primera versión del MVP (Hitos 0–5).

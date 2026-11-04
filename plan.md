@@ -913,7 +913,14 @@ Revisión de cierre realizada y hallazgos corregidos; guía y matriz en [`docs/m
       8–32 dp, sensibilidad) en Ajustes → Compatibilidad, `navigation-edges.properties` y aviso a
       `:nav`, que reconfigura las franjas en vivo; con los botones ocultos *inicio* no se apaga.
       `HomeReturn`: el escritorio crece y aparece al volver (curva de `animations.workspaces`).
-- [ ] Completar la matriz de `docs/xiaomi.md` con las tres capas.
+- [x] Completar la matriz de `docs/xiaomi.md` con las tres capas. Capa 1 (botones reales), capa 3
+      con y sin botones, capas 2 + 3 tras `adb reboot`, columna de animación de vuelta; «capa 2
+      sola» no aplica con wh01s17 (la vigilancia no lo permite).
+
+**Hito 6 terminado (2026-11-04)** → `0.2.0` (versionCode `200`). Comprobado con
+`./gradlew check assembleDebug` y en el Redmi por ADB. Pendiente manual: un teclado físico
+Bluetooth (los atajos se probaron con teclas inyectadas) y los gestos de dos dedos (ADB no simula
+multitáctil). Guía: [`docs/bindings.md`](docs/bindings.md).
 
 ### Hito 7 — Widgets (L)
 
@@ -1187,38 +1194,30 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-04:** 51 de 75 tareas marcadas (68 % del plan completo);
+- **Balance al 2026-11-04:** 52 de 75 tareas marcadas (69 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
-  Quedan los Hitos 6–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 6 (6 de 7 tareas). **Hitos 0–5 terminados**. El Hito 5 se cerró
-  con revisión de código, controles completos y pruebas ADB en el Redmi; los cierres anteriores
-  y sus pruebas siguen en §13.
-- **Última tarea completada:** menú/paleta unificados y ranking persistente (Hito 5).
-  `./gradlew check assembleDebug` en verde: 21 pruebas de menú, tres capturas de referencia,
-  índice mixto, escritura rápida, activación pendiente, teclado, persistencia y corrupción.
-  En el Redmi: apps y atajos reales de Calculadora, Wi-Fi, contextual, selector, comandos de
-  escritorios, flechas y diálogo de apagado cancelado. El historial queda idéntico tras matar
-  sólo la UI y reabrir; el escritorio original y sus tiles se conservaron. Guía: `docs/menu.md`.
-- **Revisión del Hito 5:** corregidos el cursor/letras con resultados asíncronos, las consultas
-  y modos cruzados al ejecutar, la cancelación de Enter pendiente al editar, Escape sin foco
-  Compose en HyperOS, el tratamiento previo al IME, el contextual sobre resultados ocultos,
-  la recuperación del aviso de historial y las llamadas repetidas a PackageManager al escribir.
-- **Hito 6, atajos (2026-11-04):** `bindings` leídos y aplicados, `ALT` como sustituto de `SUPER`
-  y atajos de §3. En el Redmi (eventos inyectados por ADB) ningún evento con Meta llega a la app y
-  `ALT + TAB` abre Recientes; el resto de `ALT`/`CTRL` llega (`docs/bindings.md`). Probado en el
-  Redmi con la build instalada: `ALT + 1/3`, `ALT + SHIFT + TAB`, `CTRL + ALT + A/Z` (volumen, se
-  dejó en 80), `ALT + SPACE` y `ALT + ESCAPE` abren y cierran, y mantener la batería abre Sistema.
-  Pendiente manual: dos dedos (ADB no simula multitáctil) y un teclado físico Bluetooth.
-- **Siguiente tarea:** Hito 6, completar la matriz de `docs/xiaomi.md` con las tres capas.
-  Pendientes sin bloquear: medir en release la primera
+  Quedan los Hitos 7–11; el 9 es experimental y no bloquea la 1.0.
+- **Hito en curso:** Hito 7 (sin empezar). **Hitos 0–6 terminados**; versión `0.2.0`. Los
+  cierres y sus pruebas siguen en §13.
+- **Última tarea completada:** matriz de `docs/xiaomi.md` con las tres capas; **Hito 6 cerrado**.
+  En el Redmi, por ADB: atajos con `ALT` en lugar de `SUPER` (Meta nunca llega a la app; `ALT + TAB`
+  abre Recientes), menú que alterna, volumen, terminal, tabla y editor de atajos, gestos de borde
+  configurables en vivo, animación de vuelta y gestos tras `adb reboot`. Guía: `docs/bindings.md`.
+- **Incidencia de la sesión (resuelta):** la primera versión de la animación de vuelta cerraba el
+  launcher al volver; HyperOS mostró el selector de launcher. Se cerró sin elegir, se reafirmó el
+  rol HOME de `com.wh01s17.launcher.debug` y se corrigió (§13).
+- **Siguiente tarea:** Hito 7, `AppWidgetHost` y selector de widgets del sistema como tiles
+  (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
+  Bluetooth y los gestos de dos dedos a mano; medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj.
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
   launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio → `ajustes`),
   activar el modo. El permiso `WRITE_SECURE_SETTINGS` ya está concedido a la app debug.
+  Con teclado físico, `ALT` hace de `SUPER`; `ALT + K` muestra los atajos.
 - **Bloqueos:** ninguno.
 - **Launcher predeterminado del Redmi:** `com.wh01s17.launcher.debug` con gestos
-  (`force_fsg_nav_bar = 1`, `navigation_mode = 2`), observado al empezar y al terminar
-  las pruebas ADB del 2026-11-04; no se cambió el rol HOME durante esta sesión.
+  (`force_fsg_nav_bar = 1`, `navigation_mode = 2`), comprobado al terminar las pruebas del
+  2026-11-04 (tras el reinicio). El modo se apagó y volvió a activar para probar la capa 1.
 - **Dispositivo objetivo:** Redmi Note 13 Pro 5G, HyperOS
   `OS2.0.204.0.VNRMIXM` (ROM global), Android 15 / API 35, sin más
   actualizaciones. ADB funciona desde el PC de desarrollo, con
@@ -1228,7 +1227,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   funciona. Se restauró `0` (3 botones). La capa 3 pasa a ser la navegación
   principal (Hito 2). Observaciones, ajustes y matriz de pruebas en
   [`docs/xiaomi.md`](docs/xiaomi.md).
-- **Versión del MVP:** `0.1.0` (etiqueta `v0.1.0` al cerrar). APK debug instalado y probado;
+- **Versión:** `0.2.0` (Hito 6, etiqueta `v0.2.0`); el MVP fue `0.1.0`. APK debug instalado y probado;
   firma y distribución de APK release siguen en el Hito 11. Historial en `CHANGELOG.md`.
 
 ---
@@ -1239,6 +1238,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-04 | 6 | **Hito 6 terminado; `0.2.0`.** Matriz de `docs/xiaomi.md` con las tres capas en el Redmi: capa 1 con los botones reales, capa 3 con y sin botones, capas 2 + 3 tras `adb reboot` (servicio enlazado y botones ocultos solos; atrás, inicio, recientes) y columna de animación de vuelta. Pantalla encendida con USB sólo durante las pruebas (`stay_on_while_plugged_in` vuelto a `0`); modo *gestos wh01s17* y ajustes de franjas de fábrica restaurados | `docs/xiaomi.md`, `plan.md`, `CHANGELOG.md`, `app/build.gradle.kts` |
 | 2026-11-04 | 6 | Capa 3 refinada: `EdgeSettings` (cada gesto, grosor, sensibilidad) con `homeEnabled`/`recentsEnabled` en el reconocedor, `NavigationFiles.readEdges/writeEdges`, `edgesChangedAction` y `EdgeStripOverlay.reconfigure`; sección «gestos de borde» en Compatibilidad. `HomeReturn` (animación de vuelta) y `HomeCommands` (comandos fuera de `MainActivity`). En el Redmi: apagar atrás izquierdo lo desactiva al momento, atrás/inicio/recientes con los ajustes nuevos. La primera versión de `HomeReturn` cerraba el launcher al volver (`Animatable` fuera de la composición, sin reloj de fotogramas): Android mostró el selector de launcher; se cerró sin elegir, se reafirmó el rol HOME y se corrigió animando en la composición. 5 pruebas nuevas | `core/system/navigation/`, `feature/settings/compat/EdgeSection.kt`, `app/ui/HomeReturn.kt`, `app/HomeCommands.kt` |
 | 2026-11-04 | 6 | Terminal: `LauncherCommand.OpenTerminal` (`SUPER + RETURN`), `apps.terminal` en la config, `AppCatalog.find` (paquete o actividad, perfil personal primero). La actividad de Termux es `.app.TermuxActivity`, no `.HomeActivity` como decía §6.1 (corregido). Recién instalada, la primera pulsación fallaba porque el índice no había cargado: ahora se espera. 2 pruebas nuevas; probado en el Redmi | `core/apps/model/AppCatalog.kt`, `core/config/`, `app/MainActivity.kt` |
 | 2026-11-04 | 6 | Editor de atajos: `BindingEdit` (`Rebind`, `Remove`, `ResetAll`), `BindingsEditor` (diferencia con la fábrica, resto del archivo intacto), `ConfigRepository.editBindings` + `writeUserConfig` atómico, `ShortcutEditor` y `ShortcutEditorViewModel`. En el Redmi la primera versión perdía teclas (foco de Compose en modo táctil) y el estado al recrearse la actividad (`uiautomator dump` la relanza en HyperOS, igual que conectar un teclado): corregido con `dispatchKeyEvent` y ViewModel, y probado tres veces seguidas. 6 pruebas nuevas | `core/config/BindingsEditor.kt`, `feature/settings/shortcuts/`, `app/SettingsActivity.kt` |
