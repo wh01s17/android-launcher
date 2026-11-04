@@ -27,11 +27,15 @@ sealed interface CommandParse {
 object CommandCatalog {
     private val WORKSPACE = 1..10
     private val RESIZE = -1000..1000
+    private val VOLUME_STEP = -10..10
 
     private val SPECS: List<CommandSpec> =
         listOf(
             CommandSpec("menu.open") { LauncherCommand.OpenMenu },
+            CommandSpec("menu.apps") { LauncherCommand.OpenAppsMenu },
+            CommandSpec("menu.system") { LauncherCommand.OpenSystemMenu },
             CommandSpec("notifications.open") { LauncherCommand.OpenNotificationShade },
+            CommandSpec("audio.volume", "step") { LauncherCommand.AdjustVolume(it.int("step", VOLUME_STEP)) },
             CommandSpec("workspace.focus", "id") { WorkspaceCommand.FocusWorkspace(it.int("id", WORKSPACE)) },
             CommandSpec("workspace.next") { WorkspaceCommand.CycleWorkspace(forward = true) },
             CommandSpec("workspace.previous") { WorkspaceCommand.CycleWorkspace(forward = false) },

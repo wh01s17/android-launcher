@@ -5,8 +5,19 @@ package com.wh01s17.launcher.core.input
  * llama a los ViewModels ajenos directamente. La lista crece con cada hito.
  */
 sealed interface LauncherCommand {
-    /** Abrir el menú y la paleta unificados (Hito 5). */
+    /** `Super + Space`: abrir el menú y la paleta unificados (Hito 5); si ya está en la raíz, cerrarlo. */
     data object OpenMenu : LauncherCommand
+
+    /** `Super + Alt + Space`: el menú en la página de apps; si ya está ahí, cerrarlo. */
+    data object OpenAppsMenu : LauncherCommand
+
+    /** `Super + Escape`: el menú en la página de sistema; si ya está ahí, cerrarlo. */
+    data object OpenSystemMenu : LauncherCommand
+
+    /** `Ctrl + Alt + A/Z`: sube ([steps] > 0) o baja el volumen multimedia, con el panel del sistema. */
+    data class AdjustVolume(
+        val steps: Int,
+    ) : LauncherCommand
 
     /** Abrir la cortina de notificaciones del sistema (necesita el servicio de accesibilidad). */
     data object OpenNotificationShade : LauncherCommand
