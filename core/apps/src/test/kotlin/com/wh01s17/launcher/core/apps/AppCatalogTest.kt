@@ -53,4 +53,22 @@ class AppCatalogTest {
         assertEquals(null, AppCatalog.Loading.personalSerial)
         assertEquals(0L, AppCatalog.of(profiles, emptyList()).personalSerial)
     }
+
+    @Test
+    fun `find takes a package or an activity, preferring the personal profile`() {
+        val catalog =
+            AppCatalog.of(
+                profiles,
+                listOf(
+                    app("Termux", "com.termux", userSerial = 10, className = "com.termux.app.TermuxActivity"),
+                    app("Termux", "com.termux", className = "com.termux.app.TermuxActivity"),
+                ),
+                es,
+            )
+        assertEquals(0L, catalog.find("com.termux")?.key?.userSerial)
+        assertEquals(0L, catalog.find("com.termux/.app.TermuxActivity")?.key?.userSerial)
+        assertEquals(10L, catalog.find("com.termux/.app.TermuxActivity@10")?.key?.userSerial)
+        assertEquals(null, catalog.find("com.termux/.HomeActivity"))
+        assertEquals(null, catalog.find("org.missing"))
+    }
 }

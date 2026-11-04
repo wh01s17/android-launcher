@@ -57,6 +57,19 @@ data class AppCatalog(
     fun profile(serial: Long): AppProfile? = profiles.firstOrNull { it.serial == serial }
 
     /**
+     * La app de la config (`apps.terminal`): un paquete (`com.termux`, su primera actividad, mejor del
+     * perfil personal) o una actividad (`com.termux/.app.TermuxActivity[@serial]`, plan.md §6.1).
+     */
+    fun find(spec: String): AppEntry? {
+        if ('/' !in spec) {
+            val matches = apps.filter { it.packageName == spec }
+            return matches.firstOrNull { it.key.userSerial == personalSerial } ?: matches.firstOrNull()
+        }
+        val key = AppKey.parse(spec, personalSerial ?: return null) ?: return null
+        return apps.firstOrNull { it.key == key }
+    }
+
+    /**
      * Sustituye las apps de [packages] en el perfil [userSerial] por [fresh]. Así se aplica un
      * aviso de `LauncherApps.Callback` sin volver a leer todos los paquetes.
      */
