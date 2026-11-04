@@ -891,8 +891,11 @@ Revisión de cierre realizada y hallazgos corregidos; guía y matriz en [`docs/m
       (`none` quita uno), atajos de `tiling.lua` de fábrica, `swipe-up`/`swipe-down` en el
       escritorio y `app/input/Shortcuts`. Guía: [`docs/bindings.md`](docs/bindings.md). En el emulador
       API 35, `SUPER + …` no llega a la app (ver la tarea siguiente).
-- [ ] Todos los atajos de §3; detección de los reservados por el sistema y
-      modificador alternativo configurable.
+- [x] Todos los atajos de §3; detección de los reservados por el sistema y
+      modificador alternativo configurable. `menu.apps`/`menu.system` (alternan), `audio.volume`,
+      dos dedos y dobles toques (sólo si están asignados), mantener energía → sistema;
+      `keyboard.superAlternative` (`ALT` de fábrica), `SystemReservedChords` y
+      `KeyBindingResolver.pressFor`. Lo que queda fuera de §3, con motivo, en `docs/bindings.md`.
 - [ ] Pantalla `Super + K` con la tabla de atajos generada.
 - [ ] Editor de atajos en ajustes (captura de combinación).
 - [ ] `Super + Return` abre la terminal configurada (Termux por defecto).
@@ -1138,6 +1141,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-04 | `bindings` del usuario se suman a los de fábrica (misma combinación o gesto la sustituye; `"command": "none"` la quita); repetir un disparador en el mismo archivo es error | Como `bindings.lua`, que añade a los atajos por defecto; igual que una `bar` parcial no vacía la barra |
 | 2026-11-04 | Nombres de comando con punto (`workspace.focus`, `tile.move`…) y argumentos en `args` | Sigue el ejemplo de §6.1; el catálogo está en `CommandCatalog` y `docs/bindings.md` |
 | 2026-11-04 | Con el menú abierto sólo se aplican combinaciones con `SUPER`, `CTRL` o `ALT`; mantener la tecla sólo repite `tile.resize` | No robar letras a la búsqueda; repetir como `binde` sólo donde tiene sentido |
+| 2026-11-04 | `ALT` hace de `SUPER` de fábrica (`keyboard.superAlternative`; `CTRL` o `none` configurables); primero gana la combinación exacta | En el Redmi (HyperOS 2) y el emulador API 35 ningún evento con Meta llega a la app; `ALT` sí llega salvo `ALT + TAB` |
+| 2026-11-04 | `SUPER + SPACE`, `SUPER + ALT + SPACE` y `SUPER + ESCAPE` alternan el menú (raíz, apps, sistema) | Como `wh01s17-menu toggle` de los dotfiles |
+| 2026-11-04 | Los dobles toques sólo se reconocen si están asignados en `bindings`; de fábrica no lo están | Esperar el segundo toque retrasa ~300 ms abrir una app o el menú |
+| 2026-11-04 | Sin gesto de borde inferior (apps), arrastrar fuera (quitar) ni pellizco rotacional (split) | La franja inferior es Inicio en la capa 3; el modo edición ya cubre quitar y split |
 | 2026-11-04 | Búsqueda sin autocorrección del IME | SwiftKey modificaba nombres escritos durante la prueba ADB; las consultas de apps y comandos deben conservarse literalmente |
 
 ### 11.2 Riesgos
@@ -1164,10 +1171,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-04:** 46 de 75 tareas marcadas (61 % del plan completo);
+- **Balance al 2026-11-04:** 47 de 75 tareas marcadas (63 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
   Quedan los Hitos 6–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 6 (1 de 7 tareas). **Hitos 0–5 terminados**. El Hito 5 se cerró
+- **Hito en curso:** Hito 6 (2 de 7 tareas). **Hitos 0–5 terminados**. El Hito 5 se cerró
   con revisión de código, controles completos y pruebas ADB en el Redmi; los cierres anteriores
   y sus pruebas siguen en §13.
 - **Última tarea completada:** menú/paleta unificados y ranking persistente (Hito 5).
@@ -1180,12 +1187,14 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   y modos cruzados al ejecutar, la cancelación de Enter pendiente al editar, Escape sin foco
   Compose en HyperOS, el tratamiento previo al IME, el contextual sobre resultados ocultos,
   la recuperación del aviso de historial y las llamadas repetidas a PackageManager al escribir.
-- **Hito 6, atajos (2026-11-04):** `bindings` leídos y aplicados; `check assembleDebug` en verde.
-  En el emulador API 35: `F2` y `CTRL + ALT + 3` de un `launcher.json` de usuario cambian de
-  escritorio, pero **ningún evento con Meta llega a la actividad** y `SUPER + TAB` abre Recientes.
-  El Redmi estaba bloqueado: falta probar con teclado físico (`docs/bindings.md`).
-- **Siguiente tarea:** Hito 6, todos los atajos de §3, detección de reservados y modificador
-  alternativo; empezar por confirmar en el Redmi con teclado físico qué hace `SUPER`. Pendientes sin bloquear: medir en release la primera
+- **Hito 6, atajos (2026-11-04):** `bindings` leídos y aplicados, `ALT` como sustituto de `SUPER`
+  y atajos de §3. En el Redmi (eventos inyectados por ADB) ningún evento con Meta llega a la app y
+  `ALT + TAB` abre Recientes; el resto de `ALT`/`CTRL` llega (`docs/bindings.md`). Probado en el
+  Redmi con la build instalada: `ALT + 1/3`, `ALT + SHIFT + TAB`, `CTRL + ALT + A/Z` (volumen, se
+  dejó en 80), `ALT + SPACE` y `ALT + ESCAPE` abren y cierran, y mantener la batería abre Sistema.
+  Pendiente manual: dos dedos (ADB no simula multitáctil) y un teclado físico Bluetooth.
+- **Siguiente tarea:** Hito 6, pantalla `Super + K` con la tabla generada (usar
+  `KeyBindingResolver.pressFor` y `Shortcuts.superDelivered` para mostrar qué pulsar). Pendientes sin bloquear: medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj.
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
   launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio → `ajustes`),
@@ -1214,6 +1223,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-04 | 6 | Atajos de §3 y reservados: `menu.apps`/`menu.system` que alternan, `audio.volume`, `two-finger-swipe-*`, `double-tap`/`double-tap-tile` (sólo asignados), mantener energía → sistema, `keyboard.superAlternative` (`ALT`), `SystemReservedChords`, `pressFor`. El menú deja pasar las combinaciones con `ALT`/`CTRL`/Meta y sólo actúa al soltar una tecla que vio pulsar (si no, `ALT + ESCAPE` volvía atrás). Sondeo ADB en el Redmi: Meta nunca llega, `ALT + TAB` reservado; atajos nuevos probados en el Redmi. 5 pruebas nuevas; `check assembleDebug` en verde | `core/input/binding/`, `core/config/BindingSections.kt`, `feature/workspaces/ui/TwoFingerSwipe.kt`, `app/`, `docs/bindings.md` |
 | 2026-11-04 | 6 | Atajos configurables: `core/input/binding` (`KeyChord`, `KeyNames`, `Gesture`, `CommandCatalog`, `KeyBindingResolver`, `GestureBindingResolver`), `bindings` en `core/config` (suma con la fábrica, `none`, errores por ruta), atajos de `tiling.lua` de fábrica, deslizamientos verticales del escritorio como gestos, `Shortcuts` en la app. 12 pruebas nuevas; `check assembleDebug` en verde. Emulador API 35: `F2`/`CTRL + ALT` funcionan, `SUPER` no llega a la app | `core/input/binding/`, `core/config/BindingSections.kt`, `app/input/Shortcuts.kt`, `docs/bindings.md` |
 | 2026-11-04 | 5 | **Hito 5 terminado; MVP 0.1.0.** Paleta unificada (apps/comandos/ajustes/atajos), DataStore 1.3.0, teclado y contextual, selector integrado y retirada del drawer. Revisión de cierre: edición inmediata, Enter pendiente ligado a consulta/modo, IME y Escape en HyperOS. 21 pruebas y tres capturas; `check assembleDebug` en verde. ADB: búsqueda, apps, atajos, ajustes, ranking tras recrear UI, selector, escritorios, flechas y apagado cancelado. Escritorio y gestos conservados | `feature/menu/`, `app/MenuController.kt`, `core/system/navigation/`, `docs/menu.md`, `CHANGELOG.md` |
 | 2026-11-04 | 5 | Prueba ADB del panel en el Redmi: nueve submenús/Atrás, Escape, gesto, cierre exterior, Apps, selector, Wi-Fi e Inicio. Corregido Escape al soltar con respaldo en Activity; prueba de regresión. HOME y gestos conservados, servicio enlazado y sin crashes del launcher; capturas y resultados documentados | `app/MainActivity.kt`, `feature/menu/`, `docs/menu.md`, `docs/screenshots/` |

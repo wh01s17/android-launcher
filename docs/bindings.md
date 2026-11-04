@@ -40,8 +40,27 @@ Teclas: `A`–`Z`, `0`–`9`, `F1`–`F12`, `SPACE`, `RETURN` (`ENTER`), `TAB`, 
 teclado numérico cuentan como las normales.
 
 - Con el menú abierto sólo valen las combinaciones con `SUPER`, `CTRL` o `ALT`: las demás son
-  escribir en la búsqueda. Un atajo de escritorio con el menú abierto lo cierra primero.
-- Mantener pulsado repite sólo `tile.resize` (como `binde`); el resto salta una vez.
+  escribir en la búsqueda. El menú no usa Escape, Tab, flechas ni Enter si llevan uno de esos
+  modificadores, y sólo actúa al soltar una tecla cuya pulsación vio. Un atajo de escritorio con el
+  menú abierto lo cierra primero.
+- Mantener pulsado repite sólo `tile.resize` y `audio.volume` (como `binde`); el resto salta una vez.
+
+### `SUPER` y el modificador alternativo
+
+Android 15 no entrega la tecla Meta a las apps (ver «Reservadas» abajo). Por eso
+`keyboard.superAlternative` (de fábrica `ALT`) hace de `SUPER`: `ALT + 1` dispara `SUPER + 1`.
+
+```json
+"keyboard": { "superAlternative": "ALT" }
+```
+
+- Opciones: `ALT`, `CTRL` o `none` (sólo `SUPER` de verdad). `SHIFT` no: es escribir mayúsculas.
+- Primero se busca la combinación tal cual: `CTRL + ALT + A` (volumen) gana a `SUPER + CTRL + A`.
+- No se pueden pulsar con el alternativo los atajos que ya llevan ese modificador
+  (`SUPER + ALT + SPACE` sería `ALT + ALT + SPACE`) ni los que caen en una reservada
+  (`SUPER + TAB` → `ALT + TAB`, que abre Recientes). `KeyBindingResolver.pressFor` lo calcula, y la
+  tabla de `Super + K` lo mostrará. Asígnalos a otra combinación si los necesitas.
+- Si algún día llega un evento con Meta (otro sistema o teclado), `SUPER` funciona tal cual.
 
 ### Gestos
 
@@ -49,16 +68,31 @@ teclado numérico cuentan como las normales.
 | --- | --- | --- |
 | `swipe-up` | Un dedo hacia arriba sobre el escritorio (fuera de edición) | `menu.open` |
 | `swipe-down` | Un dedo hacia abajo sobre el escritorio | — |
+| `two-finger-swipe-left` / `-right` | Dos dedos; el pager no se mueve | `workspace.next` / `workspace.previous` |
+| `two-finger-swipe-up` / `-down` | Dos dedos | — (abajo: scratchpad, Hito 8) |
+| `double-tap` | Doble toque en un hueco vacío | — (terminal, tarea `Super + Return`) |
+| `double-tap-tile` | Doble toque en un tile (lo enfoca primero) | — |
 
-Deslizar a los lados cambia siempre de escritorio y no se asigna. Los demás gestos de plan.md §3
-(dos dedos, borde inferior, doble toque) llegan con la tarea «todos los atajos de §3» del Hito 6.
+Deslizar a los lados con un dedo cambia siempre de escritorio y no se asigna. Los dobles toques
+sólo se esperan si tienen atajo: si no, un toque abriría la app o el menú con ~300 ms de retraso.
+Mantener pulsado el módulo de energía de la barra abre el menú de sistema (como `Super + Escape`).
+
+Quedan fuera, con su motivo (plan.md §3):
+
+| Gesto de §3 | Motivo |
+| --- | --- |
+| Deslizar desde el borde inferior → apps | Con *Gestos wh01s17* esa franja es Inicio (capa 3, §5.9) |
+| Arrastrar un tile fuera → quitar | El modo edición ya tiene `quitar` |
+| Pellizco rotacional → split | El modo edición ya tiene `split`; poco fiable en un tile pequeño |
 
 ## Comandos
 
 | Comando | Argumentos | Qué hace |
 | --- | --- | --- |
-| `menu.open` | — | Abre el menú wh01s17 |
+| `menu.open` | — | Abre el menú wh01s17; si ya está en la raíz, lo cierra |
+| `menu.apps` / `menu.system` | — | El menú en Apps / Sistema; si ya está ahí, lo cierra |
 | `notifications.open` | — | Cortina del sistema (necesita *Gestos wh01s17*) |
+| `audio.volume` | `step` −10…10 | Volumen multimedia, con el panel del sistema |
 | `workspace.focus` | `id` 1–10 | Va al escritorio |
 | `workspace.next` / `workspace.previous` | — | Siguiente/anterior con tiles |
 | `workspace.layout` | — | dwindle ↔ master |
@@ -74,16 +108,29 @@ Deslizar a los lados cambia siempre de escritorio y no se asigna. Los demás ges
 ## De fábrica
 
 Copiados de `bindings/tiling.lua` de los dotfiles, sólo con los comandos que ya existen
-(`core/config/src/main/assets/default-launcher.json`): `SUPER + SPACE` menú; `SUPER + 1…0`
+(`core/config/src/main/assets/default-launcher.json`): `SUPER + SPACE` menú, `SUPER + ALT + SPACE`
+apps y `SUPER + ESCAPE` sistema (alternan, como `wh01s17-menu toggle`); `CTRL + ALT + A/Z` volumen
+(plan.md §3); `SUPER + 1…0`
 escritorio; `SUPER + SHIFT + 1…0` mover tile (y `+ ALT` sin seguirlo); `SUPER (+ SHIFT) + TAB`
 siguiente/anterior; `SUPER + flechas` foco; `SUPER + SHIFT + flechas` intercambiar;
 `SUPER (+ SHIFT) + MINUS/EQUAL` tamaño; `SUPER + W/T/J/F/L`; `SUPER + ALT (+ SHIFT) + TAB` y
-`SUPER + CTRL + ←/→` grupo.
+`SUPER + CTRL + ←/→` grupo; dos dedos a los lados, escritorio siguiente/anterior.
 
-## Límite conocido: `SUPER` en Android 15
+Fuera de esta tarea: `Super + Return` (terminal) y `Super + K` (tabla) tienen tarea propia en el
+Hito 6; `Super + S` y los atajos de media, Hito 8; `Super + Ctrl + Space` (fondos), Hito 10.
 
-Probado el 2026-11-04 en el emulador `redmi-api35` con `adb shell input keycombination`: **ningún
-evento con Meta llega a la actividad** (ni la tecla sola ni `META + 2`), y `SUPER + TAB` abre
-Recientes. `CTRL + ALT + 3` y `F2` sí llegan y cambian de escritorio. Falta comprobarlo con un
-teclado físico en el Redmi (estaba bloqueado durante la prueba). Lo resuelve la tarea siguiente
-del Hito 6: detectar los atajos reservados y un modificador alternativo configurable.
+## Reservadas por el sistema
+
+Probado el 2026-11-04 con `adb shell input keycombination` en el Redmi (HyperOS 2.0.204, Android 15)
+y en el emulador `redmi-api35`, registrando lo que llega a `MainActivity.dispatchKeyEvent`:
+
+| Combinación | Resultado |
+| --- | --- |
+| `SUPER + …` (y Meta sola) | No llega ningún evento a la app |
+| `ALT + TAB` | No llega; abre Recientes |
+| `ALT + 1…0`, `ALT + SPACE`, `ALT + ESCAPE`, `ALT + SHIFT + TAB`, `ALT + F4` | Llegan |
+| `CTRL + SPACE`, `CTRL + ALT + A`, `CTRL + ALT + ←`, `CTRL + ALT + DEL` | Llegan |
+
+`SystemReservedChords` guarda sólo lo comprobado. Sin consumir, `ALT + SPACE` genera además
+`SEARCH` y `CTRL + ALT + DEL` genera `BACK` (teclas de respaldo de Android); al ser atajos se
+consumen y no llegan. Queda por repetir con un teclado físico Bluetooth.
