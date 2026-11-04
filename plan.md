@@ -907,9 +907,12 @@ Revisión de cierre realizada y hallazgos corregidos; guía y matriz en [`docs/m
 - [x] `Super + Return` abre la terminal configurada (Termux por defecto). `terminal.open`,
       `apps.terminal` (paquete o actividad; de fábrica `com.termux`), `AppCatalog.find`; espera a la
       primera carga del índice. Probado en el Redmi (`ALT + RETURN`).
-- [ ] Refinar la capa 3 (§5.9): cada gesto activable por separado, grosor y
+- [x] Refinar la capa 3 (§5.9): cada gesto activable por separado, grosor y
       sensibilidad configurables, ocultos con el teclado en pantalla,
-      animación de vuelta al launcher.
+      animación de vuelta al launcher. `EdgeSettings` (atrás izq./der., inicio, recientes, grosor
+      8–32 dp, sensibilidad) en Ajustes → Compatibilidad, `navigation-edges.properties` y aviso a
+      `:nav`, que reconfigura las franjas en vivo; con los botones ocultos *inicio* no se apaga.
+      `HomeReturn`: el escritorio crece y aparece al volver (curva de `animations.workspaces`).
 - [ ] Completar la matriz de `docs/xiaomi.md` con las tres capas.
 
 ### Hito 7 — Widgets (L)
@@ -1156,6 +1159,8 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-04 | El editor escribe en `launcher.json` sólo la diferencia con la fábrica y reescribe el archivo con sangría; un atajo cambiado pasa al final de la tabla | Es lo que escribiría el usuario a mano (§6.4); conservar el formato original exigiría un editor de JSON propio |
 | 2026-11-04 | Las teclas del editor se capturan en `dispatchKeyEvent` de la actividad, no con el foco de Compose | En el Redmi, en modo táctil, la caja con foco no recibía la tecla |
 | 2026-11-04 | `apps.terminal` acepta un paquete (abre su actividad principal) y de fábrica es `com.termux` | La actividad de Termux (`.app.TermuxActivity`) no es la del ejemplo de §6.1; con el paquete no hace falta saberla |
+| 2026-11-04 | Ajustes de las franjas en `navigation-edges.properties` (un escritor: el launcher) con aviso a `:nav`; con el modo *gestos wh01s17* activo, *inicio* se fuerza en el servicio además de en la UI | Mismo patrón que las preferencias del modo (§11.1); sin *inicio* y sin botones no se saldría de una app |
+| 2026-11-04 | La animación de vuelta al launcher es propia (`onRestart`) y usa `animations.workspaces` | HyperOS no anima la vuelta con un launcher ajeno; reutilizar la curva evita otra sección de config |
 | 2026-11-04 | Búsqueda sin autocorrección del IME | SwiftKey modificaba nombres escritos durante la prueba ADB; las consultas de apps y comandos deben conservarse literalmente |
 
 ### 11.2 Riesgos
@@ -1182,10 +1187,10 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-04:** 50 de 75 tareas marcadas (67 % del plan completo);
+- **Balance al 2026-11-04:** 51 de 75 tareas marcadas (68 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
   Quedan los Hitos 6–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 6 (5 de 7 tareas). **Hitos 0–5 terminados**. El Hito 5 se cerró
+- **Hito en curso:** Hito 6 (6 de 7 tareas). **Hitos 0–5 terminados**. El Hito 5 se cerró
   con revisión de código, controles completos y pruebas ADB en el Redmi; los cierres anteriores
   y sus pruebas siguen en §13.
 - **Última tarea completada:** menú/paleta unificados y ranking persistente (Hito 5).
@@ -1204,8 +1209,8 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   Redmi con la build instalada: `ALT + 1/3`, `ALT + SHIFT + TAB`, `CTRL + ALT + A/Z` (volumen, se
   dejó en 80), `ALT + SPACE` y `ALT + ESCAPE` abren y cierran, y mantener la batería abre Sistema.
   Pendiente manual: dos dedos (ADB no simula multitáctil) y un teclado físico Bluetooth.
-- **Siguiente tarea:** Hito 6, refinar la capa 3 (gestos por separado, grosor y sensibilidad,
-  animación de vuelta). Pendientes sin bloquear: medir en release la primera
+- **Siguiente tarea:** Hito 6, completar la matriz de `docs/xiaomi.md` con las tres capas.
+  Pendientes sin bloquear: medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj.
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
   launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio → `ajustes`),
@@ -1234,6 +1239,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-04 | 6 | Capa 3 refinada: `EdgeSettings` (cada gesto, grosor, sensibilidad) con `homeEnabled`/`recentsEnabled` en el reconocedor, `NavigationFiles.readEdges/writeEdges`, `edgesChangedAction` y `EdgeStripOverlay.reconfigure`; sección «gestos de borde» en Compatibilidad. `HomeReturn` (animación de vuelta) y `HomeCommands` (comandos fuera de `MainActivity`). En el Redmi: apagar atrás izquierdo lo desactiva al momento, atrás/inicio/recientes con los ajustes nuevos. La primera versión de `HomeReturn` cerraba el launcher al volver (`Animatable` fuera de la composición, sin reloj de fotogramas): Android mostró el selector de launcher; se cerró sin elegir, se reafirmó el rol HOME y se corrigió animando en la composición. 5 pruebas nuevas | `core/system/navigation/`, `feature/settings/compat/EdgeSection.kt`, `app/ui/HomeReturn.kt`, `app/HomeCommands.kt` |
 | 2026-11-04 | 6 | Terminal: `LauncherCommand.OpenTerminal` (`SUPER + RETURN`), `apps.terminal` en la config, `AppCatalog.find` (paquete o actividad, perfil personal primero). La actividad de Termux es `.app.TermuxActivity`, no `.HomeActivity` como decía §6.1 (corregido). Recién instalada, la primera pulsación fallaba porque el índice no había cargado: ahora se espera. 2 pruebas nuevas; probado en el Redmi | `core/apps/model/AppCatalog.kt`, `core/config/`, `app/MainActivity.kt` |
 | 2026-11-04 | 6 | Editor de atajos: `BindingEdit` (`Rebind`, `Remove`, `ResetAll`), `BindingsEditor` (diferencia con la fábrica, resto del archivo intacto), `ConfigRepository.editBindings` + `writeUserConfig` atómico, `ShortcutEditor` y `ShortcutEditorViewModel`. En el Redmi la primera versión perdía teclas (foco de Compose en modo táctil) y el estado al recrearse la actividad (`uiautomator dump` la relanza en HyperOS, igual que conectar un teclado): corregido con `dispatchKeyEvent` y ViewModel, y probado tres veces seguidas. 6 pruebas nuevas | `core/config/BindingsEditor.kt`, `feature/settings/shortcuts/`, `app/SettingsActivity.kt` |
 | 2026-11-04 | 6 | Tabla `Super + K`: `LauncherCommand.ShowShortcuts`, `encode()` con prueba de ida y vuelta de todo el catálogo, `availability`/`BlockReason`, `ShortcutTable` + `ShortcutsScreen` en `feature/settings`, entrada en Aprender. Probado en el Redmi | `core/input/binding/`, `feature/settings/shortcuts/`, `app/SettingsActivity.kt` |
