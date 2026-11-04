@@ -58,8 +58,8 @@ Android 15 no entrega la tecla Meta a las apps (ver «Reservadas» abajo). Por e
 - Primero se busca la combinación tal cual: `CTRL + ALT + A` (volumen) gana a `SUPER + CTRL + A`.
 - No se pueden pulsar con el alternativo los atajos que ya llevan ese modificador
   (`SUPER + ALT + SPACE` sería `ALT + ALT + SPACE`) ni los que caen en una reservada
-  (`SUPER + TAB` → `ALT + TAB`, que abre Recientes). `KeyBindingResolver.pressFor` lo calcula, y la
-  tabla de `Super + K` lo mostrará. Asígnalos a otra combinación si los necesitas.
+  (`SUPER + TAB` → `ALT + TAB`, que abre Recientes). `KeyBindingResolver.availability` lo calcula y la
+  tabla de `Super + K` lo muestra con el motivo. Asígnalos a otra combinación si los necesitas.
 - Si algún día llega un evento con Meta (otro sistema o teclado), `SUPER` funciona tal cual.
 
 ### Gestos
@@ -92,6 +92,7 @@ Quedan fuera, con su motivo (plan.md §3):
 | `menu.open` | — | Abre el menú wh01s17; si ya está en la raíz, lo cierra |
 | `menu.apps` / `menu.system` | — | El menú en Apps / Sistema; si ya está ahí, lo cierra |
 | `notifications.open` | — | Cortina del sistema (necesita *Gestos wh01s17*) |
+| `shortcuts.show` | — | Tabla de atajos (`Super + K`; también menú → Aprender → Atajos) |
 | `audio.volume` | `step` −10…10 | Volumen multimedia, con el panel del sistema |
 | `workspace.focus` | `id` 1–10 | Va al escritorio |
 | `workspace.next` / `workspace.previous` | — | Siguiente/anterior con tiles |
