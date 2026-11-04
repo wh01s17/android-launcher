@@ -116,6 +116,7 @@ class WorkspacesScreenTest {
                         onCommand = { commands += it },
                         onAddTile = {},
                         onOpenMenu = {},
+                        onGesture = {},
                         onOpenSettings = {},
                     )
                 }

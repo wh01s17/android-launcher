@@ -36,6 +36,7 @@ import com.wh01s17.launcher.core.apps.actions.LaunchOrigin
 import com.wh01s17.launcher.core.apps.icons.AppIconLoader
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
+import com.wh01s17.launcher.core.input.binding.Gesture
 import com.wh01s17.launcher.core.tiling.LayoutResult
 import com.wh01s17.launcher.core.tiling.Rect
 import com.wh01s17.launcher.core.tiling.TileId
@@ -45,6 +46,7 @@ import com.wh01s17.launcher.feature.workspaces.R
 import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesUiState
 import com.wh01s17.launcher.feature.workspaces.model.Desk
+import kotlin.math.abs
 
 /** Capas del lienzo: tiles, flotantes encima, y lo que se arrastra encima de todo. */
 private const val Z_FLOATING = 1f
@@ -69,10 +71,11 @@ internal fun WorkspacePage(
     iconLoader: AppIconLoader,
     onIntent: (WorkspacesIntent) -> Unit,
     onOpenMenu: () -> Unit,
+    onGesture: (Gesture) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val editing = state.editing
-    BoxWithConstraints(modifier.fillMaxSize().then(if (editing) Modifier else Modifier.swipeUpToOpen(onOpenMenu))) {
+    BoxWithConstraints(modifier.fillMaxSize().then(if (editing) Modifier else Modifier.verticalSwipes(onGesture))) {
         val area = Rect(0, 0, constraints.maxWidth, constraints.maxHeight)
         val gaps = style.gaps(LocalDensity.current)
         val result = remember(workspace, area, gaps) { layout(workspace, area, gaps) }
@@ -346,23 +349,29 @@ private fun EmptyHint(
 internal fun workspaceLabel(number: Int): String = if (number == Desk.LAST) "0" else number.toString()
 
 /**
- * Deslizar hacia arriba abre el menú (plan.md §3). Va en el contenedor, no en el fondo: así también
- * funciona empezando sobre un tile (los tiles no consumen el movimiento fuera de edición). Basta con
- * subir una fila del menú, como en el inicio provisional.
+ * Deslizar en vertical emite [Gesture.SwipeUp] o [Gesture.SwipeDown]; qué hacen lo deciden los
+ * `bindings` (de fábrica, hacia arriba abre el menú, plan.md §3). Va en el contenedor, no en el
+ * fondo: así también funciona empezando sobre un tile (los tiles no consumen el movimiento fuera de
+ * edición). Basta con recorrer una fila del menú; un mismo arrastre emite un solo gesto.
  */
 @Composable
-private fun Modifier.swipeUpToOpen(onOpen: () -> Unit): Modifier {
+private fun Modifier.verticalSwipes(onGesture: (Gesture) -> Unit): Modifier {
     val threshold = with(LocalDensity.current) { WhTheme.spacing.menuRowHeight.toPx() }
-    return pointerInput(onOpen, threshold) {
+    val latest by rememberUpdatedState(onGesture)
+    return pointerInput(threshold) {
         var travelled = 0f
+        var fired = false
         detectVerticalDragGestures(
-            onDragStart = { travelled = 0f },
+            onDragStart = {
+                travelled = 0f
+                fired = false
+            },
             onVerticalDrag = { change, dragAmount ->
                 travelled += dragAmount
-                if (travelled < -threshold) {
+                if (!fired && abs(travelled) > threshold) {
                     change.consume()
-                    travelled = 0f
-                    onOpen()
+                    fired = true
+                    latest(if (travelled < 0) Gesture.SwipeUp else Gesture.SwipeDown)
                 }
             },
         )

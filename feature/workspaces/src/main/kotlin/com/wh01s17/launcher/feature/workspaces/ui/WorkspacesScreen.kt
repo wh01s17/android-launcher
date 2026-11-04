@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import com.wh01s17.launcher.core.apps.icons.AppIconLoader
 import com.wh01s17.launcher.core.input.WorkspaceCommand
+import com.wh01s17.launcher.core.input.binding.Gesture
 import com.wh01s17.launcher.core.tiling.Rect
 import com.wh01s17.launcher.feature.workspaces.CanvasMetrics
 import com.wh01s17.launcher.feature.workspaces.R
@@ -64,6 +65,7 @@ fun WorkspacesScreen(
     onCommand: (WorkspaceCommand) -> Unit,
     onAddTile: () -> Unit,
     onOpenMenu: () -> Unit,
+    onGesture: (Gesture) -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -81,6 +83,7 @@ fun WorkspacesScreen(
                 iconLoader,
                 onIntent,
                 onOpenMenu,
+                onGesture,
                 Modifier.fillMaxSize().graphicsLayer {
                     scaleX = scale
                     scaleY = scale
@@ -111,6 +114,7 @@ private fun WorkspacePager(
     iconLoader: AppIconLoader,
     onIntent: (WorkspacesIntent) -> Unit,
     onOpenMenu: () -> Unit,
+    onGesture: (Gesture) -> Unit,
     modifier: Modifier,
 ) {
     val style = rememberTilingStyle(state.general)
@@ -142,7 +146,7 @@ private fun WorkspacePager(
         flingBehavior = PagerDefaults.flingBehavior(state = pager, snapAnimationSpec = spec),
         key = { it },
     ) { page ->
-        WorkspacePage(state.workspaces[page], page + Desk.FIRST, state, style, iconLoader, onIntent, onOpenMenu)
+        WorkspacePage(state.workspaces[page], page + Desk.FIRST, state, style, iconLoader, onIntent, onOpenMenu, onGesture)
     }
 }
 

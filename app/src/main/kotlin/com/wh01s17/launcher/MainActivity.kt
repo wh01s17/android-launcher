@@ -41,6 +41,7 @@ import com.wh01s17.launcher.feature.menu.search.SearchIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesViewModel
 import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
+import com.wh01s17.launcher.input.Shortcuts
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import android.graphics.Color as AndroidColor
@@ -65,6 +66,14 @@ class MainActivity : ComponentActivity() {
 
     private val menuController by lazy {
         MenuController(this, menu, search, container.notificationShade, container.commandBus::send, ::openNotificationShade)
+    }
+
+    /** Un atajo de escritorio con el menú abierto lo cierra antes, para ver lo que hace. */
+    private val shortcuts by lazy {
+        Shortcuts(container.configRepository.state) { command ->
+            if (command is WorkspaceCommand && menu.page.value != null) menuController.close()
+            container.commandBus.send(command)
+        }
     }
 
     private val bar: BarViewModel by viewModels {
@@ -125,6 +134,7 @@ class MainActivity : ComponentActivity() {
                     onCommand = workspaces::onCommand,
                     onAddTile = menuController::pick,
                     onOpenMenu = menuController::open,
+                    onGesture = shortcuts::onGesture,
                     onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
                     modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(top = barHeight()),
                 )
@@ -158,7 +168,7 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Los comandos de la barra (y, más adelante, del teclado, los gestos y el menú) llegan por el bus;
+     * Los comandos de la barra, el teclado, los gestos y el menú llegan por el bus;
      * la app elegida en el drawer en modo selección se convierte en un tile.
      */
     private fun handleCommands() {
@@ -207,11 +217,14 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Escape también funciona en modo táctil, cuando Compose no conserva un nodo con foco.
-     * AndroidX core marca su override como interno; este es el callback público de Activity.
+     * Los atajos de `bindings` van antes que la UI (con el menú abierto, sólo los que llevan `SUPER`,
+     * `CTRL` o `ALT`, para no robar letras a la búsqueda). Escape también funciona en modo táctil,
+     * cuando Compose no conserva un nodo con foco. AndroidX core marca su override como interno;
+     * este es el callback público de Activity.
      */
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (shortcuts.onKeyEvent(event, typing = menu.page.value != null)) return true
         if (event.keyCode != KeyEvent.KEYCODE_ESCAPE) return super.dispatchKeyEvent(event)
         if (menu.page.value == null) return super.dispatchKeyEvent(event)
         if (event.action == KeyEvent.ACTION_UP && !event.isCanceled) menuController.back()
