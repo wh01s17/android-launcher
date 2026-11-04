@@ -2,6 +2,7 @@ package com.wh01s17.launcher
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.media.AudioManager
 import android.os.Bundle
 import android.view.KeyEvent
 import android.widget.Toast
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,6 +37,7 @@ import com.wh01s17.launcher.feature.bar.Bar
 import com.wh01s17.launcher.feature.bar.BarViewModel
 import com.wh01s17.launcher.feature.bar.barHeight
 import com.wh01s17.launcher.feature.menu.panel.LauncherMenu
+import com.wh01s17.launcher.feature.menu.panel.MenuPage
 import com.wh01s17.launcher.feature.menu.panel.MenuViewModel
 import com.wh01s17.launcher.feature.menu.search.MenuSearchViewModel
 import com.wh01s17.launcher.feature.menu.search.SearchIntent
@@ -44,6 +47,7 @@ import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
 import com.wh01s17.launcher.input.Shortcuts
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import android.graphics.Color as AndroidColor
 
 /**
@@ -65,7 +69,7 @@ class MainActivity : ComponentActivity() {
     private val appVersion by lazy { packageManager.getPackageInfo(packageName, 0).versionName.orEmpty() }
 
     private val menuController by lazy {
-        MenuController(this, menu, search, container.notificationShade, container.commandBus::send, ::openNotificationShade)
+        MenuController(this, menu, search, container.notificationShade, container.commandBus::send, ::handleCommand)
     }
 
     /** Un atajo de escritorio con el menú abierto lo cierra antes, para ver lo que hace. */
@@ -135,6 +139,7 @@ class MainActivity : ComponentActivity() {
                     onAddTile = menuController::pick,
                     onOpenMenu = menuController::open,
                     onGesture = shortcuts::onGesture,
+                    boundGestures = remember(config.config?.bindings) { Shortcuts.boundGestures(config.config) },
                     onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
                     modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(top = barHeight()),
                 )
@@ -177,15 +182,27 @@ class MainActivity : ComponentActivity() {
                 launch { search.picks.collect { workspaces.addApp(it.key) } }
                 launch { search.closed.collect { menu.close() } }
                 launch { search.commands.collect(menuController::execute) }
-                container.commandBus.commands.collect { command ->
-                    when (command) {
-                        LauncherCommand.OpenMenu -> menuController.open()
-                        LauncherCommand.OpenNotificationShade -> openNotificationShade()
-                        is WorkspaceCommand -> workspaces.onCommand(command)
-                    }
-                }
+                container.commandBus.commands.collect(::handleCommand)
             }
         }
+    }
+
+    private fun handleCommand(command: LauncherCommand) {
+        when (command) {
+            LauncherCommand.OpenMenu -> menuController.toggle(MenuPage.Root)
+            LauncherCommand.OpenAppsMenu -> menuController.toggle(MenuPage.Apps)
+            LauncherCommand.OpenSystemMenu -> menuController.toggle(MenuPage.System)
+            LauncherCommand.OpenNotificationShade -> openNotificationShade()
+            is LauncherCommand.AdjustVolume -> adjustVolume(command.steps)
+            is WorkspaceCommand -> workspaces.onCommand(command)
+        }
+    }
+
+    /** Volumen multimedia con el panel del sistema, como las teclas de volumen del teléfono. */
+    private fun adjustVolume(steps: Int) {
+        val audio = getSystemService(AudioManager::class.java) ?: return
+        val direction = if (steps > 0) AudioManager.ADJUST_RAISE else AudioManager.ADJUST_LOWER
+        repeat(abs(steps)) { audio.adjustStreamVolume(AudioManager.STREAM_MUSIC, direction, AudioManager.FLAG_SHOW_UI) }
     }
 
     /**

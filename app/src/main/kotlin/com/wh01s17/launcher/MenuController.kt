@@ -17,7 +17,7 @@ internal class MenuController(
     private val search: MenuSearchViewModel,
     navigation: NotificationShade,
     onWorkspace: (WorkspaceCommand) -> Unit,
-    openShade: () -> Unit,
+    private val onOther: (LauncherCommand) -> Unit,
 ) {
     private val actions =
         MenuActions(
@@ -27,8 +27,7 @@ internal class MenuController(
             onCommand = { command ->
                 when (command) {
                     is WorkspaceCommand -> onWorkspace(command)
-                    LauncherCommand.OpenNotificationShade -> openShade()
-                    LauncherCommand.OpenMenu -> open()
+                    else -> onOther(command)
                 }
             },
             navigationActions = navigation,
@@ -37,6 +36,23 @@ internal class MenuController(
     fun open() {
         search.onIntent(SearchIntent.Open)
         menu.open()
+    }
+
+    /**
+     * `wh01s17-menu toggle [page]` del escritorio: abre el menú en [page], o lo cierra si ya está
+     * ahí. Así `Super + Space` (o `Super + Escape`) dos veces abre y cierra.
+     */
+    fun toggle(page: MenuPage) {
+        if (menu.page.value == page) {
+            close()
+            return
+        }
+        open()
+        when (page) {
+            MenuPage.Root -> Unit
+            MenuPage.Apps -> openApps()
+            else -> menu.navigate(page)
+        }
     }
 
     private fun openApps() {

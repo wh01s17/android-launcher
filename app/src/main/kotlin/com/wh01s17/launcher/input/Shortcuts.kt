@@ -2,9 +2,9 @@ package com.wh01s17.launcher.input
 
 import android.view.KeyEvent
 import com.wh01s17.launcher.core.config.ConfigState
+import com.wh01s17.launcher.core.config.LauncherConfig
 import com.wh01s17.launcher.core.input.LauncherCommand
 import com.wh01s17.launcher.core.input.WorkspaceCommand
-import com.wh01s17.launcher.core.input.binding.Binding
 import com.wh01s17.launcher.core.input.binding.Gesture
 import com.wh01s17.launcher.core.input.binding.GestureBindingResolver
 import com.wh01s17.launcher.core.input.binding.KeyBindingResolver
@@ -18,7 +18,7 @@ internal class Shortcuts(
     private val config: StateFlow<ConfigState>,
     private val send: (LauncherCommand) -> Unit,
 ) {
-    private var source: List<Binding>? = null
+    private var source: LauncherConfig? = null
     private var keys = KeyBindingResolver(emptyList())
     private var gestures = GestureBindingResolver(emptyList())
 
@@ -26,28 +26,38 @@ internal class Shortcuts(
     private var heldKey: Int? = null
 
     /**
+     * Si alguna vez llegó un evento con Meta en este proceso. En Android 15 (Redmi y emulador) no
+     * llega ninguno; un teclado o un sistema que sí lo entregue hace válidos los atajos con `SUPER`.
+     */
+    var superDelivered: Boolean = false
+        private set
+
+    /**
      * `true` si [event] es (o termina) un atajo y no debe seguir hacia la UI. Mantener la tecla sólo
-     * repite los cambios de tamaño, como `binde` en Hyprland; las demás repeticiones se consumen.
+     * repite los cambios de tamaño y de volumen, como `binde` en Hyprland; las demás repeticiones se
+     * consumen.
      */
     fun onKeyEvent(
         event: KeyEvent,
         typing: Boolean,
     ): Boolean {
-        when (event.action) {
-            KeyEvent.ACTION_DOWN -> {
-                refresh()
-                val command = keys.resolve(event.keyCode, event.metaState, typing) ?: return false
-                heldKey = event.keyCode
-                if (event.repeatCount == 0 || command is WorkspaceCommand.ResizeTile) send(command)
-                return true
-            }
-            KeyEvent.ACTION_UP ->
-                if (event.keyCode == heldKey) {
-                    heldKey = null
-                    return true
-                }
+        if (event.metaState and KeyEvent.META_META_ON != 0) superDelivered = true
+        return when (event.action) {
+            KeyEvent.ACTION_DOWN -> onKeyDown(event, typing)
+            KeyEvent.ACTION_UP -> (event.keyCode == heldKey).also { if (it) heldKey = null }
+            else -> false
         }
-        return false
+    }
+
+    private fun onKeyDown(
+        event: KeyEvent,
+        typing: Boolean,
+    ): Boolean {
+        refresh()
+        val command = keys.resolve(event.keyCode, event.metaState, typing) ?: return false
+        heldKey = event.keyCode
+        if (event.repeatCount == 0 || command.repeats) send(command)
+        return true
     }
 
     fun onGesture(gesture: Gesture) {
@@ -56,10 +66,18 @@ internal class Shortcuts(
     }
 
     private fun refresh() {
-        val bindings = config.value.config?.bindings ?: return
-        if (bindings === source) return
-        source = bindings
-        keys = KeyBindingResolver(bindings)
-        gestures = GestureBindingResolver(bindings)
+        val current = config.value.config ?: return
+        if (current === source) return
+        source = current
+        keys = KeyBindingResolver(current.bindings, current.keyboard.superAlternative)
+        gestures = GestureBindingResolver(current.bindings)
+    }
+
+    companion object {
+        /** Los gestos con atajo en [config]; la UI sólo espera un doble toque si está asignado. */
+        fun boundGestures(config: LauncherConfig?): Set<Gesture> = GestureBindingResolver(config?.bindings.orEmpty()).bound
     }
 }
+
+private val LauncherCommand.repeats: Boolean
+    get() = this is WorkspaceCommand.ResizeTile || this is LauncherCommand.AdjustVolume
