@@ -14,6 +14,9 @@ sealed interface LauncherCommand {
     /** `Super + Escape`: el menú en la página de sistema; si ya está ahí, cerrarlo. */
     data object OpenSystemMenu : LauncherCommand
 
+    /** `Super + K`: la tabla de atajos (plan.md §6.4), generada desde `bindings`. */
+    data object ShowShortcuts : LauncherCommand
+
     /** `Ctrl + Alt + A/Z`: sube ([steps] > 0) o baja el volumen multimedia, con el panel del sistema. */
     data class AdjustVolume(
         val steps: Int,

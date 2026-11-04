@@ -55,6 +55,18 @@ class SuperAlternativeTest {
     }
 
     @Test
+    fun `availability names the reason a chord cannot be typed`() {
+        fun blocked(text: String) = (resolver.availability(chord(text)) as Availability.Blocked).reason
+        assertEquals(BlockReason.AlternativeTwice, blocked("SUPER + ALT + SPACE"))
+        assertEquals(BlockReason.Recents, blocked("SUPER + TAB"))
+        assertEquals(BlockReason.Shadowed, blocked("SUPER + CTRL + A"))
+        assertEquals(
+            BlockReason.NoSuper,
+            (KeyBindingResolver(bindings).availability(chord("SUPER + 1")) as Availability.Blocked).reason,
+        )
+    }
+
+    @Test
     fun `reserved chords say why`() {
         assertEquals(SystemReservedChords.Reason.SuperNotDelivered, SystemReservedChords.reason(chord("SUPER + 1")))
         assertNull(SystemReservedChords.reason(chord("SUPER + 1"), superDelivered = true))

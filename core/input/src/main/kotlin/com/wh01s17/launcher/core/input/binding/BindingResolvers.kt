@@ -34,31 +34,67 @@ class KeyBindingResolver(
     }
 
     /**
-     * Lo que hay que pulsar en este equipo para disparar [chord], o `null` si no se puede (detección
-     * de reservados, plan.md §7 Hito 6). Con [superDelivered] en `false` (lo normal en Android 15),
-     * `SUPER` se sustituye por [superAlternative]; la combinación resultante no puede estar reservada
-     * por el sistema ni tapada por otro atajo que coincida tal cual.
+     * Qué hay que pulsar en este equipo para disparar [chord] (detección de reservados, plan.md §7
+     * Hito 6). Con [superDelivered] en `false` (lo normal en Android 15), `SUPER` se sustituye por
+     * [superAlternative]; la combinación resultante no puede estar reservada por el sistema ni tapada
+     * por otro atajo que coincida tal cual.
      */
-    fun pressFor(
+    fun availability(
         chord: KeyChord,
         superDelivered: Boolean = false,
-    ): KeyChord? {
+    ): Availability {
         val alternative = superAlternative
         val press =
             when {
                 KeyModifier.Super !in chord.modifiers || superDelivered -> chord
-                alternative == null || alternative in chord.modifiers -> return null
+                alternative == null -> return Availability.Blocked(BlockReason.NoSuper)
+                alternative in chord.modifiers -> return Availability.Blocked(BlockReason.AlternativeTwice)
                 else -> chord.copy(modifiers = chord.modifiers - KeyModifier.Super + alternative)
             }
-        val shadowed = press != chord && press in byChord
-        return press.takeIf { !shadowed && SystemReservedChords.reason(press, superDelivered) == null }
+        return when {
+            press != chord && press in byChord -> Availability.Blocked(BlockReason.Shadowed)
+            SystemReservedChords.reason(press, superDelivered) == SystemReservedChords.Reason.Recents ->
+                Availability.Blocked(BlockReason.Recents)
+            else -> Availability.Press(press)
+        }
     }
+
+    /** Lo que hay que pulsar, o `null` si no se puede (ver [availability]). */
+    fun pressFor(
+        chord: KeyChord,
+        superDelivered: Boolean = false,
+    ): KeyChord? = (availability(chord, superDelivered) as? Availability.Press)?.chord
 
     private fun asSuper(chord: KeyChord): KeyChord? {
         val alternative = superAlternative ?: return null
         if (alternative !in chord.modifiers || KeyModifier.Super in chord.modifiers) return null
         return chord.copy(modifiers = chord.modifiers - alternative + KeyModifier.Super)
     }
+}
+
+sealed interface Availability {
+    data class Press(
+        val chord: KeyChord,
+    ) : Availability
+
+    data class Blocked(
+        val reason: BlockReason,
+    ) : Availability
+}
+
+/** Por qué no se puede pulsar un atajo. */
+enum class BlockReason {
+    /** Lleva `SUPER`, Android no lo entrega y no hay modificador alternativo. */
+    NoSuper,
+
+    /** Ya lleva el modificador alternativo (`SUPER + ALT + …` con `ALT`). */
+    AlternativeTwice,
+
+    /** Con el alternativo coincide con otro atajo, que gana. */
+    Shadowed,
+
+    /** `ALT + TAB`: Android abre Recientes. */
+    Recents,
 }
 
 /**
