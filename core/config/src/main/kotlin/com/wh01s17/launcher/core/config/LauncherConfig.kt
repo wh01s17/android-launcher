@@ -1,5 +1,6 @@
 package com.wh01s17.launcher.core.config
 
+import com.wh01s17.launcher.core.input.binding.Binding
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -9,14 +10,16 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 
 /**
- * `launcher.json` (plan.md §6). Se leen `bar`, `general` y `animations`; el resto del archivo se
- * ignora (atajos, fondos y demás llegan en sus hitos, con su migración si hace falta).
+ * `launcher.json` (plan.md §6). Se leen `bar`, `general`, `animations` y `bindings`; el resto del
+ * archivo se ignora (fondos y demás llegan en sus hitos, con su migración si hace falta).
  */
 data class LauncherConfig(
     val version: Int,
     val bar: BarConfig,
     val general: GeneralConfig = GeneralConfig(),
     val animations: AnimationsConfig = AnimationsConfig(),
+    /** Atajos de teclado y gestos (plan.md §6.4), ya combinados con los de fábrica. */
+    val bindings: List<Binding> = emptyList(),
 )
 
 /** `bar` de `launcher.json`, igual que `bar` de `shell.json` del escritorio. */

@@ -27,9 +27,9 @@ sealed interface ParseResult {
 
 /**
  * Lee `launcher.json` (plan.md §6) con mensajes legibles. Es estricto con lo que entiende (tipos
- * y valores de `version`, `bar`, `general` y `animations`) y tolerante con lo que no (claves desconocidas se ignoran, para
- * que una config de una versión futura siga abriéndose). Una config con errores no se aplica a
- * medias: devuelve todos los errores a la vez.
+ * y valores de `version`, `bar`, `general`, `animations` y `bindings`) y tolerante con lo que no
+ * (claves desconocidas se ignoran, para que una config de una versión futura siga abriéndose). Una
+ * config con errores no se aplica a medias: devuelve todos los errores a la vez.
  */
 object ConfigParser {
     /** Versión del esquema que entiende esta build (plan.md §6.2). */
@@ -83,7 +83,8 @@ object ConfigParser {
             }
         val general = GeneralSections.readGeneral(root["general"], fallback?.general ?: GeneralConfig(), errors)
         val animations = GeneralSections.readAnimations(root["animations"], fallback?.animations ?: AnimationsConfig(), errors)
-        return if (version != null && bar != null) LauncherConfig(version, bar, general, animations) else null
+        val bindings = BindingSections.readBindings(root["bindings"], fallback?.bindings.orEmpty(), errors)
+        return if (version != null && bar != null) LauncherConfig(version, bar, general, animations, bindings) else null
     }
 
     private fun readVersion(
