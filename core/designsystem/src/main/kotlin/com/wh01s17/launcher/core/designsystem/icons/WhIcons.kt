@@ -66,6 +66,26 @@ object WhIcons {
     val Bluetooth = icon("Bluetooth", 0xF00AF)
     val Battery = icon("Battery", 0xF0079)
     val BatteryCharging = icon("BatteryCharging", 0xF0085)
+    val BatteryLow = icon("BatteryLow", 0xF007A)
+    val BatteryMedium = icon("BatteryMedium", 0xF007E)
+    val BatteryFull = icon("BatteryFull", 0xF0082)
+
+    /** Un rayo: batería cargando, como el módulo de energía del shell. */
+    val Charging = icon("Charging", 0xF0084)
+    val WifiOff = icon("WifiOff", 0xF092E)
+    val Ethernet = icon("Ethernet", 0xF0200)
+
+    /** Datos móviles: las barras de cobertura (`signal` de la fuente). `md-network` parece un router. */
+    val Cellular = icon("Cellular", 0xF052B)
+    val BluetoothConnected = icon("BluetoothConnected", 0xF00B1)
+    val BluetoothOff = icon("BluetoothOff", 0xF00B2)
+
+    /** No molestar. */
+    val Moon = icon("Moon", 0xF050E)
+
+    /** Ahorro de batería. */
+    val Leaf = icon("Leaf", 0xF032A)
+    val Headphone = icon("Headphone", 0xF02CB)
     val Bell = icon("Bell", 0xF009A)
     val BellOff = icon("BellOff", 0xF009B)
     val Clock = icon("Clock", 0xE383)

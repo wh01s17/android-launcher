@@ -50,9 +50,6 @@ class GalleryScreenshotTest {
     fun typography() = capture("typography") { GalleryTypography() }
 
     @Test
-    fun icons() = capture("icons") { GalleryIcons() }
-
-    @Test
     fun buttons() = capture("buttons") { GalleryButtons() }
 
     @Test

@@ -27,6 +27,18 @@ data class WhSpacing(
     val panelPadding: Dp,
     val popupPadding: Dp,
     val barHeight: Dp,
+    /**
+     * Relleno horizontal de un módulo de la barra. El shell usa 8,5 px (`horizontalMargin`); en un
+     * teléfono de 407 dp no caben los módulos del plan con tanto, así que se reduce.
+     */
+    val barItemPaddingX: Dp,
+    /** Ancho de la celda de un escritorio en la barra (el shell usa 18 px). */
+    val barWorkspaceWidth: Dp,
+    /** Subrayado del escritorio activo (`Workspaces.qml`: 8 × 2 px). */
+    val barUnderlineWidth: Dp,
+    val barUnderlineHeight: Dp,
+    /** Celda de una cuadrícula táctil (calendario): cerca de 48 dp, pero caben siete columnas. */
+    val gridCell: Dp,
     /** Hueco entre tiles (`gaps_in` de `looknfeel.lua`, no sincronizado). */
     val gapsIn: Dp,
     /** Hueco al borde de la pantalla (`gaps_out` de `looknfeel.lua`, no sincronizado). */
@@ -45,6 +57,11 @@ data class WhSpacing(
         private val SHELL_MENU_ROW_HEIGHT = 50.dp
         private val SHELL_MENU_BORDER = 2.dp
         private val SHELL_MENU_WIDTH = 300.dp
+        private val SHELL_UNDERLINE_WIDTH = 8.dp
+        private val SHELL_UNDERLINE_HEIGHT = 2.dp
+        private val BAR_ITEM_PADDING_X = 5.dp
+        private val BAR_WORKSPACE_WIDTH = 26.dp
+        private val GRID_CELL = 44.dp
 
         fun create(fontScale: Float): WhSpacing {
             val s = WhTokens.Spacing
@@ -60,7 +77,13 @@ data class WhSpacing(
                 panelGap = s.panelGap * factor,
                 panelPadding = s.panelPadding * factor,
                 popupPadding = s.popupPadding * factor,
-                barHeight = WhTokens.Bar.sizeVertical * factor,
+                // Una barra superior usa `size-horizontal` (el eje transversal de una barra horizontal).
+                barHeight = WhTokens.Bar.sizeHorizontal * factor,
+                barItemPaddingX = BAR_ITEM_PADDING_X,
+                barWorkspaceWidth = BAR_WORKSPACE_WIDTH,
+                barUnderlineWidth = SHELL_UNDERLINE_WIDTH * factor,
+                barUnderlineHeight = SHELL_UNDERLINE_HEIGHT * factor,
+                gridCell = GRID_CELL,
                 gapsIn = 2.dp,
                 gapsOut = 2.dp,
                 borderSize = WhTokens.Controls.normalBorderWidth,
