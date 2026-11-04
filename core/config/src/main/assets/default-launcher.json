@@ -23,14 +23,7 @@
         { "id": "wh01s17.network" },
         { "id": "wh01s17.bluetooth" },
         { "id": "wh01s17.audio" },
-        {
-          "id": "wh01s17.power",
-          "classColors": {
-            "charging": "#84c959",
-            "low": "#e8b53f",
-            "critical": "#ff6b66"
-          }
-        }
+        { "id": "wh01s17.power" }
       ]
     }
   }

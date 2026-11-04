@@ -30,6 +30,9 @@ La barra sigue a la del escritorio (`shell.json`): mismos nombres de opciones (`
 
 - `transparent` (por defecto `true`): sin fondo propio. `outline`: contorno con el borde activo.
 - `centerAnchor`: el módulo que se mantiene centrado en la pantalla (el reloj, normalmente).
+- **Sólo cambia lo que escribes:** lo que falta sale de la config de fábrica, clave a clave.
+  `{"version": 1, "bar": {"outline": true}}` sólo enciende el contorno; un grupo de `layout` que no
+  aparece se conserva, y `"right": []` lo vacía.
 - Las claves que no se conocen se ignoran. Una config con errores **no se aplica**: se conserva la
   anterior, la barra muestra un icono rojo ⓘ y los errores salen con su ruta
   (`bar.layout.left[2].id: falta`). Si el archivo se arregla, el aviso desaparece.

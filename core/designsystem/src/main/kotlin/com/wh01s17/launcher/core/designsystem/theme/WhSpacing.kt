@@ -59,9 +59,12 @@ data class WhSpacing(
         private val SHELL_MENU_WIDTH = 300.dp
         private val SHELL_UNDERLINE_WIDTH = 8.dp
         private val SHELL_UNDERLINE_HEIGHT = 2.dp
-        private val BAR_ITEM_PADDING_X = 5.dp
-        private val BAR_WORKSPACE_WIDTH = 26.dp
-        private val GRID_CELL = 44.dp
+
+        // A escala 1; con la fuente ×1,25 de fábrica dan 5, 26 y 44 dp. Escalan con el texto para
+        // que un número de dos cifras o un nombre de día no se corten con la fuente grande.
+        private val BAR_ITEM_PADDING_X = 4.dp
+        private val BAR_WORKSPACE_WIDTH = 20.8.dp
+        private val GRID_CELL = 35.2.dp
 
         fun create(fontScale: Float): WhSpacing {
             val s = WhTokens.Spacing
@@ -79,11 +82,11 @@ data class WhSpacing(
                 popupPadding = s.popupPadding * factor,
                 // Una barra superior usa `size-horizontal` (el eje transversal de una barra horizontal).
                 barHeight = WhTokens.Bar.sizeHorizontal * factor,
-                barItemPaddingX = BAR_ITEM_PADDING_X,
-                barWorkspaceWidth = BAR_WORKSPACE_WIDTH,
+                barItemPaddingX = BAR_ITEM_PADDING_X * factor,
+                barWorkspaceWidth = BAR_WORKSPACE_WIDTH * factor,
                 barUnderlineWidth = SHELL_UNDERLINE_WIDTH * factor,
                 barUnderlineHeight = SHELL_UNDERLINE_HEIGHT * factor,
-                gridCell = GRID_CELL,
+                gridCell = GRID_CELL * factor,
                 gapsIn = 2.dp,
                 gapsOut = 2.dp,
                 borderSize = WhTokens.Controls.normalBorderWidth,

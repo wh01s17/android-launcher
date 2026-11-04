@@ -90,6 +90,17 @@ class WhThemeValuesTest {
     }
 
     @Test
+    fun `bar cells grow with the font`() {
+        val normal = WhSpacing.create(1.25f)
+        assertEquals(26f, normal.barWorkspaceWidth.value, 0.001f)
+        assertEquals(44f, normal.gridCell.value, 0.001f)
+        assertEquals(5f, normal.barItemPaddingX.value, 0.001f)
+        val large = WhSpacing.create(1.5f)
+        assertEquals(26f * 1.5f / 1.25f, large.barWorkspaceWidth.value, 0.001f)
+        assertEquals(44f * 1.5f / 1.25f, large.gridCell.value, 0.001f)
+    }
+
+    @Test
     fun `menu measures follow Menu qml`() {
         val s = WhSpacing.create(1.25f)
         assertEquals(62.5f, s.menuRowHeight.value, 0.001f)

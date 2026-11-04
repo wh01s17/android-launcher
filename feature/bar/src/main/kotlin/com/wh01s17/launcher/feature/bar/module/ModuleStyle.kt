@@ -43,7 +43,7 @@ object ModuleStyleResolver {
         classes: List<String>,
         defaults: ModuleDefaults,
     ): ModuleStyle {
-        val colors = defaults.classColors.mapKeys { it.key } + configuredColors(settings)
+        val colors = defaults.classColors + configuredColors(settings)
         val color = classes.firstNotNullOfOrNull { colors[it] } ?: colors[DEFAULT_CLASS] ?: defaults.color
         val dim = settings.stringList(DIM_CLASSES)?.toSet() ?: defaults.dimClasses
         return ModuleStyle(

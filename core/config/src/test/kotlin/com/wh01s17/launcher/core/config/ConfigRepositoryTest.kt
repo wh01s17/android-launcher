@@ -1,6 +1,7 @@
 package com.wh01s17.launcher.core.config
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -52,7 +53,7 @@ class ConfigRepositoryTest {
     fun `a valid user config replaces the factory one`() =
         runTest {
             val repo = repository()
-            source.user = """{"version":1,"bar":{"layout":{"left":[{"id":"core.menu"}]}}}"""
+            source.user = """{"version":1,"bar":{"layout":{"left":[{"id":"core.menu"}],"center":[],"right":[]}}}"""
             repo.reload()
             assertEquals(
                 listOf("core.menu"),
@@ -66,7 +67,7 @@ class ConfigRepositoryTest {
     fun `an invalid user config keeps the last good one and reports the errors`() =
         runTest {
             val repo = repository()
-            source.user = """{"version":1,"bar":{"layout":{"left":[{"id":"core.menu"}]}}}"""
+            source.user = """{"version":1,"bar":{"layout":{"left":[{"id":"core.menu"}],"center":[],"right":[]}}}"""
             repo.reload()
             source.user = """{"version":1,"bar":{"outline":"si"}}"""
             repo.reload()
@@ -122,6 +123,28 @@ class ConfigRepositoryTest {
                     .path,
             )
             assertTrue(repo.state.value.config != null)
+        }
+
+    @Test
+    fun `the factory config is read once and reloads run one after another`() =
+        runTest {
+            var defaultReads = 0
+            val counting =
+                object : ConfigSource {
+                    override fun readUserConfig(): String? = source.readUserConfig()
+
+                    override fun readDefaultConfig() = source.default.also { defaultReads++ }
+                }
+            val repo = ConfigRepository(counting, StandardTestDispatcher(testScheduler))
+            val jobs = List(3) { backgroundScope.launch { repo.reload() } }
+            jobs.forEach { it.join() }
+            repo.reload()
+            assertEquals(1, defaultReads)
+            assertEquals(
+                8,
+                repo.state.value.config!!
+                    .bar.layout.all.size,
+            )
         }
 
     @Test

@@ -38,8 +38,9 @@ object ConfigParser {
     private val json = Json
 
     /**
-     * [fallback] da las secciones que faltan (`bar`): así `{"version": 1}` sigue teniendo barra.
-     * La config de fábrica se lee sin fallback y por tanto debe traer todo.
+     * [fallback] da lo que falta, clave a clave: sin `bar`, la barra entera; con `bar` pero sin
+     * `layout` o sin un grupo, esos valores. Así `{"bar": {"outline": true}}` sólo cambia el
+     * contorno y no vacía la barra. La config de fábrica se lee sin fallback y debe traer todo.
      */
     fun parse(
         text: String,
@@ -77,7 +78,7 @@ object ConfigParser {
         val bar =
             when (val element = root["bar"]) {
                 null -> fallback?.bar.also { if (it == null) errors += ConfigError("bar", "falta") }
-                is JsonObject -> readBar(element, errors)
+                is JsonObject -> readBar(element, fallback?.bar ?: BarConfig(), errors)
                 else -> null.also { errors += ConfigError("bar", "debe ser un objeto") }
             }
         return if (version != null && bar != null) LauncherConfig(version, bar) else null
@@ -102,17 +103,24 @@ object ConfigParser {
 
     private fun readBar(
         bar: JsonObject,
+        defaults: BarConfig,
         errors: MutableList<ConfigError>,
-    ): BarConfig {
-        val defaults = BarConfig()
-        return BarConfig(
+    ): BarConfig =
+        BarConfig(
             position = readPosition(bar["position"], errors) ?: defaults.position,
             transparent = ConfigValues.readBoolean(bar["transparent"], "bar.transparent", errors) ?: defaults.transparent,
             outline = ConfigValues.readBoolean(bar["outline"], "bar.outline", errors) ?: defaults.outline,
-            centerAnchor = ConfigValues.readString(bar["centerAnchor"], "bar.centerAnchor", errors),
-            layout = readLayout(bar["layout"], errors) ?: defaults.layout,
+            centerAnchor =
+                if (bar.containsKey(
+                        "centerAnchor",
+                    )
+                ) {
+                    ConfigValues.readString(bar["centerAnchor"], "bar.centerAnchor", errors)
+                } else {
+                    defaults.centerAnchor
+                },
+            layout = readLayout(bar["layout"], defaults.layout, errors),
         )
-    }
 
     private fun readPosition(
         element: JsonElement?,
@@ -126,29 +134,31 @@ object ConfigParser {
         return position
     }
 
+    /** Un grupo que falta conserva el de [defaults]; uno vacío (`[]`) lo vacía de verdad. */
     private fun readLayout(
         element: JsonElement?,
+        defaults: BarLayoutConfig,
         errors: MutableList<ConfigError>,
-    ): BarLayoutConfig? =
+    ): BarLayoutConfig =
         when (element) {
-            null -> null
+            null -> defaults
             is JsonObject ->
                 BarLayoutConfig(
-                    left = readGroup(element["left"], "left", errors),
-                    center = readGroup(element["center"], "center", errors),
-                    right = readGroup(element["right"], "right", errors),
+                    left = readGroup(element["left"], "left", errors) ?: defaults.left,
+                    center = readGroup(element["center"], "center", errors) ?: defaults.center,
+                    right = readGroup(element["right"], "right", errors) ?: defaults.right,
                 )
-            else -> null.also { errors += ConfigError("bar.layout", "debe ser un objeto") }
+            else -> defaults.also { errors += ConfigError("bar.layout", "debe ser un objeto") }
         }
 
     private fun readGroup(
         element: JsonElement?,
         name: String,
         errors: MutableList<ConfigError>,
-    ): List<BarModuleConfig> {
+    ): List<BarModuleConfig>? {
         val path = "bar.layout.$name"
         return when (element) {
-            null -> emptyList()
+            null -> null
             is JsonArray -> element.mapIndexedNotNull { index, entry -> readModule(entry, "$path[$index]", errors) }
             else -> emptyList<BarModuleConfig>().also { errors += ConfigError(path, "debe ser una lista") }
         }

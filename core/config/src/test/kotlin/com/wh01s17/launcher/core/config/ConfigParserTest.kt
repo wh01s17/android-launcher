@@ -77,6 +77,22 @@ class ConfigParserTest {
     }
 
     @Test
+    fun `a partial bar only changes what it says and keeps the rest of the fallback`() {
+        val fallback = success(File("src/main/assets/default-launcher.json").readText())
+        val outline = success("""{"version":1,"bar":{"outline":true}}""", fallback).bar
+        assertEquals(true, outline.outline)
+        assertEquals(fallback.bar.layout, outline.layout)
+        assertEquals("wh01s17.clock", outline.centerAnchor)
+        // Un grupo nuevo sustituye sólo ese grupo; `[]` lo vacía.
+        val layout = success("""{"version":1,"bar":{"layout":{"right":[]}}}""", fallback).bar.layout
+        assertEquals(fallback.bar.layout.left, layout.left)
+        assertEquals(fallback.bar.layout.center, layout.center)
+        assertTrue(layout.right.isEmpty())
+        // `centerAnchor` explícito manda, aunque sea otro.
+        assertEquals("core.menu", success("""{"version":1,"bar":{"centerAnchor":"core.menu"}}""", fallback).bar.centerAnchor)
+    }
+
+    @Test
     fun `a missing bar comes from the fallback, and without a fallback is an error`() {
         val fallback = success("""{"version":1,"bar":{"outline":true}}""")
         assertEquals(true, success("""{"version":1}""", fallback).bar.outline)

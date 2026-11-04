@@ -37,15 +37,12 @@ class BluetoothSource(
             Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
                 context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
 
-    override fun observe(): Flow<BluetoothStatus> {
-        val actions =
-            buildList {
-                add(BluetoothAdapter.ACTION_STATE_CHANGED)
-                // Esta difusión exige el permiso en Android 12+; sin él no se registra.
-                if (canSeeConnections) add(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
-            }
-        return context.broadcastState(intentFilterOf(*actions.toTypedArray())) { current() }
-    }
+    // Las conexiones se escuchan siempre: sin el permiso Android no entrega la difusión, y si el
+    // usuario lo concede con la barra en pantalla empieza a llegar sin volver a registrar nada.
+    override fun observe(): Flow<BluetoothStatus> =
+        context.broadcastState(intentFilterOf(BluetoothAdapter.ACTION_STATE_CHANGED, BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
+            current()
+        }
 
     // Los dos métodos que exigen BLUETOOTH_CONNECT sólo se llaman si `canSeeConnections`.
     @SuppressLint("MissingPermission")

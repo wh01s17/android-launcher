@@ -47,20 +47,26 @@ class NetworkSource(
 
     override fun observe(): Flow<NetworkState> =
         callbackFlow {
+            // La red que se está mostrando: un `onLost` tardío de otra red no debe ponerla a cero.
+            var current: Network? = connectivity.activeNetwork
             val callback =
                 object : ConnectivityManager.NetworkCallback() {
                     override fun onCapabilitiesChanged(
                         network: Network,
                         capabilities: NetworkCapabilities,
                     ) {
+                        current = network
                         trySend(capabilities.toState())
                     }
 
                     override fun onLost(network: Network) {
+                        if (network != current) return
+                        current = null
                         trySend(NetworkState.Offline)
                     }
                 }
-            trySend(NetworkState.Offline)
+            // El valor de partida es el real (no un «sin conexión» que parpadearía al volver al inicio).
+            trySend(current?.let(connectivity::getNetworkCapabilities)?.toState() ?: NetworkState.Offline)
             connectivity.registerDefaultNetworkCallback(callback)
             awaitClose { connectivity.unregisterNetworkCallback(callback) }
         }.conflate().distinctUntilChanged()

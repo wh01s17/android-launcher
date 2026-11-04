@@ -4,6 +4,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
@@ -37,13 +39,20 @@ class ConfigRepository(
      * Lee de nuevo la config. Orden: si hay `launcher.json` y es válido, se usa; si no, se conserva
      * la última config buena (o la de fábrica la primera vez) y se anotan los errores.
      */
-    suspend fun reload() {
-        val next = withContext(ioDispatcher) { load(mutableState.value.config) }
-        mutableState.value = next
-    }
+    suspend fun reload() =
+        // Las recargas van en fila: si no, una que leyó el archivo antes podría terminar después y
+        // pisar a una más reciente (arranque y `onResume` llegan casi a la vez).
+        reloadLock.withLock {
+            val next = withContext(ioDispatcher) { load(mutableState.value.config) }
+            mutableState.value = next
+        }
+
+    private val reloadLock = Mutex()
+
+    /** La config de fábrica no cambia mientras la app corre: se lee y se parsea una vez. */
+    private val defaults: LauncherConfig by lazy { parseDefaults() }
 
     private fun load(lastGood: LauncherConfig?): ConfigState {
-        val defaults = parseDefaults()
         val keep = lastGood ?: defaults
         return try {
             when (val text = source.readUserConfig()) {

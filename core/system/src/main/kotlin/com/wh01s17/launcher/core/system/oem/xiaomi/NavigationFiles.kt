@@ -10,10 +10,11 @@ import java.util.Properties
  * escritor**, escrito de forma atómica (temporal + `rename`) y leído de nuevo en cada decisión.
  */
 class NavigationFiles(
-    directory: File,
+    /** Carpeta de los archivos; quien quiera enterarse de cambios la vigila (`FileObserver`). */
+    val directory: File,
 ) {
     private val prefsFile = File(directory, "navigation-mode.properties")
-    private val statusFile = File(directory, "navigation-status.properties")
+    private val statusFile = File(directory, STATUS_FILE_NAME)
 
     /** Lo escribe el launcher (asistente de compatibilidad). */
     fun readPrefs(): GestureModePrefs {
@@ -72,12 +73,14 @@ class NavigationFiles(
         if (!temp.renameTo(file)) throw IOException("cannot replace $file")
     }
 
-    private companion object {
-        const val ENABLED = "enabled"
-        const val HIDE_LINE = "hideGestureLine"
-        const val PREVIOUS_LINE = "previousGestureLine"
-        const val STATUS = "status"
-        const val AT = "at"
+    companion object {
+        /** Lo escribe el proceso de navegación con temporal + `rename`: llega como `MOVED_TO`. */
+        const val STATUS_FILE_NAME = "navigation-status.properties"
+        private const val ENABLED = "enabled"
+        private const val HIDE_LINE = "hideGestureLine"
+        private const val PREVIOUS_LINE = "previousGestureLine"
+        private const val STATUS = "status"
+        private const val AT = "at"
     }
 }
 

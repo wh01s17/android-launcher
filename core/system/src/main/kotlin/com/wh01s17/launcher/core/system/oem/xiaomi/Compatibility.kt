@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.database.ContentObserver
 import android.net.Uri
+import android.os.FileObserver
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -79,8 +80,26 @@ class AndroidCompatibilityGateway(
                 Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES),
             )
         uris.forEach { resolver.registerContentObserver(it, false, observer) }
-        return AutoCloseable { resolver.unregisterContentObserver(observer) }
+        // La última decisión de la capa 2 (p. ej. «se rindió») la escribe `:nav` en un archivo, sin
+        // tocar ningún ajuste: se vigila también, o el aviso no llegaría hasta otro cambio.
+        val statusWatcher =
+            object : FileObserver(compat.files.directory, FileObserver.MOVED_TO or FileObserver.CLOSE_WRITE) {
+                override fun onEvent(
+                    event: Int,
+                    path: String?,
+                ) {
+                    if (path == NavigationFiles.STATUS_FILE_NAME) mainHandler.post(onChange)
+                }
+            }
+        compat.files.directory.mkdirs()
+        statusWatcher.startWatching()
+        return AutoCloseable {
+            resolver.unregisterContentObserver(observer)
+            statusWatcher.stopWatching()
+        }
     }
+
+    private val mainHandler = Handler(Looper.getMainLooper())
 }
 
 /**

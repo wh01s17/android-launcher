@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -125,11 +127,14 @@ private fun NoticeItem(notice: BarNotice) {
 }
 
 /** Un arrastre hacia abajo de [threshold] píxeles, una sola vez por gesto (plan.md §3). */
+@Composable
 private fun Modifier.swipeDownToOpenShade(
     threshold: Float,
     onSwipe: () -> Unit,
-): Modifier =
-    pointerInput(threshold) {
+): Modifier {
+    // El gesto vive más que una composición: se lee siempre el `onSwipe` más reciente.
+    val currentOnSwipe by rememberUpdatedState(onSwipe)
+    return pointerInput(threshold) {
         var travelled = 0f
         var fired = false
         detectVerticalDragGestures(
@@ -142,8 +147,9 @@ private fun Modifier.swipeDownToOpenShade(
                 if (!fired && travelled > threshold) {
                     fired = true
                     change.consume()
-                    onSwipe()
+                    currentOnSwipe()
                 }
             },
         )
     }
+}

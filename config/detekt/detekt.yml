@@ -8,6 +8,10 @@ naming:
   FunctionNaming:
     ignoreAnnotated: ['Composable']
 style:
+  # Las cláusulas de guarda (`if (…) return x` al principio) son la forma más clara de las
+  # operaciones del motor de tiling; no cuentan como returns de más.
+  ReturnCount:
+    excludeGuardClauses: true
   # Igual que max_line_length de .editorconfig (ktlint).
   MaxLineLength:
     maxLineLength: 140
