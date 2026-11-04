@@ -3,6 +3,9 @@ package com.wh01s17.launcher.feature.menu.panel
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
@@ -17,13 +20,18 @@ internal class MenuCallbacks(
     val search: (SearchIntent) -> Unit,
 )
 
-/** El mismo recorrido para toque, IME y teclado. No ejecuta acciones de Android. */
+/**
+ * El mismo recorrido para toque, IME y teclado. No ejecuta acciones de Android. [held] son las
+ * teclas cuya pulsación se vio (sobrevive a las recomposiciones): sólo se actúa al soltar una de
+ * ellas, así soltar el Escape de `ALT + ESCAPE` no vuelve atrás.
+ */
 internal class MenuNavigation(
     private val page: MenuPage,
     private val search: MenuSearchState,
     private val selected: Int,
     private val select: (Int) -> Unit,
     private val callbacks: MenuCallbacks,
+    private val held: MutableSet<Key> = mutableSetOf(),
 ) {
     private val entries = menuEntries(page)
     val searching = search.query.isNotEmpty() || page == MenuPage.Apps
@@ -60,8 +68,10 @@ internal class MenuNavigation(
         }
     }
 
+    /** Con `ALT`, `CTRL` o Meta es un atajo de `bindings` (docs/bindings.md): sigue hacia la actividad. */
     fun onKey(event: KeyEvent): Boolean =
         when {
+            event.type == KeyEventType.KeyDown && (event.isAltPressed || event.isCtrlPressed || event.isMetaPressed) -> false
             event.key == Key.Escape -> released(event, ::back)
             event.key == Key.Menu || (event.key == Key.F10 && event.isShiftPressed) -> released(event, ::contextMenu)
             event.key in HORIZONTAL && search.query.isEmpty() -> released(event) { horizontal(event.key) }
@@ -86,10 +96,12 @@ internal class MenuNavigation(
     private fun released(
         event: KeyEvent,
         action: () -> Unit,
-    ): Boolean {
-        if (event.type == KeyEventType.KeyUp) action()
-        return true
-    }
+    ): Boolean =
+        when (event.type) {
+            KeyEventType.KeyDown -> held.add(event.key).let { true }
+            KeyEventType.KeyUp -> held.remove(event.key).also { if (it) action() }
+            else -> true
+        }
 
     companion object {
         private val HORIZONTAL = setOf(Key.DirectionLeft, Key.DirectionRight)

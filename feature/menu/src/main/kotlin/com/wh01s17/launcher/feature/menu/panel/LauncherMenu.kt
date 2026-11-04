@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onPreInterceptKeyBeforeSoftKeyboard
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.pointerInput
@@ -72,7 +73,9 @@ fun LauncherMenu(
             loaded = search.loaded && text == search.query,
         )
     var selected by remember(page, text) { mutableIntStateOf(0) }
-    val navigation = MenuNavigation(page, currentSearch, selected, { selected = it }, MenuCallbacks(onNavigate, onBack, onAction, onSearch))
+    val held = remember { mutableSetOf<Key>() }
+    val navigation =
+        MenuNavigation(page, currentSearch, selected, { selected = it }, MenuCallbacks(onNavigate, onBack, onAction, onSearch), held)
     BackHandler(onBack = navigation::back)
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         WhScrim(onClick = onClose, clickLabel = stringResource(R.string.drawer_close))

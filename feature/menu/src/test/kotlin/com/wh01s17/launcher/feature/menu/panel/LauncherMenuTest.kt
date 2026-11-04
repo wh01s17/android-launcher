@@ -55,6 +55,27 @@ class LauncherMenuTest {
         assertEquals(MenuAction.Apps, action)
     }
 
+    /** `ALT + ESCAPE` es el atajo del menú de sistema: el menú no vuelve atrás ni al soltar Escape. */
+    @Test
+    fun shortcutChordsPassThrough() {
+        var page by mutableStateOf<MenuPage?>(MenuPage.System)
+        composeRule.setContent {
+            WhTheme { LauncherMenu(page, { page = it }, { page = MenuPage.Root }, { page = null }, {}) }
+        }
+        composeRule.onRoot().performKeyInput {
+            keyDown(Key.AltLeft)
+            keyDown(Key.Escape)
+            keyUp(Key.AltLeft)
+            keyUp(Key.Escape)
+        }
+        assertEquals(MenuPage.System, page)
+        composeRule.onRoot().performKeyInput {
+            keyDown(Key.Escape)
+            keyUp(Key.Escape)
+        }
+        assertEquals(MenuPage.Root, page)
+    }
+
     @Test
     @Config(qualifiers = "w904dp-h407dp-xxhdpi")
     fun shortWindowKeepsLastEntryReachable() {
