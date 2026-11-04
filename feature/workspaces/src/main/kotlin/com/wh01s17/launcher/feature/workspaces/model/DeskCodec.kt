@@ -98,22 +98,30 @@ object DeskCodec {
                         },
                     )
                 is TileContent.Widget -> put("widget", content.appWidgetId)
+                is TileContent.Native -> put("native", content.id)
             }
         }
 
     private fun decodeTile(element: JsonElement): Pair<TileId, TileContent> {
         val json = element as? JsonObject ?: fail("tiles must be objects")
         val id = (json["id"] as? JsonPrimitive)?.longOrNull ?: fail("a tile has no id")
-        (json["widget"] as? JsonPrimitive)?.takeIf { !it.isString }?.intOrNull?.let { return TileId(id) to TileContent.Widget(it) }
-        val app = json["app"] as? JsonObject ?: fail("tile $id has no content")
-        val key =
-            AppKey(
-                packageName = app.string("package") ?: fail("tile $id has no package"),
-                className = app.string("class") ?: fail("tile $id has no class"),
-                userSerial = (app["user"] as? JsonPrimitive)?.longOrNull ?: fail("tile $id has no user"),
-            )
-        return TileId(id) to TileContent.App(key)
+        val content =
+            json.int("widget")?.let(TileContent::Widget)
+                ?: json.string("native")?.let(TileContent::Native)
+                ?: decodeApp(json["app"] as? JsonObject ?: fail("tile $id has no content"), id)
+        return TileId(id) to content
     }
+
+    private fun decodeApp(
+        app: JsonObject,
+        id: Long,
+    ) = TileContent.App(
+        AppKey(
+            packageName = app.string("package") ?: fail("tile $id has no package"),
+            className = app.string("class") ?: fail("tile $id has no class"),
+            userSerial = (app["user"] as? JsonPrimitive)?.longOrNull ?: fail("tile $id has no user"),
+        ),
+    )
 
     private fun JsonObject.int(key: String): Int? = (this[key] as? JsonPrimitive)?.takeIf { !it.isString }?.intOrNull
 

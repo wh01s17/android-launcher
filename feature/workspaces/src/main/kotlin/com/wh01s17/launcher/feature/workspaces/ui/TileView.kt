@@ -71,6 +71,7 @@ internal fun TileView(
         val body = Modifier.fillMaxWidth().weight(1f)
         when (info) {
             is TileInfo.Widget -> WidgetBody(info, editing, onLongPress, body)
+            is TileInfo.Native -> NativeBody(info, editing, body)
             else -> TileBody(info as TileInfo.App?, appsLoaded, iconLoader, body)
         }
     }
@@ -90,6 +91,22 @@ private fun WidgetBody(
     } else {
         Box(modifier, contentAlignment = Alignment.Center) {
             WhText(stringResource(R.string.tile_widget), style = WhTheme.typography.bodySmall, color = WhTheme.colors.darkForeground)
+        }
+    }
+}
+
+@Composable
+private fun NativeBody(
+    info: TileInfo.Native,
+    editing: Boolean,
+    modifier: Modifier,
+) {
+    val renderer = LocalWidgetRenderer.current
+    if (renderer != null) {
+        renderer.Native(info.id, interactive = !editing, modifier = modifier)
+    } else {
+        Box(modifier, contentAlignment = Alignment.Center) {
+            WhText(info.id, style = WhTheme.typography.bodySmall, color = WhTheme.colors.darkForeground)
         }
     }
 }
@@ -184,6 +201,7 @@ private fun tabLabel(info: TileInfo?): String =
     when (info) {
         is TileInfo.App -> info.app?.label ?: info.key.packageName
         is TileInfo.Widget -> stringResource(R.string.tile_widget)
+        is TileInfo.Native -> info.id
         null -> ""
     }
 

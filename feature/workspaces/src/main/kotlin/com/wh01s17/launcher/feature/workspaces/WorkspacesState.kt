@@ -30,6 +30,11 @@ sealed interface TileInfo {
     data class Widget(
         val appWidgetId: Int,
     ) : TileInfo
+
+    /** Un widget propio de wh01s17; también lo pinta el renderer de la app. */
+    data class Native(
+        val id: String,
+    ) : TileInfo
 }
 
 enum class WorkspaceMessage { NotInstalled, ProfilePaused, ProfileResumeRequested, LaunchFailed }

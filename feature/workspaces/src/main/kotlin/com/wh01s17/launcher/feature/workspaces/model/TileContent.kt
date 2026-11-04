@@ -19,4 +19,12 @@ sealed interface TileContent {
     data class Widget(
         val appWidgetId: Int,
     ) : TileContent
+
+    /**
+     * Un widget propio de wh01s17 (reloj, pomodoro, metrónomo, uso del sistema, TIDAL…), por su
+     * nombre (`"pomodoro"`). Lo pinta el [com.wh01s17.launcher.feature.workspaces.ui.WidgetRenderer].
+     */
+    data class Native(
+        val id: String,
+    ) : TileContent
 }
