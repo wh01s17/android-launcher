@@ -106,6 +106,17 @@ Quedan fuera, con su motivo (plan.md §3):
 | `edit.toggle` | — | Entra o sale del modo edición |
 | `none` | — | Quita un atajo de fábrica |
 
+## Editor (Ajustes → Atajos)
+
+En la tabla de `Super + K`, tocar un atajo abre el editor: pulsa la combinación nueva (se guarda tal
+cual se pulsa: `ALT + J`, no `SUPER + J`), o `quitar`. Escape sin modificadores cancela. Si la
+combinación ya era de otro atajo, se avisa y, al guardar, el otro la pierde. Los gestos no se
+capturan: sólo se pueden quitar. `restablecer los de fábrica` borra `bindings` del archivo.
+
+El editor escribe en `files/config/launcher.json` sólo la diferencia con la fábrica (`"none"` para
+los que se quitan) y conserva el resto del archivo, reescrito con sangría. Si el archivo tiene
+errores, no escribe nada y lo dice: corrígelo antes a mano.
+
 ## De fábrica
 
 Copiados de `bindings/tiling.lua` de los dotfiles, sólo con los comandos que ya existen
