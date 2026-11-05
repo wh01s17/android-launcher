@@ -5,6 +5,9 @@ import com.wh01s17.launcher.core.designsystem.palette.PaletteHost
 import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.di.AppContainer
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
@@ -18,13 +21,11 @@ class LauncherApplication :
     lateinit var container: AppContainer
         private set
 
-    override val palette: PlayerPalette
+    override val palettes: Flow<PlayerPalette>
         get() =
-            TidalampPalettes.byName(
-                container.configRepository.state.value.config
-                    ?.appearance
-                    ?.palette,
-            )
+            container.configRepository.state
+                .map { TidalampPalettes.byName(it.config?.appearance?.palette) }
+                .distinctUntilChanged()
 
     override fun onCreate() {
         super.onCreate()

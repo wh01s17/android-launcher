@@ -8,14 +8,14 @@ import androidx.activity.ComponentActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.wh01s17.launcher.core.designsystem.palette.paletteOf
+import com.wh01s17.launcher.core.designsystem.palette.accentsOf
 import com.wh01s17.launcher.core.designsystem.screensaver.WhSpinView
 
-/** Explicit preview; the automatic HOME idle mode uses the same view in its own overlay. */
+/** Vista previa a petición; la inactividad de HOME usa la misma vista en su propia capa. */
 class ScreensaverActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(WhSpinView(this, paletteOf(application).accent))
+        setContentView(WhSpinView(this, accents = accentsOf(application)))
         WindowCompat.getInsetsController(window, window.decorView).apply {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             hide(WindowInsetsCompat.Type.systemBars())

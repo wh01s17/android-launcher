@@ -17,17 +17,20 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.min
 import kotlin.math.sin
 
-/** ASCII frames are rendered off the UI thread, only while this view is visible and attached. */
-@Suppress("MagicNumber") // Camera timing and relative framing, independent of Android density.
+/** Los fotogramas ASCII se calculan fuera del hilo de UI y sólo mientras la vista se ve y está adjunta. */
+@Suppress("MagicNumber") // Tiempos de cámara y encuadre relativo, independientes de la densidad.
 class WhSpinView(
     context: Context,
     accent: Color = WhTokens.Colors.accent,
+    /** Si llega, la W sigue sus cambios mientras se ve (la paleta puede cargarse después). */
+    private val accents: Flow<Color>? = null,
 ) : View(context) {
     private val paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -42,6 +45,14 @@ class WhSpinView(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        accents?.let { flow ->
+            scope?.launch {
+                flow.collect {
+                    paint.color = it.toArgb()
+                    invalidate()
+                }
+            }
+        }
         animateFrames()
     }
 
