@@ -255,6 +255,10 @@ class MainActivity : ComponentActivity() {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (shortcuts.onKeyEvent(event, typing = menu.page.value != null)) return true
         if (event.keyCode != KeyEvent.KEYCODE_ESCAPE) return super.dispatchKeyEvent(event)
+        if (widgets.pickerOpen) {
+            if (event.action == KeyEvent.ACTION_UP && !event.isCanceled) widgets.closePicker()
+            return true
+        }
         if (menu.page.value == null) return super.dispatchKeyEvent(event)
         if (event.action == KeyEvent.ACTION_UP && !event.isCanceled) menuController.back()
         return true

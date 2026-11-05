@@ -2,6 +2,7 @@ package com.wh01s17.launcher.widgets
 
 import android.Manifest
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -98,6 +99,15 @@ internal class HomeWidgets(
         picking = true
     }
 
+    /** Escape del teclado físico: cierra el selector si está abierto (`true` si lo cerró). */
+    fun closePicker(): Boolean {
+        if (!picking) return false
+        picking = false
+        return true
+    }
+
+    val pickerOpen: Boolean get() = picking
+
     fun onConfigureResult(
         requestCode: Int,
         resultCode: Int,
@@ -106,6 +116,8 @@ internal class HomeWidgets(
     @Composable
     fun Picker() {
         if (!picking) return
+        // Atrás (gesto, botón o Escape) cierra el selector, como cualquier otra ventana del inicio.
+        BackHandler { picking = false }
         WidgetPicker(
             onPick = { provider ->
                 picking = false
