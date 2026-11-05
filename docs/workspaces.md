@@ -114,13 +114,15 @@ tile se queda con «widget no disponible». En `files/state/workspaces.json` se 
 
 ### Widgets propios (wh01s17)
 
-En el selector, la sección «wh01s17» añade widgets propios, guardados como `{"native": "tidal"}`:
+El selector tiene un buscador como el del menú (sin tildes ni mayúsculas, por nombre del widget o
+de su app); Enter añade el primero. La sección «wh01s17» añade widgets propios, guardados como
+`{"native": "tidal"}`:
 
 | Widget | Qué hace |
 | --- | --- |
 | TIDAL (tidalamp nova) | Carátula, tiempo, canción, avance (tocar salta) y ⏮ ⏯ ■ ⏭. Pide el acceso a notificaciones (sólo lee la sesión de música). Tocar «▍ tidalamp» cambia de paleta (las de tidalamp; *phosphor* de fábrica) |
 | Pomodoro | Sistemas de `pomodoro.sh` (40/10, 25/5, 50/10, 90/20), iniciar/pausar, saltar, reiniciar, ±1 min; sigue contando con la app cerrada |
-| Metrónomo | 40–240 BPM, tap tempo, compás y subdivisiones de `wh01s17.metronome`; acento en el primer tiempo |
+| Metrónomo | 40–240 BPM (tocar el número lo deja escribir con el teclado), tap tempo, compás y subdivisiones de `wh01s17.metronome`; acento en el primer tiempo |
 | Reloj y calendario | Hora, fecha y la semana de lunes a domingo |
 | Uso del sistema | RAM y almacenamiento, en amarillo por encima del 80 % |
 

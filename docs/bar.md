@@ -41,15 +41,26 @@ La barra sigue a la del escritorio (`shell.json`): mismos nombres de opciones (`
 ## Barra de fábrica
 
 La barra de estado de Android sigue visible (se probó ocultarla y quedaba peor), así que la de
-fábrica no repite lo que ya muestra: hora, red, bluetooth y batería. Queda el menú y los
-escritorios a la izquierda y, a la derecha, los avisos, la fecha (`ddd d MMM`; mantener pulsado
-alterna a `HH:mm`) y el volumen. `wh01s17.network`, `wh01s17.bluetooth` y `wh01s17.power` siguen
+fábrica no repite lo que ya muestra: hora, red, bluetooth y batería. Queda el menú, los
+escritorios y el pomodoro a la izquierda y, a la derecha, los avisos, el metrónomo, la fecha
+(`ddd d MMM`; mantener pulsado alterna a `HH:mm`) y el volumen, como en `shell.json`. `wh01s17.network`, `wh01s17.bluetooth` y `wh01s17.power` siguen
 disponibles para quien los quiera en su `launcher.json`.
 
 **Recorte de la cámara:** si la barra llega a cruzar el recorte superior (el del Redmi está al
 centro), el grupo central se aparta a su derecha o, si no cabe, a su izquierda; los rellenos de los
 módulos pueden tocarse con los vecinos para hacerle sitio. Con la barra de estado visible la barra va
 debajo y no lo cruza.
+
+## Pomodoro y metrónomo en segundo plano
+
+Mientras alguno corre, un servicio en primer plano mantiene vivo el launcher (sin él, HyperOS
+cortaba el metrónomo al salir) y muestra una notificación: la fase con su cuenta atrás, *pausar* y
+*saltar fase*, y *parar metrónomo*. Al terminar una fase sola llega un aviso con sonido («Terminó el
+enfoque · Ahora: descanso corto · 5 min»); saltar o pausar no avisan. El fin de fase lo despierta
+una alarma exacta (`USE_EXACT_ALARM`), porque con el teléfono dormido el temporizador interno se
+retrasa. La primera vez que algo corre sin permiso de notificaciones, el launcher explica para qué
+sirve antes de pedirlo; con «ahora no» no vuelve a preguntar (se activa en los ajustes de Android) y
+todo sigue funcionando, sin avisos.
 
 ## Opciones comunes a todos los módulos
 
@@ -74,6 +85,8 @@ Colores: `#RGB`, `#RRGGBB` o `#RRGGBBAA`.
 | `wh01s17.network` | Red por defecto: Wi-Fi, datos móviles, cable o sin conexión | `wifi`, `cellular`, `ethernet`, `other`, `none`, `no-internet`, `vpn` | `none` atenuado, `no-internet` amarillo |
 | `wh01s17.bluetooth` | Apagado, encendido o conectado | `off`, `on`, `connected` | `off` atenuado, `connected` verde |
 | `wh01s17.audio` | Volumen de medios | `muted`, `low` (< 50 %), `high` | `muted` atenuado |
+| `pomodoro` | El de `pomodoro.sh`, sobre el mismo estado que su tile: icono de la fase y lo que falta; sin empezar, sólo el icono (cabe en 407 dp). Tocar inicia o pausa; mantener abre el panel (saltar, reiniciar, ±1 min y sistema) | `work-running`, `short-break-running`, `long-break-running` y sus `-paused` | trabajo rojo, descanso corto verde, largo cian; en pausa, atenuado |
+| `wh01s17.metronome` | El metrónomo analógico del escritorio, sobre el mismo estado que su tile; la varilla cambia de lado en cada tiempo. Tocar lo inicia o para; mantener abre el panel (tempo, que también se escribe tocando el número, tap, compás, acento y subdivisión). Las opciones `bpm`, `beats`… de `shell.json` no se leen: los ajustes son los del tile | `running`, `stopped` | `running` verde |
 
 El orden de las clases importa para el color: una batería al 8 % sin cargar tiene `critical` y
 `low`, y gana `critical`.
