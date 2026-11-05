@@ -18,8 +18,8 @@ persona debe poder retomar el trabajo leyendo sólo este archivo y el código.
    y el [§13 Registro de actualizaciones](#13-registro-de-actualizaciones).
 2. Toma la **primera tarea sin marcar** del hito en curso. No empieces un hito
    nuevo si el anterior no cumple su *Definición de terminado*, salvo un hito
-   aplazado explícitamente. Orden pendiente acordado: **10 → 11 → 9**; el Hito 9
-   experimental queda para después de la versión 1.0.
+   aplazado o descartado explícitamente. Sólo queda el **Hito 11** (versión 1.0); el Hito 9
+   está descartado (2026-11-05).
 3. Antes de escribir código, lee los archivos que vas a tocar y respeta las
    [reglas obligatorias](#1-reglas-obligatorias), sobre todo el límite de
    **1000 líneas por archivo**. Sólo se supera con una justificación
@@ -68,7 +68,7 @@ acotado va con el modelo equilibrado.
 | 6 · Teclado y gestos | Opus 5.5 · `high` | `gpt-6.1-sol` · `high` | Conflictos con gestos del sistema y la tecla Super |
 | 7 · Widgets | Sonnet 5.5 · `high` | `gpt-6.1-terra` · `high` | `AppWidgetHost` bien documentado |
 | 8 · Scratchpad, notificaciones, media | Sonnet 5.5 · `high` | `gpt-6.1-terra` · `high` | APIs estándar |
-| 9 · Freeform (experimental) | Opus 5.5 · `xhigh` | `gpt-6.1-sol` · `xhigh` | Hay que investigar la plataforma |
+| 9 · Freeform (descartado) | — | — | Descartado por el usuario (2026-11-05) |
 | 10 · Estilo y salvapantallas | Sonnet 5.5 · `medium` | `gpt-6.1-terra` · `medium` | Ajustes de UI y portar `w-spin.py` |
 | 11 · Rendimiento y versión 1.0 | Opus 5.5 · `high` | `gpt-6.1-sol` · `high` | Medición de rendimiento, accesibilidad, firma |
 | Tareas mecánicas (sincronizar tema, `ktlintFormat`, registro del plan, commits) | Haiku 5.5 · `low` | `gpt-6-luna` · `low` | Sin decisiones de diseño |
@@ -190,7 +190,7 @@ lo hace un compositor. Por eso:
 | Concepto Hyprland | Realidad en Android | Decisión |
 | --- | --- | --- |
 | Ventanas de apps en mosaico | Un launcher no puede redimensionar apps ajenas en pantalla completa. | Los tiles son *lanzadores vivos*: icono, nombre, estado (notificaciones, media) o un widget. Al tocarlo se abre la app. |
-| Tiling real de apps | Posible sólo con ventanas *freeform* (modo escritorio de Android 15+/16, tablets, pantallas externas, o la opción de desarrollador "freeform windows"). | Hito 9 experimental: `ActivityOptions.setLaunchBounds()` con los rectángulos del motor de tiling cuando el dispositivo lo soporte. |
+| Tiling real de apps | Posible sólo con ventanas *freeform* (modo escritorio de Android 15+/16, tablets, pantallas externas, o la opción de desarrollador "freeform windows"). | Descartado (antes Hito 9 experimental): `ActivityOptions.setLaunchBounds()` con los rectángulos del motor de tiling cuando el dispositivo lo soporte. |
 | Split en dos apps | `FLAG_ACTIVITY_LAUNCH_ADJACENT` sólo funciona si el sistema ya está en multiventana. | Acción "abrir al lado" disponible sólo cuando `isInMultiWindowMode`. |
 | `Super + W` cerrar ventana | No se pueden cerrar apps ajenas. | En el launcher cierra/quita el tile; nunca mata procesos. |
 | Lock screen propio | No reemplazable por un launcher. | Fuera de alcance. El salvapantallas sí. |
@@ -209,7 +209,7 @@ lo hace un compositor. Por eso:
   `ro.mi.os.version.incremental = OS2.0.204.0.VNRMIXM` (ROM **global**,
   `MI` = región global, `V` = Android 15) y `ro.build.version.sdk = 35`.
 - Teléfonos en vertical (prioridad), tablets y modo escritorio/pantalla
-  externa (secundario, Hito 9).
+  externa (fuera de alcance: el Hito 9 se descartó).
 - `minSdk 29` (Android 10), `targetSdk`/`compileSdk` = la última API estable
   disponible al iniciar el Hito 0 (≥ 36). Verificarlo y anotarlo en §11.
   Como el teléfono se queda en API 35, cualquier API más nueva va protegida
@@ -528,7 +528,7 @@ o por un `LauncherCommandBus` definido en `core/input`.
 | Bloquear / cortina / apagado | `AccessibilityService.performGlobalAction` | Servicio de accesibilidad (opt-in, explicar uso) | No |
 | Fondo de sistema | `WallpaperManager` | `SET_WALLPAPER` (normal) | No |
 | Salvapantallas | `DreamService` | — | No |
-| Freeform | `ActivityOptions.setLaunchBounds`, `ActivityOptions.makeBasic().setLaunchDisplayId` | — | No (Hito 9) |
+| Freeform | `ActivityOptions.setLaunchBounds`, `ActivityOptions.makeBasic().setLaunchDisplayId` | — | No (Hito 9 descartado) |
 | Forzar gestos en Xiaomi | `Settings.Global.putInt("force_fsg_nav_bar", 1)` | `WRITE_SECURE_SETTINGS`, declarado en el manifest y otorgado una vez por ADB (`pm grant`) | No (§5.9) |
 
 ### 5.9 Compatibilidad con Xiaomi (MIUI / HyperOS)
@@ -716,8 +716,8 @@ Cada hito termina con: `./gradlew check` verde, APK instalable, entrada en
 §13 y, si aplica, capturas en `docs/screenshots/`. Estimaciones en sesiones
 de trabajo de agente (S ≈ 1, M ≈ 2–3, L ≈ 4–6).
 
-**Prioridad pendiente (2026-11-05): 10 → 11 → 9.** Se conserva la numeración
-para mantener las referencias; el Hito 9 experimental se aborda al final, después de la 1.0.
+**Pendiente (2026-11-05): sólo el Hito 11.** El Hito 9 se descartó a petición del usuario; se
+conserva la numeración para mantener las referencias.
 
 ### Hito 0 — Fundaciones (M)
 
@@ -993,17 +993,12 @@ Se dejó la pista original en pausa, el escritorio 1 visible y la distribución 
 HOME y `force_fsg_nav_bar = 1` confirmados. Limpiar todo y el aviso con cuenta atrás se cubren
 con Compose, sin borrar avisos reales ni cambiar la config del usuario. Guía: `docs/notifications.md`.
 
-### Hito 9 — Modo escritorio / freeform (L, experimental)
+### Hito 9 — Modo escritorio / freeform (descartado)
 
-**Aplazado hasta después de los Hitos 10 y 11**, por petición del usuario (2026-11-05).
-No bloquea el avance de esos hitos ni la versión 1.0.
-
-- [ ] Detectar soporte freeform y pantallas externas (`DisplayManager`).
-- [ ] Al lanzar desde un tile en un dispositivo compatible, usar el `Rect`
-      del motor de tiling con `setLaunchBounds` (tiling real de apps).
-- [ ] Workspace por pantalla externa (`Ctrl + Alt + TAB` cambia de monitor).
-- [ ] Documentar dispositivos probados y limitaciones en `docs/freeform.md`.
-- [ ] Si un fabricante no lo soporta, la función se oculta sin errores.
+**Descartado** por el usuario (2026-11-05): no le interesa el tiling real de apps en ventanas libres ni
+las pantallas externas. Sus tareas (detectar freeform y pantallas externas, `setLaunchBounds` con los
+rectángulos del motor, un escritorio por pantalla, `docs/freeform.md`) salen del plan; los tiles
+siguen siendo lanzadores vivos (§2.2).
 
 ### Hito 10 — Estilo, fondos, salvapantallas y config (M)
 
@@ -1026,7 +1021,6 @@ No bloquea el avance de esos hitos ni la versión 1.0.
 - [ ] Memoria: sin fugas (LeakCanary en debug), caché de iconos acotada.
 - [ ] Accesibilidad: TalkBack en tiles y barra, contraste AA (verificado con
       los tokens), tamaños táctiles ≥ 48 dp aunque el visual sea compacto.
-- [ ] Rotación, plegables, modo multiusuario, perfil de trabajo.
 - [ ] Firma de release, `versionCode` automático, notas de versión.
 - [ ] Documentación de usuario `docs/usage.md`.
 
@@ -1257,6 +1251,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-05 | Fondos originales W/lunas generados con Python estándar a tres resoluciones; imágenes personales copiadas y reducidas a un máximo de 2048 px en almacenamiento privado | Evita dependencias de herramientas externas, permisos de almacenamiento y distribuir arte de terceros. Cambiar el fondo Android exige una acción explícita |
 | 2026-11-05 | W ASCII adaptada de `w-spin.py`, una muestra por celda a unos 15 fps, sin brillo especular; `DreamService` separado del temporizador de inactividad de HOME | Mantiene geometría, perspectiva e iluminación con coste acotado. HOME sólo cuenta mientras está en primer plano; Android conserva el control de su apagado y del salvapantallas al cargar |
 | 2026-11-05 | Negro puro OLED en el salvapantallas, los fondos incluidos y la base del escritorio; token `WhDefaults.oledBackground` en designsystem y negro fijo en el generador | Petición explícita del usuario: esas zonas deben apagar los píxeles. Excepción acotada a R6: el negro de hardware es independiente de la paleta de superficies del tema, que se conserva. Las imágenes importadas mantienen sus colores |
+| 2026-11-05 | Descartar el Hito 9 (freeform y pantallas externas) y, del Hito 11, la tarea de rotación, plegables, multiusuario y perfil de trabajo | Petición del usuario: no le interesan; la app es sólo para él, en su Redmi y en vertical. El plan queda en 69 tareas |
 | 2026-11-05 | La paleta de tidalamp se elige en Estilo y tiñe todo el launcher remapeando por RGB los colores de phosphor de los tokens; los tokens siguen siendo la única fuente (R6) | Petición del usuario. phosphor es idéntica al tema wh01s17, así que con ella nada cambia; rojo/amarillo/naranja/azul/magenta conservan su significado y el negro OLED no se toca |
 | 2026-11-05 | Barra llena: primero modo compacto (relleno 5 → 2 dp, celdas 26 → 20 dp) y, si no basta, ocultar de derecha a izquierda los módulos en reposo (metrónomo parado, media en pausa); nunca se pisan. El módulo `media` muestra el icono del botón (`⏸` sonando, `▶` en pausa) | Elección del usuario tras ver el escritorio 6 con el pomodoro en marcha (faltaban ~79 dp); el icono de estado (`♫`/`⏸`) se leía al revés |
 
@@ -1266,7 +1261,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | --- | --- | --- |
 | Atajos `Meta + …` interceptados por el sistema | Algunos atajos no llegan | Modificador alternativo; documentar por versión de Android |
 | Fabricantes que matan el proceso del launcher o limitan servicios | Estado perdido, widgets congelados | Estado persistido en cada cambio; sin trabajo en segundo plano innecesario |
-| Freeform no disponible en la mayoría de teléfonos | Hito 9 de alcance limitado | Hito marcado experimental; no bloquea 1.0 |
+| Freeform no disponible en la mayoría de teléfonos | — | Hito 9 descartado (2026-11-05) |
 | Accesibilidad usada para acciones globales puede ser rechazada por el usuario | Faltan bloquear/cortina/apagado | Funciones opcionales, explicadas, con fallback |
 | Departure Mono pequeña en móvil | Legibilidad | Factor de escala de fuente configurable (§4.4) |
 | Assets de terceros (Gengar, Opeth) | Licencias | No versionarlos; importación por el usuario |
@@ -1284,9 +1279,9 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-05:** 63 de 75 tareas marcadas (84 % del plan completo);
-  MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
-  Quedan los Hitos 11 y 9, en ese orden; el 9 es experimental y queda para después de la 1.0.
+- **Balance al 2026-11-05:** 64 de 69 tareas marcadas (93 % del plan); MVP completo: 45 de 45
+  (100 %). Son casillas, no una medida del esfuerzo. Sólo queda el Hito 11 (versión 1.0); el Hito 9
+  y la tarea de rotación, plegables, multiusuario y perfil de trabajo se descartaron.
 - **Hito en curso:** Hito 11 (sin empezar). **Hitos 0–8 y 10 terminados**; versión `0.5.0`. Los
   cierres y sus pruebas siguen en §13.
 - **Última tarea completada:** **Hito 10 cerrado**: editor de estilo, fondos W/lunas con selector propio,
@@ -1329,6 +1324,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-05 | Planificación | A petición del usuario se descartan el Hito 9 y la tarea de rotación/plegables/multiusuario/perfil de trabajo del Hito 11. Balance: 64 de 69 (93 %); sólo queda el Hito 11. Protocolo de retoma, tabla de modelos, §2, riesgos y estado actualizados | `plan.md` |
 | 2026-11-05 | 10 | **Revisión del Hito 10 con Opus** (`/code-review high db6bf80..HEAD`, 10 hallazgos). Corregidos: escala de fuente atascada en 104 % (`roundToInt`), ratón/rueda sin reiniciar la inactividad (`dispatchGenericMotionEvent`), Dream con la paleta de fábrica en arranque en frío (`PaletteHost.palettes` como flujo y `WhSpinView(accents)`), fondos siempre en 1220×2712 (`WallpaperStore.nearestSize`), `TidalampPalettes.after` muerto, KDoc en inglés y mensajes fuera de `strings.xml` (R5), música sin texto como fila vacía. Aceptados sin cambio: aviso emergente al reanudar la música (apagado de fábrica) e insignia en su tile, consecuencia de mostrarla mientras suena; inactividad de 150 s mayor que el apagado de pantalla habitual; remapeo por RGB (el `green` del tema es el acento); constantes de Estilo duplicadas con la config. `StyleIntegrationTest` corregida (`MainActivity` es `singleTask` y ya existe como HOME; HyperOS bloquea lanzarla desde segundo plano) y en verde en el Redmi; config del usuario intacta; atajo `ALT + CTRL + SPACE` abre los fondos | `feature/settings/style/StyleScreen.kt`, `app/MainActivity.kt`, `core/designsystem/palette/PaletteHost.kt`, `core/system/wallpaper/WallpaperStore.kt`, `app/src/androidTest/.../StyleIntegrationTest.kt` |
 | 2026-11-05 | 10 → 11 | Visualizador (petición del usuario: la izquierda se veía rara). Con 48 bandas logarítmicas sobre bins enteros, las ~12 primeras leían el bin 1 y saturaban: tramo plano y escalones. `SpectrumMath.bands`: bordes fraccionarios desde el bin 2 con un 15 % lineal, interpolación entre bins, +3 dB por octava, rango −36…+12 dB. 2 pruebas nuevas. Visto en el Redmi con TIDAL sonando | `core/system/media/AudioSpectrum.kt` |
 | 2026-11-05 | 10 → 11 | Corregido a petición del usuario: la notificación de TIDAL salía en el panel y el contador sólo en pausa, y debe ser al revés. `NotificationFilter` reconoce la música (`EXTRA_MEDIA_SESSION`/`CATEGORY_TRANSPORT`) y la enseña sólo en curso, es decir, sonando; prueba nueva | `core/system/notifications/NotificationFilter.kt`, `NotificationMapper.kt` |
