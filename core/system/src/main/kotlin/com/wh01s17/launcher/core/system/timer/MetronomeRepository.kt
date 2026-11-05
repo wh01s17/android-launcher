@@ -8,11 +8,16 @@ import java.io.File
 import java.io.IOException
 import java.util.Properties
 
-/** El metrónomo en un instante: sus ajustes, si suena y el tiempo actual (para el péndulo). */
+/** El metrónomo en un instante: sus ajustes, si suena y el tiempo actual (para los puntos). */
 data class MetronomeState(
     val settings: MetronomeSettings = MetronomeSettings(),
     val running: Boolean = false,
     val beat: Int = 0,
+    /**
+     * Tiempos sonados desde que arrancó (`beatCount` del escritorio): el péndulo de la barra cambia
+     * de lado con su paridad. [beat] no sirve: vuelve a 0 en cada compás y con un tiempo no cambia.
+     */
+    val ticks: Long = 0,
 )
 
 /**
@@ -36,13 +41,13 @@ class MetronomeRepository(
     fun toggle() = if (mutableState.value.running) stop() else start()
 
     fun start() {
-        mutableState.update { it.copy(running = true, beat = 0) }
-        player.start { beat -> mutableState.update { it.copy(beat = beat) } }
+        mutableState.update { it.copy(running = true, beat = 0, ticks = 0) }
+        player.start { beat -> mutableState.update { it.copy(beat = beat, ticks = it.ticks + 1) } }
     }
 
     fun stop() {
         player.stop()
-        mutableState.update { it.copy(running = false, beat = 0) }
+        mutableState.update { it.copy(running = false, beat = 0, ticks = 0) }
     }
 
     /** Cambia los ajustes (tempo, compás, subdivisión, acento); se ajustan a sus límites y se guardan. */

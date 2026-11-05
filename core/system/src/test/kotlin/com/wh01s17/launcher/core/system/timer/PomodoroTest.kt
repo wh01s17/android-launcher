@@ -64,4 +64,17 @@ class PomodoroTest {
         val afterTwo = Pomodoro.skip(Pomodoro.skip(Pomodoro.skip(ultradian, 0), 0), 0)
         assertEquals("ultradian has a long break every two sessions", PomodoroPhase.LongBreak, afterTwo.phase)
     }
+
+    @Test
+    fun `only a phase that runs out by itself counts as finished`() {
+        val running = Pomodoro.toggle(classic, now = 0)
+        val ended = Pomodoro.tick(running, now = 25 * minute)
+        assertEquals(PomodoroPhase.Work, Pomodoro.finished(running, ended, now = 25 * minute))
+        // Saltar, pausar o reiniciar antes de tiempo no avisan.
+        assertEquals(null, Pomodoro.finished(running, Pomodoro.skip(running, now = minute), now = minute))
+        assertEquals(null, Pomodoro.finished(running, Pomodoro.toggle(running, now = minute), now = minute))
+        assertEquals(null, Pomodoro.finished(running, Pomodoro.reset(running), now = minute))
+        // Parado no hay nada que terminar.
+        assertEquals(null, Pomodoro.finished(classic, Pomodoro.skip(classic, now = 0), now = 99 * minute))
+    }
 }

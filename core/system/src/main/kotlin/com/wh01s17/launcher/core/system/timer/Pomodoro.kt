@@ -94,6 +94,20 @@ object Pomodoro {
         return if (state.running) state.copy(endsAtMillis = now + remaining) else state.copy(remainingMillis = remaining)
     }
 
+    /**
+     * La fase que terminó sola entre [previous] y [next] (para avisar, como `notify_phase_finished`
+     * de `pomodoro.sh`), o `null` si el cambio fue del usuario: saltar, pausar o reiniciar antes de
+     * tiempo no avisan.
+     */
+    fun finished(
+        previous: PomodoroState,
+        next: PomodoroState,
+        now: Long,
+    ): PomodoroPhase? {
+        val endsAt = previous.endsAtMillis ?: return null
+        return previous.phase.takeIf { previous.running && now >= endsAt && next != previous }
+    }
+
     /** Avanza las fases que ya terminaron (puede ser más de una si el teléfono estuvo dormido). */
     fun tick(
         state: PomodoroState,

@@ -40,6 +40,12 @@ class PomodoroRepository(
 
     fun adjust(minutes: Int) = update { Pomodoro.adjust(it, minutes, clock()) }
 
+    /**
+     * Avanza si la fase ya terminó. Lo llama la alarma exacta del fin de fase: con el teléfono
+     * dormido, el temporizador interno ([schedule]) puede llegar minutos tarde.
+     */
+    fun tick() = update { Pomodoro.tick(it, clock()) }
+
     private fun update(transform: (PomodoroState) -> PomodoroState) {
         val next = transform(mutableState.value)
         if (next != mutableState.value) {
