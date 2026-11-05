@@ -1,8 +1,11 @@
 package com.wh01s17.launcher
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -10,6 +13,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -47,6 +51,7 @@ import com.wh01s17.launcher.feature.workspaces.ui.LocalWidgetRenderer
 import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
 import com.wh01s17.launcher.input.Shortcuts
 import com.wh01s17.launcher.ui.HomeReturn
+import com.wh01s17.launcher.ui.NotificationOptIn
 import com.wh01s17.launcher.ui.screenReaderSemantics
 import com.wh01s17.launcher.widgets.HomeWidgets
 import kotlinx.coroutines.flow.map
@@ -71,6 +76,10 @@ class MainActivity : ComponentActivity() {
     private val menu: MenuViewModel by viewModels()
     private val homeReturn = HomeReturn()
     private lateinit var widgets: HomeWidgets
+
+    /** El permiso de notificaciones, tras explicarlo ([NotificationOptIn]). */
+    private val notificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { container.timers.notificationsAnswered(declined = false) }
     private val appVersion by lazy { packageManager.getPackageInfo(packageName, 0).versionName.orEmpty() }
 
     private val menuController: MenuController by lazy {
@@ -211,6 +220,13 @@ class MainActivity : ComponentActivity() {
                     version = appVersion,
                 )
                 widgets.Picker()
+                val askNotifications by container.timers.askNotifications.collectAsStateWithLifecycle()
+                if (askNotifications) {
+                    NotificationOptIn(
+                        onAllow = ::requestNotifications,
+                        onDecline = { container.timers.notificationsAnswered(declined = true) },
+                    )
+                }
             }
         }
     }
@@ -230,12 +246,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** Android 13+ tiene diálogo de permiso; antes, las notificaciones se activan en los ajustes de la app. */
+    private fun requestNotifications() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, packageName))
+            container.timers.notificationsAnswered(declined = false)
+        }
+    }
+
     /**
      * Vigilancia de plan.md §5.9: si los botones están ocultos y la navegación propia no está viva,
      * se devuelven y se avisa. Como launcher HOME, esto corre en cada vuelta al inicio y al arrancar.
      */
     override fun onResume() {
         super.onResume()
+        container.timers.ensureService()
         // Una config editada a mano (o importada) se aplica al volver al inicio.
         lifecycleScope.launch { container.configRepository.reload() }
         if (container.navigationWatchdog.check()) {

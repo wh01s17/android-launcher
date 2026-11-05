@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Icono de notificación: la «W» de wh01s17 (shell/plugins/menu/BarWidget.qml de los dotfiles),
+    rellena; Android la pinta como silueta en la barra de estado. Lienzo 336 × 304 centrado en 24 dp.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="400"
+    android:viewportHeight="400">
+    <group
+        android:translateX="32"
+        android:translateY="48">
+        <path
+            android:fillColor="@android:color/white"
+            android:pathData="M0 0h80v240H0zm128 0h80v240h-80zm128 0h80v240h-80zM64 240h80v64H64zm128 0h80v64h-80z" />
+    </group>
+</vector>

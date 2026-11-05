@@ -7,4 +7,25 @@
     <string name="shade_needs_service">Para abrir las notificaciones desde la barra, activa «Gestos wh01s17» en Ajustes → Accesibilidad.</string>
     <string name="navigation_buttons_restored">Los gestos wh01s17 no estaban activos: se devolvieron los botones de navegación.</string>
     <string name="terminal_missing">No se pudo abrir la terminal «%1$s» (apps.terminal en launcher.json).</string>
+
+    <!-- Pomodoro y metrónomo: notificaciones y opt-in (plan.md §7 Hito 7, R8). -->
+    <string name="timer_channel_ongoing">Pomodoro y metrónomo en marcha</string>
+    <string name="timer_channel_alerts">Fin de fase del pomodoro</string>
+    <string name="timer_phase_work">Enfoque</string>
+    <string name="timer_phase_short">Descanso corto</string>
+    <string name="timer_phase_long">Descanso largo</string>
+    <string name="timer_pomodoro_title">Pomodoro · %1$s</string>
+    <string name="timer_pomodoro_session">Sesión %1$d/%2$d</string>
+    <string name="timer_pomodoro_with_metronome">%1$s · metrónomo a %2$d BPM</string>
+    <string name="timer_metronome_title">Metrónomo</string>
+    <string name="timer_action_pause">Pausar</string>
+    <string name="timer_action_skip">Saltar fase</string>
+    <string name="timer_action_stop_metronome">Parar metrónomo</string>
+    <string name="timer_alert_work_done">Terminó el enfoque</string>
+    <string name="timer_alert_break_done">Terminó el descanso</string>
+    <string name="timer_alert_next">Ahora: %1$s · %2$d min</string>
+    <string name="timer_optin_title">Avisos del pomodoro y el metrónomo</string>
+    <string name="timer_optin_body">Con permiso de notificaciones verás el tiempo que queda, podrás pausar o parar desde ahí y te avisará al terminar cada fase. Sin él, el pomodoro y el metrónomo siguen funcionando, pero sin avisos.</string>
+    <string name="timer_optin_allow">permitir</string>
+    <string name="timer_optin_later">ahora no</string>
 </resources>

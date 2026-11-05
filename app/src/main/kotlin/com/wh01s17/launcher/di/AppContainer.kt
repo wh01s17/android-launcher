@@ -39,6 +39,7 @@ import com.wh01s17.launcher.feature.widgets.host.WidgetHost
 import com.wh01s17.launcher.feature.widgets.native.NativeWidgetSources
 import com.wh01s17.launcher.feature.workspaces.data.DeskRepository
 import com.wh01s17.launcher.feature.workspaces.data.FileDeskStorage
+import com.wh01s17.launcher.timer.TimerCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -96,6 +97,9 @@ class AppContainer(
         PomodoroRepository(File(File(appContext.filesDir, "state"), "pomodoro.properties"), processScope)
     }
     val metronome: MetronomeRepository by lazy { MetronomeRepository(File(File(appContext.filesDir, "state"), "metronome.properties")) }
+
+    /** Servicio en primer plano, alarma del fin de fase y avisos del pomodoro y el metrónomo. */
+    val timers: TimerCoordinator by lazy { TimerCoordinator(appContext, pomodoro, metronome, processScope) }
 
     /** Lo que necesitan los widgets propios de wh01s17. */
     val audioSpectrum: AudioSpectrum by lazy { AudioSpectrum(appContext) }

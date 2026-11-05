@@ -2,6 +2,21 @@
 <!-- Sin permiso INTERNET (plan.md §1 R9). -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+        Pomodoro y metrónomo (plan.md §7 Hito 7). El servicio en primer plano sólo existe mientras
+        alguno corre. POST_NOTIFICATIONS es opt-in (R8): se explica antes de pedirlo y sin él todo
+        funciona, sin avisos. USE_EXACT_ALARM: el fin de fase de un temporizador que el usuario
+        inició (en Android 12, SCHEDULE_EXACT_ALARM; sin él la alarma es aproximada).
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+
     <application
         android:name=".LauncherApplication"
         android:allowBackup="false"
@@ -31,6 +46,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Pomodoro y metrónomo mientras corren; lo arranca TimerCoordinator. -->
+        <service
+            android:name=".timer.TimerService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback|specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Pomodoro timer started by the user: keeps the countdown visible and its phase change on time." />
+        </service>
+
+        <!-- Alarma exacta del fin de una fase del pomodoro. -->
+        <receiver
+            android:name=".timer.PomodoroAlarmReceiver"
+            android:exported="false" />
 
         <!-- Ajustes (Compatibilidad): sólo desde el propio launcher. -->
         <activity
