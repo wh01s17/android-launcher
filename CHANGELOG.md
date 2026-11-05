@@ -3,6 +3,22 @@
 El proyecto usa [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
+## [0.4.0] — 2026-11-05
+
+Hito 8: scratchpad, notificaciones y media.
+
+### Añadido
+
+- Scratchpad superpuesto con edición y guardado; `SUPER + S`, dos dedos abajo y «S» en la barra.
+- Acceso opcional a notificaciones: insignias por app y perfil, contador en la barra y panel propio
+  para abrir y descartar avisos. Aviso emergente configurable con barra de cuenta atrás verde.
+- Módulo `media`: sesión de cualquier app, reproducir/pausar al tocar y panel de transporte al
+  mantener; atajos `CTRL + ALT + O/P/I` y acciones en Sistema, incluso sin acceso a notificaciones.
+
+### Corregido
+
+- Media sigue a la sesión que empieza a reproducir aunque otra estuviese seleccionada.
+
 ## [0.3.0] — 2026-11-05
 
 Hito 7: widgets, y el pulido y el rendimiento pedidos durante el hito.

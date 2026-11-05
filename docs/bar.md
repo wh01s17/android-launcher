@@ -42,7 +42,7 @@ La barra sigue a la del escritorio (`shell.json`): mismos nombres de opciones (`
 
 La barra de estado de Android sigue visible (se probó ocultarla y quedaba peor), así que la de
 fábrica no repite lo que ya muestra: hora, red, bluetooth y batería. Queda el menú, los
-escritorios y el pomodoro a la izquierda y, a la derecha, los avisos, el metrónomo, la fecha
+escritorios y el pomodoro a la izquierda y, a la derecha, los avisos, media (si hay sesión), el metrónomo, la fecha
 (`ddd d MMM`; mantener pulsado alterna a `HH:mm`) y el volumen, como en `shell.json`. `wh01s17.network`, `wh01s17.bluetooth` y `wh01s17.power` siguen
 disponibles para quien los quiera en su `launcher.json`.
 
@@ -80,7 +80,8 @@ Colores: `#RGB`, `#RRGGBB` o `#RRGGBBAA`.
 | `core.menu` | Botón del menú, con la «W» de la barra del escritorio (`shell/plugins/menu/BarWidget.qml`: el mismo trazado, sólo el trazo). Abre el panel wh01s17 (`menu.md`), con Apps y submenús | — | verde |
 | `core.workspaces` | Números `1`–`persistent` (por defecto `5`, como el shell) más los que tienen tiles y el activo; los demás vacíos no se muestran. El 10 se llama `0`. Activo en verde con subrayado, ocupados en el color del texto, vacíos al 35 %. Tocar cambia de escritorio | — | — |
 | `wh01s17.clock` | Hora y fecha. Tocar: calendario. Mantener: alterna `format` y `formatAlt` | — | `format` `HH:mm` (la barra de fábrica usa `ddd d MMM`) |
-| `wh01s17.indicators` | No molestar (luna). Sólo ocupa sitio si hay algo activo | `dnd` | — |
+| `wh01s17.indicators` | Contador de notificaciones (tocar abre el panel propio) y No molestar (luna); sin acceso no hay contador | `dnd`, `notifications` | — |
+| `media` | Sesión de cualquier app: tocar reproduce/pausa; mantener abre el panel de transporte | `playing`, `paused` | sonando verde; pausa atenuada |
 | `wh01s17.power` | Batería (icono + %). Sin batería, nada | `charging`, `full`, `low` (≤ 20 %), `critical` (≤ 10 %), `power-save` | cargando verde, `low` amarillo, `critical` rojo |
 | `wh01s17.network` | Red por defecto: Wi-Fi, datos móviles, cable o sin conexión | `wifi`, `cellular`, `ethernet`, `other`, `none`, `no-internet`, `vpn` | `none` atenuado, `no-internet` amarillo |
 | `wh01s17.bluetooth` | Apagado, encendido o conectado | `off`, `on`, `connected` | `off` atenuado, `connected` verde |
@@ -125,7 +126,7 @@ barra se ve (con 5 s de margen para girar la pantalla). Sin permisos peligrosos 
 
 - **Bluetooth conectado** exige `BLUETOOTH_CONNECT`, que no se pide aún: hoy sólo se distingue
   encendido de apagado. El opt-in llegará con los ajustes.
-- **Notificaciones** (contador) llegan con el acceso a notificaciones del Hito 8.
+- **Notificaciones y media** requieren el acceso opcional explicado en [notifications.md](notifications.md).
 - **Escritorios**: los reales del Hito 4 (`docs/workspaces.md`): el actual y los que tienen tiles.
 
 ## Pruebas

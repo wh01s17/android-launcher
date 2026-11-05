@@ -394,7 +394,7 @@ android-launcher/
 │   ├── workspaces/           # pager de workspaces, lienzo de tiles, modo edición
 │   ├── bar/                  # barra y registro de módulos
 │   ├── menu/                 # menú wh01s17 / paleta / selector de apps
-│   ├── scratchpad/           # workspace especial superpuesto
+│   ├── notifications/        # panel propio y aviso emergente de notificaciones
 │   ├── widgets/              # AppWidgetHost + widgets nativos (reloj, pomodoro, metrónomo)
 │   ├── settings/             # ajustes, atajos (Super+K), importar/exportar config
 │   └── screensaver/          # DreamService con la W girando
@@ -969,12 +969,23 @@ el tempo se escribe tocando el número. No se porta la sincronización de No mol
       (`slidevert` 300 ms `easeOutQuint`), «S» al final de la tira del arrastre y en la barra
       (magenta), `scratchpad.toggle`/`scratchpad.move` (`Super + S` / `Super + Alt + S`, dos dedos
       abajo) y guardado en `workspaces.json`.
-- [ ] `NotificationListenerService` opt-in: badges en tiles (el hueco del badge en
+- [x] `NotificationListenerService` opt-in: badges en tiles (el hueco del badge en
       `TileView`, Hito 4), contador en
       indicadores, panel de notificaciones propio con la superficie de
       `shell.notifications.toml` (barra de cuenta atrás `#84c959`).
-- [ ] Controles de media (`MediaSessionManager`) en barra y atajos
+- [x] Controles de media (`MediaSessionManager`) en barra y atajos
       `Ctrl + Alt + O/P/I`.
+
+**Hito 8 terminado (2026-11-05)** → `0.4.0` (versionCode `400`).
+`./gradlew check assembleDebug` en verde, incluidas las pruebas de workspaces y las capturas
+Roborazzi (panel nuevo y menú Sistema actualizado). 17 pruebas en `feature/notifications`.
+Revisión local de cierre y correcciones en [`docs/review-hito8.md`](docs/review-hito8.md).
+Instalado con `installFast` en el Redmi: contador, panel, descarte de aviso temporal, apertura de
+TIDAL desde su notificación, Escape y scratchpad con `ALT + S`; media con título/artista/álbum,
+reproducir/pausar y `CTRL + ALT + O/P/I` (siguiente y anterior verificados en la sesión).
+Se dejó la pista original en pausa, el escritorio 1 visible y la distribución conservada;
+HOME y `force_fsg_nav_bar = 1` confirmados. Limpiar todo y el aviso con cuenta atrás se cubren
+con Compose, sin borrar avisos reales ni cambiar la config del usuario. Guía: `docs/notifications.md`.
 
 ### Hito 9 — Modo escritorio / freeform (L, experimental)
 
@@ -1209,7 +1220,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-04 | Pomodoro y metrónomo viven en `core/system/timer` (no en `feature/widgets`) | Los comparten el tile, el módulo de barra y el servicio en primer plano (Hito 7); un feature no depende de otro |
 | 2026-11-04 | El pomodoro guarda cuándo termina la fase (reloj de pared) y se persiste en `files/state/pomodoro.properties` | No se desfasa aunque la UI no mire y sobrevive a que HyperOS cierre el proceso |
 | 2026-11-04 | El metrónomo escribe cada tiempo entero en un `AudioTrack` en stream | El reloj del audio marca el ritmo, como `metronome-engine.py`; un temporizador derivaría |
-| 2026-11-04 | `WhNotificationListener` (acceso a notificaciones, opt-in) se declara ya para leer la sesión de TIDAL; no lee notificaciones | Android sólo da `MediaSessionManager.getActiveSessions` a quien lo tiene (R8: el widget explica y ofrece activarlo) |
+| 2026-11-04 | `WhNotificationListener` (acceso a notificaciones, opt-in) se declara para leer la sesión de TIDAL; desde el Hito 8 también publica notificaciones | Android sólo da `MediaSessionManager.getActiveSessions` a quien lo tiene (R8: el widget explica y ofrece activarlo) |
 | 2026-11-04 | Widget de TIDAL con el tema *nova* de tidalamp; paletas de tidalamp copiadas a `core/designsystem/palette` | Petición del usuario; R6 exige que los colores salgan del sistema de diseño. *phosphor* es la de wh01s17 y la de fábrica |
 | 2026-11-04 | Búsqueda sin autocorrección del IME | SwiftKey modificaba nombres escritos durante la prueba ADB; las consultas de apps y comandos deben conservarse literalmente |
 | 2026-11-04 | Sin clima en el widget del reloj | R9 (sin `INTERNET`); el usuario eligió no añadirlo antes que pedir red |
@@ -1231,6 +1242,8 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-05 | Soltar un tile cerca del borde de otro lo coloca a ese lado (`moveNextTo`) en vez de intercambiarlos; durante el arrastre se resalta el hueco que ocupará | El usuario esperaba que las dos apps quedaran donde las dejó (el intercambio hacía un «enroque»); así se arrastra una ventana en Hyprland |
 | 2026-11-05 | Vista previa real del arrastre (el escritorio se pinta como quedará al soltar) y `deshacer` en el modo edición (`UndoHistory`, 50 pasos, sin contar foco ni escritorio actual) | Un movimiento estiró tiles que el usuario no esperaba (el vecino ocupa el hueco que se deja) y no había forma de volver atrás |
 | 2026-11-05 | El scratchpad es un escritorio especial dentro de `Desk` (no un módulo `feature/scratchpad` aparte) | Comparte motor, guardado, edición y deshacer con los escritorios; como `special:scratchpad`, mientras se ve recibe los tiles nuevos y cambiar de escritorio lo oculta |
+
+| 2026-11-05 | Nuevo módulo `feature/notifications` para el panel propio y el aviso; insignias mediante `LocalTileBadges` conectado por la app | Mantiene los features independientes (§5.2); se reutiliza el listener de media y no se guardan textos. Avisos emergentes apagados de fábrica para no duplicar Android |
 
 ### 11.2 Riesgos
 
@@ -1256,18 +1269,17 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-05:** 56 de 75 tareas marcadas (75 % del plan completo);
+- **Balance al 2026-11-05:** 58 de 75 tareas marcadas (77 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
-  Quedan los Hitos 8–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 8 (1 de 3 tareas). **Hitos 0–7 terminados**; versión `0.3.0`. Los
+  Quedan los Hitos 9–11; el 9 es experimental y no bloquea la 1.0.
+- **Hito siguiente:** Hito 9 (experimental, sin empezar). **Hitos 0–8 terminados**; versión `0.4.0`. Los
   cierres y sus pruebas siguen en §13.
-- **Última tarea completada:** **Hito 7 cerrado**: módulos de barra del pomodoro y el metrónomo y
-  servicio en primer plano con notificación, alarma exacta y aviso de fin de fase; además, buscador
-  en el selector de widgets y tempo escribible (peticiones del usuario). Probado en el Redmi.
+- **Última tarea completada:** **Hito 8 cerrado**: scratchpad, notificaciones e insignias por perfil,
+  panel propio y aviso opcional con cuenta atrás, módulo media y atajos. Ver cierre y pruebas en §7 y §13.
 - **Incidencia de la sesión (resuelta):** la primera versión de la animación de vuelta cerraba el
   launcher al volver; HyperOS mostró el selector de launcher. Se cerró sin elegir, se reafirmó el
   rol HOME de `com.wh01s17.launcher.debug` y se corrigió (§13).
-- **Siguiente tarea:** Hito 8, notificaciones (`NotificationListenerService`: badges, contador y panel; modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
+- **Siguiente tarea:** Hito 9, detectar soporte freeform y pantallas externas (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
   Bluetooth y los gestos de dos dedos a mano; medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj;
   probar a mano en el Redmi agrupar por arrastre y con los botones. Tras reinstalar, la vigilancia puede devolver los botones un instante hasta que el servicio
@@ -1289,7 +1301,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   funciona. Se restauró `0` (3 botones). La capa 3 pasa a ser la navegación
   principal (Hito 2). Observaciones, ajustes y matriz de pruebas en
   [`docs/xiaomi.md`](docs/xiaomi.md).
-- **Versión:** `0.3.0` (Hito 7); antes `0.2.0` (Hito 6, etiqueta `v0.2.0`) y el MVP `0.1.0`. En el Redmi va la compilación
+- **Versión:** `0.4.0` (Hito 8); antes `0.3.0` (Hito 7), `0.2.0` (Hito 6, etiqueta `v0.2.0`) y el MVP `0.1.0`. En el Redmi va la compilación
   `fast` (`./gradlew installFast`, mismo id y datos que la debug; ver `docs/setup.md`);
   firma y distribución de APK release siguen en el Hito 11. Historial en `CHANGELOG.md`.
 
@@ -1301,6 +1313,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-05 | 8 | **Hito 8 cerrado → 0.4.0 (400).** Listener con filtro y estado por perfil, badges y contador, panel y aviso opcional en `feature/notifications`; media de cualquier app en barra y comandos/atajos O/P/I. Corregidas las pruebas del aviso (snapshots/reloj), observación de todas las sesiones de media y complejidad/formato del parser. Revisión local documentada. `check assembleDebug` en verde, capturas del panel y de Sistema; `installFast` y pruebas ADB del panel, descarte, apertura, scratchpad y transporte multimedia. Escritorio conservado, pista original en pausa y HOME/gestos confirmados | `core/system/notifications/`, `core/system/media/`, `feature/notifications/`, `feature/bar/`, `feature/workspaces/ui/TileBadges.kt`, `app/ui/HomeNotifications.kt`, `docs/notifications.md`, `docs/review-hito8.md` |
 | 2026-11-05 | 8 | Scratchpad: `Desk.scratchpad`/`scratchpadVisible`/`active`/`toggleScratchpad` (un solo `copy` por cambio), `DeskCodec` con `scratchpad` opcional, `ScratchpadOverlay`, «S» en la tira (`STRIP_TARGETS`) y en `core.workspaces`, comandos y atajos de fábrica. Pruebas de modelo, guardado, ViewModel y captura de la barra. En el Redmi sólo se instaló (el usuario usaba el teléfono) | `feature/workspaces/model/Desk.kt`, `ui/ScratchpadOverlay.kt`, `feature/bar/module/WorkspacesModule.kt`, `core/input/` |
 | 2026-11-05 | 7 | Vista previa y deshacer (petición del usuario: mover WhatsApp estiró Cámara y no se podía volver atrás; su distribución anterior no se pudo recuperar). `afterDrop` + `rememberDropPreview`/`DragOverlay`: los tiles se colocan donde quedarán y se resalta el hueco del arrastrado; `UndoHistory` + `DeskEditor` (todo cambio de los escritorios pasa por él) y botón `deshacer`. Pruebas de historial y de deshacer en el ViewModel | `feature/workspaces/model/UndoHistory.kt`, `data/DeskEditor.kt`, `ui/WorkspacePage.kt`, `ui/EditToolbar.kt` |
 | 2026-11-05 | 7 | Arrastre de tiles como Hyprland (petición del usuario tras el cierre): `Workspace.moveNextTo` en `core/tiling` (pruebas propias y en las de propiedades), `DropZone`/`dropTargetAt` (centro agrupa, borde más cercano en proporción al lado), intent `MoveNextTo` en lugar de `SwapTiles` y `DropHint` con el hueco que ocupará. 8 pruebas nuevas | `core/tiling/WorkspaceMoves.kt`, `feature/workspaces/ui/PageGeometry.kt`, `ui/WorkspacePage.kt`, `ui/EditOverlay.kt` |

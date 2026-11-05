@@ -157,3 +157,9 @@ La suite de menú suma 21 pruebas; `./gradlew check assembleDebug` pasa.
 
 Capturas del dispositivo: [raíz](screenshots/menu-redmi.png),
 [Sistema](screenshots/menu-system-redmi.png) y [búsqueda](screenshots/menu-search-redmi.png).
+
+## Notificaciones y media (Hito 8)
+
+Sistema ofrece Notificaciones (panel propio), Cortina de notificaciones (Android) y reproducir
+o pausar, pista siguiente y anterior. También aparecen en la búsqueda de comandos. El acceso
+opcional y los controles se explican en [notifications.md](notifications.md).

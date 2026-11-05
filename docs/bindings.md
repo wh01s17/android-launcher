@@ -69,7 +69,7 @@ Android 15 no entrega la tecla Meta a las apps (ver «Reservadas» abajo). Por e
 | `swipe-up` | Un dedo hacia arriba sobre el escritorio (fuera de edición) | `menu.open` |
 | `swipe-down` | Un dedo hacia abajo sobre el escritorio | — |
 | `two-finger-swipe-left` / `-right` | Dos dedos; el pager no se mueve | `workspace.next` / `workspace.previous` |
-| `two-finger-swipe-up` / `-down` | Dos dedos | — (abajo: scratchpad, Hito 8) |
+| `two-finger-swipe-up` / `-down` | Dos dedos | Abajo: `scratchpad.toggle`; arriba sin asignar |
 | `double-tap` | Doble toque en un hueco vacío | — (terminal, tarea `Super + Return`) |
 | `double-tap-tile` | Doble toque en un tile (lo enfoca primero) | — |
 
@@ -91,6 +91,8 @@ Quedan fuera, con su motivo (plan.md §3):
 | --- | --- | --- |
 | `menu.open` | — | Abre el menú wh01s17; si ya está en la raíz, lo cierra |
 | `menu.apps` / `menu.system` | — | El menú en Apps / Sistema; si ya está ahí, lo cierra |
+| `notifications.panel` | — | Alterna el panel propio, con explicación del acceso si falta |
+| `media.play-pause` / `media.next` / `media.previous` | — | Transporte multimedia (`CTRL + ALT + O/P/I`), también sin acceso a notificaciones |
 | `notifications.open` | — | Cortina del sistema (necesita *Gestos wh01s17*) |
 | `shortcuts.show` | — | Tabla de atajos (`Super + K`; también menú → Aprender → Atajos) |
 | `terminal.open` | — | Abre `apps.terminal` (`Super + Return`; de fábrica `com.termux`) |
@@ -145,7 +147,8 @@ un grupo o sacar de él están el arrastre y los botones del modo edición. Igua
 `SUPER + K` abre la tabla y `SUPER + RETURN` la terminal. La terminal es `apps.terminal`: un
 paquete (`"com.termux"`, su actividad principal) o una actividad (`"com.termux/.app.TermuxActivity"`).
 
-Fuera del Hito 6: `Super + S` y los atajos de media, Hito 8; `Super + Ctrl + Space` (fondos), Hito 10.
+Desde el Hito 8: `CTRL + ALT + O/P/I` controla media y `SUPER + S` el scratchpad.
+Pendiente: `Super + Ctrl + Space` (fondos), Hito 10.
 
 ## Reservadas por el sistema
 
