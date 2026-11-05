@@ -22,8 +22,8 @@ object NotificationFilter {
         if (packageName == ownPackage) return false
         if (flags and Notification.FLAG_GROUP_SUMMARY != 0) return false
         val ongoing = flags and Notification.FLAG_ONGOING_EVENT != 0
-        if (media) return ongoing
-        if (ongoing) return false
+        // La música, sólo mientras suena; el resto en curso (servicios) queda fuera.
+        if (ongoing != media) return false
         return !title.isNullOrBlank() || !text.isNullOrBlank()
     }
 }
