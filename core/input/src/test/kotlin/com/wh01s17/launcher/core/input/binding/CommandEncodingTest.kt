@@ -36,6 +36,8 @@ class CommandEncodingTest {
             WorkspaceCommand.ToggleGroup,
             WorkspaceCommand.MoveIntoGroup(CommandDirection.Right),
             WorkspaceCommand.MoveOutOfGroup,
+            WorkspaceCommand.ToggleScratchpad,
+            WorkspaceCommand.MoveTileToScratchpad,
         )
 
     @Test

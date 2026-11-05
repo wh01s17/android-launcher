@@ -94,6 +94,8 @@
     <string name="cmd_group_toggle">Agrupar / desagrupar</string>
     <string name="cmd_group_move_into">Meter en el grupo %1$s</string>
     <string name="cmd_group_move_out">Sacar del grupo</string>
+    <string name="cmd_scratchpad_toggle">Mostrar / ocultar el scratchpad</string>
+    <string name="cmd_scratchpad_move">Llevar al scratchpad</string>
     <string name="cmd_unknown">%1$s</string>
     <string name="gesture_swipe_up">Deslizar hacia arriba</string>
     <string name="gesture_swipe_down">Deslizar hacia abajo</string>

@@ -47,4 +47,6 @@ fun LauncherCommand.encode(): EncodedCommand =
         WorkspaceCommand.ToggleGroup -> EncodedCommand("group.toggle")
         is WorkspaceCommand.MoveIntoGroup -> EncodedCommand("group.move-into", mapOf("direction" to direction.name.lowercase()))
         WorkspaceCommand.MoveOutOfGroup -> EncodedCommand("group.move-out")
+        WorkspaceCommand.ToggleScratchpad -> EncodedCommand("scratchpad.toggle")
+        WorkspaceCommand.MoveTileToScratchpad -> EncodedCommand("scratchpad.move")
     }

@@ -101,6 +101,12 @@ sealed interface WorkspaceCommand : LauncherCommand {
     /** `Super + Alt + G`: saca el tile de su grupo a un hueco propio. */
     data object MoveOutOfGroup : WorkspaceCommand
 
+    /** `Super + S`: muestra u oculta el scratchpad (`togglespecialworkspace` de Hyprland). */
+    data object ToggleScratchpad : WorkspaceCommand
+
+    /** `Super + Alt + S`: lleva el tile con el foco al scratchpad, sin seguirlo. */
+    data object MoveTileToScratchpad : WorkspaceCommand
+
     /** Entrar o salir del modo edición (mantener pulsado un hueco vacío). */
     data object ToggleEditMode : WorkspaceCommand
 }

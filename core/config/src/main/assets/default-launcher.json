@@ -92,6 +92,8 @@
     { "keys": "SUPER + ALT + SHIFT + TAB", "command": "group.previous" },
     { "keys": "SUPER + CTRL + LEFT", "command": "group.previous" },
     { "keys": "SUPER + CTRL + RIGHT", "command": "group.next" },
+    { "keys": "SUPER + S", "command": "scratchpad.toggle" },
+    { "keys": "SUPER + ALT + S", "command": "scratchpad.move" },
     { "keys": "SUPER + G", "command": "group.toggle" },
     { "keys": "SUPER + ALT + G", "command": "group.move-out" },
     { "keys": "SUPER + ALT + LEFT", "command": "group.move-into", "args": { "direction": "left" } },
@@ -100,7 +102,8 @@
     { "keys": "SUPER + ALT + DOWN", "command": "group.move-into", "args": { "direction": "down" } },
     { "gesture": "swipe-up", "command": "menu.open" },
     { "gesture": "two-finger-swipe-left", "command": "workspace.next" },
-    { "gesture": "two-finger-swipe-right", "command": "workspace.previous" }
+    { "gesture": "two-finger-swipe-right", "command": "workspace.previous" },
+    { "gesture": "two-finger-swipe-down", "command": "scratchpad.toggle" }
   ],
   "keyboard": { "superAlternative": "ALT" },
   "apps": { "terminal": "com.termux" }

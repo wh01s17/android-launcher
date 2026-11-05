@@ -59,6 +59,8 @@ object CommandCatalog {
             CommandSpec("group.toggle") { WorkspaceCommand.ToggleGroup },
             CommandSpec("group.move-into", "direction") { WorkspaceCommand.MoveIntoGroup(it.direction("direction")) },
             CommandSpec("group.move-out") { WorkspaceCommand.MoveOutOfGroup },
+            CommandSpec("scratchpad.toggle") { WorkspaceCommand.ToggleScratchpad },
+            CommandSpec("scratchpad.move") { WorkspaceCommand.MoveTileToScratchpad },
             CommandSpec("edit.toggle") { WorkspaceCommand.ToggleEditMode },
         )
 
