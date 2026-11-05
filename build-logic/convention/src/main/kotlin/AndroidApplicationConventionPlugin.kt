@@ -26,6 +26,18 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     getByName("debug") {
                         applicationIdSuffix = ".debug"
                     }
+                    // Para el uso diario en el teléfono: no depurable (ART compila el código; en debug
+                    // casi todo va por el intérprete) y perfilable para simpleperf. Mismo id y firma
+                    // que debug, así que se instala encima conservando escritorios y ajustes.
+                    // Sin R8 hasta el Hito 11 (plan.md §7), que añade reglas y Baseline Profile.
+                    create("fast") {
+                        initWith(getByName("release"))
+                        applicationIdSuffix = ".debug"
+                        signingConfig = signingConfigs.getByName("debug")
+                        matchingFallbacks += "release"
+                        isDebuggable = false
+                        isProfileable = true
+                    }
                 }
             }
             configureQuality()
