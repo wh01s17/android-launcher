@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
 import com.wh01s17.launcher.LauncherApplication
 import com.wh01s17.launcher.MainActivity
 import com.wh01s17.launcher.ScreensaverActivity
@@ -39,16 +41,13 @@ class StyleIntegrationTest {
             container.desk.state.first { it != null }
             container.desk.flush()
             val desktopBefore = desktop.takeIf { it.exists() }?.readBytes()
-            var home: MainActivity? = null
             try {
                 container.configRepository.reload()
                 val export = container.configRepository.exportDocument()
                 assertEquals(EditResult.Saved, container.configRepository.importDocument(export))
                 assertTrue(container.configRepository.importDocument("broken") is EditResult.Refused)
                 assertEquals(export, container.configRepository.exportDocument())
-                val intent = Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                val activity = instrumentation.startActivitySync(intent) as MainActivity
-                home = activity
+                val activity = launchHome(context)
                 val patch = Json.parseToJsonElement("""{"idle":{"screensaver":1},"appearance":{"fontScale":1.5}}""") as JsonObject
                 assertEquals(EditResult.Saved, container.configRepository.editValues(patch))
                 assertEquals(
@@ -87,9 +86,38 @@ class StyleIntegrationTest {
                     File(context.filesDir, "config/launcher.json").delete()
                 }
                 container.configRepository.reload()
-                home?.let { activity -> instrumentation.runOnMainSync { activity.finish() } }
             }
         }
+
+    /**
+     * `MainActivity` es `singleTask` y, como HOME, casi siempre ya existe: Android reutiliza esa
+     * instancia (`onNewIntent`) y `startActivitySync` esperaría para siempre una nueva. Se lanza y se
+     * toma la instancia reanudada; no se cierra al terminar, porque es el launcher del usuario.
+     */
+    private fun launchHome(context: android.content.Context): MainActivity {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        repeat(LAUNCH_ATTEMPTS) {
+            instrumentation.waitForIdleSync()
+            var home: MainActivity? = null
+            instrumentation.runOnMainSync {
+                home =
+                    ActivityLifecycleMonitorRegistry
+                        .getInstance()
+                        .getActivitiesInStage(Stage.RESUMED)
+                        .filterIsInstance<MainActivity>()
+                        .firstOrNull()
+            }
+            home?.let { return it }
+            SystemClock.sleep(LAUNCH_POLL_MILLIS)
+        }
+        error("MainActivity never resumed")
+    }
+
+    private companion object {
+        const val LAUNCH_ATTEMPTS = 50
+        const val LAUNCH_POLL_MILLIS = 100L
+    }
 
     private fun containsSpin(view: View): Boolean =
         view is WhSpinView ||
