@@ -939,7 +939,7 @@ multitáctil). Guía: [`docs/bindings.md`](docs/bindings.md).
       `metronome-engine.py` sobre `AudioTrack`); widgets en `feature/widgets/native` y sección
       «wh01s17» del selector. Además, a petición del usuario, **TIDAL** con el tema *nova* de
       tidalamp y sus paletas (phosphor de fábrica; tocar el título cambia), sobre `MediaSource`
-      y el acceso a notificaciones opt-in. Pendiente: oír el metrónomo en el Redmi.
+      y el acceso a notificaciones opt-in. El metrónomo suena en el Redmi (confirmado por el usuario).
 - [x] Módulos de barra correspondientes (`pomodoro`, `wh01s17.metronome`). Sobre los mismos
       repositorios que los tiles (`feature/bar/timer`): pomodoro con icono de fase y tiempo (sin
       empezar, sólo el icono, para caber en 407 dp) y clases de `pomodoro.sh`; metrónomo analógico de
@@ -955,9 +955,8 @@ multitáctil). Guía: [`docs/bindings.md`](docs/bindings.md).
 **Hito 7 terminado (2026-11-05)** → `0.3.0` (versionCode `300`). Comprobado con
 `./gradlew check assembleFast` y en el Redmi por ADB. Además, a petición del usuario durante el hito:
 grupos explícitos, barra sin repetir la de Android, rendimiento, buscador del selector de widgets y
-tempo del metrónomo escribible (§13). Pendiente manual: que el usuario confirme que oye el
-metrónomo (por ADB sólo se vio el `AudioTrack` sonando) y probar a mano escribir el tempo (cubierto
-con una prueba de Compose). No se porta la sincronización de No molestar de `pomodoro.sh`.
+tempo del metrónomo escribible (§13). El usuario confirmó en el Redmi que el metrónomo suena y que
+el tempo se escribe tocando el número. No se porta la sincronización de No molestar de `pomodoro.sh`.
 
 ### Hito 8 — Scratchpad, notificaciones y media (M)
 
@@ -1261,8 +1260,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 - **Siguiente tarea:** Hito 8, scratchpad (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
   Bluetooth y los gestos de dos dedos a mano; medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj;
-  probar a mano en el Redmi agrupar por arrastre y con los botones, oír el metrónomo y escribir el
-  tempo. Tras reinstalar, la vigilancia puede devolver los botones un instante hasta que el servicio
+  probar a mano en el Redmi agrupar por arrastre y con los botones. Tras reinstalar, la vigilancia puede devolver los botones un instante hasta que el servicio
   de gestos se reenlaza (visto el 2026-11-05; se ocultan solos).
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
   launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio → `ajustes`),
