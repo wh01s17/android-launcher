@@ -33,6 +33,9 @@ class CommandEncodingTest {
             WorkspaceCommand.CycleGroup(forward = true),
             WorkspaceCommand.CycleGroup(forward = false),
             WorkspaceCommand.ToggleEditMode,
+            WorkspaceCommand.ToggleGroup,
+            WorkspaceCommand.MoveIntoGroup(CommandDirection.Right),
+            WorkspaceCommand.MoveOutOfGroup,
         )
 
     @Test

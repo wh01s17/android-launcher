@@ -91,6 +91,9 @@
     <string name="cmd_group_next">Siguiente pestaña del grupo</string>
     <string name="cmd_group_previous">Pestaña anterior del grupo</string>
     <string name="cmd_edit">Modo edición</string>
+    <string name="cmd_group_toggle">Agrupar / desagrupar</string>
+    <string name="cmd_group_move_into">Meter en el grupo %1$s</string>
+    <string name="cmd_group_move_out">Sacar del grupo</string>
     <string name="cmd_unknown">%1$s</string>
     <string name="gesture_swipe_up">Deslizar hacia arriba</string>
     <string name="gesture_swipe_down">Deslizar hacia abajo</string>

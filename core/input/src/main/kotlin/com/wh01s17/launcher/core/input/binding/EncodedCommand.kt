@@ -44,4 +44,7 @@ fun LauncherCommand.encode(): EncodedCommand =
         WorkspaceCommand.CloseTile -> EncodedCommand("tile.close")
         is WorkspaceCommand.CycleGroup -> EncodedCommand(if (forward) "group.next" else "group.previous")
         WorkspaceCommand.ToggleEditMode -> EncodedCommand("edit.toggle")
+        WorkspaceCommand.ToggleGroup -> EncodedCommand("group.toggle")
+        is WorkspaceCommand.MoveIntoGroup -> EncodedCommand("group.move-into", mapOf("direction" to direction.name.lowercase()))
+        WorkspaceCommand.MoveOutOfGroup -> EncodedCommand("group.move-out")
     }

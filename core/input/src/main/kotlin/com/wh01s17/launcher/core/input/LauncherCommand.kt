@@ -90,6 +90,17 @@ sealed interface WorkspaceCommand : LauncherCommand {
         val forward: Boolean,
     ) : WorkspaceCommand
 
+    /** `Super + G`: deshace el grupo del tile, o lo agrupa con el último tile enfocado. */
+    data object ToggleGroup : WorkspaceCommand
+
+    /** `Super + Alt + flechas`: mete el tile en el grupo (o tile) de ese lado. */
+    data class MoveIntoGroup(
+        val direction: CommandDirection,
+    ) : WorkspaceCommand
+
+    /** `Super + Alt + G`: saca el tile de su grupo a un hueco propio. */
+    data object MoveOutOfGroup : WorkspaceCommand
+
     /** Entrar o salir del modo edición (mantener pulsado un hueco vacío). */
     data object ToggleEditMode : WorkspaceCommand
 }

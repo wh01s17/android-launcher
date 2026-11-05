@@ -42,6 +42,9 @@ private fun labelOf(command: EncodedCommand): Pair<Int, Array<Any>> {
         "group.next" -> R.string.cmd_group_next to emptyArray()
         "group.previous" -> R.string.cmd_group_previous to emptyArray()
         "edit.toggle" -> R.string.cmd_edit to emptyArray()
+        "group.toggle" -> R.string.cmd_group_toggle to emptyArray()
+        "group.move-into" -> R.string.cmd_group_move_into to arrayOf(direction(args["direction"]))
+        "group.move-out" -> R.string.cmd_group_move_out to emptyArray()
         else -> R.string.cmd_unknown to arrayOf(command.name)
     }
 }

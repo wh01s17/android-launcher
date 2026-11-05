@@ -56,6 +56,9 @@ object CommandCatalog {
             CommandSpec("tile.close") { WorkspaceCommand.CloseTile },
             CommandSpec("group.next") { WorkspaceCommand.CycleGroup(forward = true) },
             CommandSpec("group.previous") { WorkspaceCommand.CycleGroup(forward = false) },
+            CommandSpec("group.toggle") { WorkspaceCommand.ToggleGroup },
+            CommandSpec("group.move-into", "direction") { WorkspaceCommand.MoveIntoGroup(it.direction("direction")) },
+            CommandSpec("group.move-out") { WorkspaceCommand.MoveOutOfGroup },
             CommandSpec("edit.toggle") { WorkspaceCommand.ToggleEditMode },
         )
 
