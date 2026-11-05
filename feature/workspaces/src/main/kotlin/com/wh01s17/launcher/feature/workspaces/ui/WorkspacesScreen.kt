@@ -163,7 +163,10 @@ private fun WorkspacePager(
         flingBehavior = PagerDefaults.flingBehavior(state = pager, snapAnimationSpec = spec),
         key = { it },
     ) { page ->
-        WorkspacePage(state.workspaces[page], page + Desk.FIRST, state, style, iconLoader, onIntent, onOpenMenu, gestures)
+        // Cada escritorio en su capa: al deslizar sólo se mueve, no se vuelve a grabar su dibujo.
+        Box(Modifier.fillMaxSize().graphicsLayer()) {
+            WorkspacePage(state.workspaces[page], page + Desk.FIRST, state, style, iconLoader, onIntent, onOpenMenu, gestures)
+        }
     }
 }
 

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -36,6 +35,7 @@ import com.wh01s17.launcher.core.designsystem.components.WhScrim
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.icons.WhGlyph
 import com.wh01s17.launcher.core.designsystem.icons.WhIcons
+import com.wh01s17.launcher.core.designsystem.layout.chromeAndKeyboard
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.feature.menu.R
 import android.view.KeyEvent as AndroidKeyEvent
@@ -88,7 +88,7 @@ internal fun AppMenuOverlay(
             WhScrim(onClick = { onIntent(SearchIntent.DismissMenu) }, clickLabel = stringResource(R.string.drawer_close))
             WhPanel(
                 Modifier
-                    .windowInsetsPadding(WindowInsets.safeDrawing)
+                    .windowInsetsPadding(WindowInsets.chromeAndKeyboard)
                     .padding(WhTheme.spacing.controlGap)
                     .widthIn(max = WhTheme.spacing.menuWidth)
                     .focusRequester(focus)

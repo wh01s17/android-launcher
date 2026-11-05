@@ -18,7 +18,7 @@
             android:clearTaskOnLaunch="true"
             android:resumeWhilePausing="true"
             android:taskAffinity=""
-            android:windowSoftInputMode="adjustPan"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

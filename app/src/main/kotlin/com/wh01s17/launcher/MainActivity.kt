@@ -14,9 +14,10 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.wh01s17.launcher.core.designsystem.layout.chrome
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.input.WorkspaceCommand
 import com.wh01s17.launcher.feature.bar.Bar
@@ -45,6 +47,7 @@ import com.wh01s17.launcher.feature.workspaces.ui.LocalWidgetRenderer
 import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
 import com.wh01s17.launcher.input.Shortcuts
 import com.wh01s17.launcher.ui.HomeReturn
+import com.wh01s17.launcher.ui.screenReaderSemantics
 import com.wh01s17.launcher.widgets.HomeWidgets
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -156,10 +159,12 @@ class MainActivity : ComponentActivity() {
                     .fillMaxSize()
                     .background(
                         WhTheme.colors.background,
-                    ).then(homeReturn.modifier(config.config?.animations?.workspaces)),
+                    ).then(homeReturn.modifier(config.config?.animations?.workspaces))
+                    .then(screenReaderSemantics()),
             ) {
                 // Los escritorios ocupan lo que dejan la barra y los insets (la exclusive zone de
-                // la barra en Hyprland): ningún tile queda debajo.
+                // la barra en Hyprland): ningún tile queda debajo. El teclado no cuenta: los tapa sin
+                // cambiar su tamaño (ver `WhInsets`).
                 CompositionLocalProvider(LocalWidgetRenderer provides widgets.renderer) {
                     WorkspacesScreen(
                         state = workspacesState,
@@ -172,7 +177,11 @@ class MainActivity : ComponentActivity() {
                         onGesture = shortcuts::onGesture,
                         boundGestures = remember(config.config?.bindings) { Shortcuts.boundGestures(config.config) },
                         onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
-                        modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(top = barHeight()),
+                        modifier =
+                            Modifier
+                                .windowInsetsPadding(WindowInsets.chrome.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+                                .windowInsetsPadding(WindowInsets.statusBars)
+                                .padding(top = barHeight()),
                     )
                 }
                 // La barra va debajo de la barra de estado del sistema (plan.md §5.5). Hasta que
