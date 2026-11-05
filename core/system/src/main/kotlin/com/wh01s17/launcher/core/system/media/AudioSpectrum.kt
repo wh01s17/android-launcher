@@ -7,10 +7,14 @@ import android.media.audiofx.Visualizer
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.hypot
 import kotlin.math.log10
+import kotlin.math.log2
 import kotlin.math.max
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * El espectro de lo que suena en el teléfono (el analizador de tidalamp), con `Visualizer` sobre la
@@ -80,7 +84,12 @@ class AudioSpectrum(
 object SpectrumMath {
     /**
      * [fft] es el formato de `Visualizer.getFft`: `[re0, reN/2, re1, im1, re2, im2, …]`. Las bandas
-     * cubren los bins 1..N/2 en escala logarítmica; la magnitud pasa a dB entre [FLOOR_DB] y 0.
+     * reparten en escala logarítmica los bins [LOW_BIN]..N/2 con bordes fraccionarios: en los graves
+     * una banda es más estrecha que un bin y toma la magnitud interpolada entre los dos vecinos (si no,
+     * varias bandas seguidas repetirían el mismo bin y el lado izquierdo se vería plano y a saltos). En
+     * las demás manda el pico de sus bins. La magnitud pasa a dB entre [FLOOR_DB] y [CEILING_DB], con
+     * una compensación de [TILT_DB_PER_OCTAVE] (la del ruido rosa, como un analizador): sin ella y sin
+     * margen sobre 0 dB, los graves de casi cualquier canción quedaban recortados en una línea plana.
      */
     fun bands(
         fft: ByteArray,
@@ -88,29 +97,57 @@ object SpectrumMath {
     ): FloatArray {
         val bins = fft.size / 2
         val out = FloatArray(count)
-        if (bins < 2 || count == 0) return out
+        if (bins <= LOW_BIN + 1 || count == 0) return out
+        val magnitude = DoubleArray(bins) { k -> if (k == 0) 0.0 else hypot(fft[2 * k].toDouble(), fft[2 * k + 1].toDouble()) }
+        val top = (bins - 1).toDouble()
         for (band in 0 until count) {
-            val from = edge(band, count, bins)
-            val to = max(from + 1, edge(band + 1, count, bins))
-            var peak = 0.0
-            for (k in from until minOf(to, bins)) {
-                val re = fft[2 * k].toDouble()
-                val im = fft[2 * k + 1].toDouble()
-                peak = max(peak, hypot(re, im))
-            }
-            val db = if (peak > 0) 20 * log10(peak / FULL_SCALE) else FLOOR_DB
-            out[band] = ((db - FLOOR_DB) / -FLOOR_DB).toFloat().coerceIn(0f, 1f)
+            val from = edge(band, count, top)
+            val to = edge(band + 1, count, top)
+            val center = sqrt(from * to)
+            val peak =
+                if (to - from < 1.0) {
+                    interpolate(magnitude, center)
+                } else {
+                    (ceil(from).toInt()..floor(to).toInt().coerceAtMost(bins - 1)).maxOf { magnitude[it] }
+                }
+            if (peak <= 0) continue
+            val db = 20 * log10(peak / FULL_SCALE) + TILT_DB_PER_OCTAVE * log2(center / LOW_BIN)
+            out[band] = ((db - FLOOR_DB) / (CEILING_DB - FLOOR_DB)).toFloat().coerceIn(0f, 1f)
         }
         return out
     }
 
-    /** Primer bin de la banda [band]: reparto logarítmico entre el bin 1 y [bins]. */
+    /**
+     * Borde fraccionario de la banda [band] entre [LOW_BIN] y [top]: logarítmico con un [LINEAR_MIX]
+     * lineal. Puramente logarítmico, con 48 bandas, las 15 primeras se repartían menos de 3 bins
+     * (cada bin son unos 43 Hz) y dibujaban un tramo recto; así cada banda tiene datos propios.
+     */
     private fun edge(
         band: Int,
         count: Int,
-        bins: Int,
-    ): Int = (bins.toDouble().pow(band.toDouble() / count)).toInt().coerceIn(1, bins)
+        top: Double,
+    ): Double {
+        val position = band.toDouble() / count
+        val logarithmic = LOW_BIN * (top / LOW_BIN).pow(position)
+        val linear = LOW_BIN + (top - LOW_BIN) * position
+        return logarithmic * (1 - LINEAR_MIX) + linear * LINEAR_MIX
+    }
 
+    private fun interpolate(
+        magnitude: DoubleArray,
+        at: Double,
+    ): Double {
+        val low = floor(at).toInt().coerceIn(0, magnitude.size - 1)
+        val high = (low + 1).coerceAtMost(magnitude.size - 1)
+        val t = at - low
+        return magnitude[low] * (1 - t) + magnitude[high] * t
+    }
+
+    /** Desde el bin 2: el 0 es la continua y el 1 (unos 43 Hz) casi siempre satura. */
+    private const val LOW_BIN = 2.0
     private const val FULL_SCALE = 128.0
-    private const val FLOOR_DB = -48.0
+    private const val FLOOR_DB = -36.0
+    private const val CEILING_DB = 12.0
+    private const val TILT_DB_PER_OCTAVE = 3.0
+    private const val LINEAR_MIX = 0.15
 }
