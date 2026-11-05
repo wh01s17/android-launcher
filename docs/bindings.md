@@ -95,6 +95,7 @@ Quedan fuera, con su motivo (plan.md §3):
 | `media.play-pause` / `media.next` / `media.previous` | — | Transporte multimedia (`CTRL + ALT + O/P/I`), también sin acceso a notificaciones |
 | `notifications.open` | — | Cortina del sistema (necesita *Gestos wh01s17*) |
 | `shortcuts.show` | — | Tabla de atajos (`Super + K`; también menú → Aprender → Atajos) |
+| `wallpaper.open` | — | Selector de fondos (`SUPER + CTRL + SPACE`; `ALT + CTRL + SPACE` en el Redmi) |
 | `terminal.open` | — | Abre `apps.terminal` (`Super + Return`; de fábrica `com.termux`) |
 | `audio.volume` | `step` −10…10 | Volumen multimedia, con el panel del sistema |
 | `workspace.focus` | `id` 1–10 | Va al escritorio |
@@ -148,7 +149,7 @@ un grupo o sacar de él están el arrastre y los botones del modo edición. Igua
 paquete (`"com.termux"`, su actividad principal) o una actividad (`"com.termux/.app.TermuxActivity"`).
 
 Desde el Hito 8: `CTRL + ALT + O/P/I` controla media y `SUPER + S` el scratchpad.
-Pendiente: `Super + Ctrl + Space` (fondos), Hito 10.
+Desde el Hito 10: `SUPER + CTRL + SPACE` abre el selector propio de fondos ([estilo](style.md)).
 
 ## Reservadas por el sistema
 

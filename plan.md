@@ -17,7 +17,9 @@ persona debe poder retomar el trabajo leyendo sólo este archivo y el código.
 1. Lee este archivo completo, en especial [§12 Estado actual](#12-estado-actual)
    y el [§13 Registro de actualizaciones](#13-registro-de-actualizaciones).
 2. Toma la **primera tarea sin marcar** del hito en curso. No empieces un hito
-   nuevo si el anterior no cumple su *Definición de terminado*.
+   nuevo si el anterior no cumple su *Definición de terminado*, salvo un hito
+   aplazado explícitamente. Orden pendiente acordado: **10 → 11 → 9**; el Hito 9
+   experimental queda para después de la versión 1.0.
 3. Antes de escribir código, lee los archivos que vas a tocar y respeta las
    [reglas obligatorias](#1-reglas-obligatorias), sobre todo el límite de
    **1000 líneas por archivo**. Sólo se supera con una justificación
@@ -269,9 +271,10 @@ Fuente: `~/dotfiles/desktop/.config/wh01s17/themes/wh01s17/`.
 
 | Token | Valor | Uso |
 | --- | --- | --- |
-| `background` / void | `#0a0e0f` | Fondo base |
+| `background` / void | `#0a0e0f` | Fondo de interfaz; el escritorio usa negro OLED |
 | `darkBackground` | `#070a0b` | Scrims |
-| `darkerBackground` | `#040607` | Salvapantallas |
+| `darkerBackground` | `#040607` | Fondo más oscuro del tema |
+| `oledBackground` | `#000000` | Escritorio, fondos incluidos y salvapantallas (petición del usuario; token fijo en `WhDefaults`, §11.1) |
 | `surface` | `#11161a` | Barra, menú, popups |
 | `lighterBackground` / raised | `#171e23` | Tooltips, tiles |
 | `border` | `#243038` | Borde inactivo, controles |
@@ -713,6 +716,9 @@ Cada hito termina con: `./gradlew check` verde, APK instalable, entrada en
 §13 y, si aplica, capturas en `docs/screenshots/`. Estimaciones en sesiones
 de trabajo de agente (S ≈ 1, M ≈ 2–3, L ≈ 4–6).
 
+**Prioridad pendiente (2026-11-05): 10 → 11 → 9.** Se conserva la numeración
+para mantener las referencias; el Hito 9 experimental se aborda al final, después de la 1.0.
+
 ### Hito 0 — Fundaciones (M)
 
 - [x] Instalar el Android SDK (abrir Android Studio una vez, §10), configurar
@@ -989,6 +995,9 @@ con Compose, sin borrar avisos reales ni cambiar la config del usuario. Guía: `
 
 ### Hito 9 — Modo escritorio / freeform (L, experimental)
 
+**Aplazado hasta después de los Hitos 10 y 11**, por petición del usuario (2026-11-05).
+No bloquea el avance de esos hitos ni la versión 1.0.
+
 - [ ] Detectar soporte freeform y pantallas externas (`DisplayManager`).
 - [ ] Al lanzar desde un tile en un dispositivo compatible, usar el `Rect`
       del motor de tiling con `setLaunchBounds` (tiling real de apps).
@@ -998,15 +1007,15 @@ con Compose, sin borrar avisos reales ni cambiar la config del usuario. Guía: `
 
 ### Hito 10 — Estilo, fondos, salvapantallas y config (M)
 
-- [ ] Menú *Style*: tema, fondo, fuente (escala), transparencia, huecos,
+- [x] Menú *Style*: tema, fondo, fuente (escala), transparencia, huecos,
       radio, estilo de iconos; cambios en vivo.
-- [ ] `tools/render-wallpapers.py`: variantes verticales de los fondos
+- [x] `tools/render-wallpapers.py`: variantes verticales de los fondos
       (marca W y lunas en el repo; Gengar/Opeth importables por el usuario).
-- [ ] Selector de fondos (`Super + Ctrl + Space`), dibujado propio y opción
+- [x] Selector de fondos (`Super + Ctrl + Space`), dibujado propio y opción
       de fijarlo como fondo del sistema.
-- [ ] `DreamService` con la W girando (portar la lógica de `w-spin.py`) sobre
-      `#040607`; `idle.screensaver` desde config.
-- [ ] Importar/exportar `launcher.json` por SAF; validación con errores
+- [x] `DreamService` con la W girando (portar la lógica de `w-spin.py`) sobre
+      negro puro OLED `#000000` (petición del usuario); `idle.screensaver` desde config.
+- [x] Importar/exportar `launcher.json` por SAF; validación con errores
       legibles.
 
 ### Hito 11 — Endurecimiento y versión 1.0 (M)
@@ -1242,8 +1251,13 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-05 | Soltar un tile cerca del borde de otro lo coloca a ese lado (`moveNextTo`) en vez de intercambiarlos; durante el arrastre se resalta el hueco que ocupará | El usuario esperaba que las dos apps quedaran donde las dejó (el intercambio hacía un «enroque»); así se arrastra una ventana en Hyprland |
 | 2026-11-05 | Vista previa real del arrastre (el escritorio se pinta como quedará al soltar) y `deshacer` en el modo edición (`UndoHistory`, 50 pasos, sin contar foco ni escritorio actual) | Un movimiento estiró tiles que el usuario no esperaba (el vecino ocupa el hueco que se deja) y no había forma de volver atrás |
 | 2026-11-05 | El scratchpad es un escritorio especial dentro de `Desk` (no un módulo `feature/scratchpad` aparte) | Comparte motor, guardado, edición y deshacer con los escritorios; como `special:scratchpad`, mientras se ve recibe los tiles nuevos y cambiar de escritorio lo oculta |
-
 | 2026-11-05 | Nuevo módulo `feature/notifications` para el panel propio y el aviso; insignias mediante `LocalTileBadges` conectado por la app | Mantiene los features independientes (§5.2); se reutiliza el listener de media y no se guardan textos. Avisos emergentes apagados de fábrica para no duplicar Android |
+| 2026-11-05 | Aplazar el Hito 9 experimental hasta después de los Hitos 10 y 11 (orden 10 → 11 → 9) | Petición del usuario: freeform no es prioritario; primero estilo, salvapantallas y la versión 1.0. Se conserva la numeración y el alcance del hito |
+| 2026-11-05 | Hito 10: sólo se ofrece el tema instalado `wh01s17`; escala y fondo en `appearance`, iconos en `apps.iconStyle`, inactividad en `idle.screensaver` | Es el único tema presente en los dotfiles. La paleta permanece en los tokens generados y los cambios del editor conservan el resto del JSON |
+| 2026-11-05 | Fondos originales W/lunas generados con Python estándar a tres resoluciones; imágenes personales copiadas y reducidas a un máximo de 2048 px en almacenamiento privado | Evita dependencias de herramientas externas, permisos de almacenamiento y distribuir arte de terceros. Cambiar el fondo Android exige una acción explícita |
+| 2026-11-05 | W ASCII adaptada de `w-spin.py`, una muestra por celda a unos 15 fps, sin brillo especular; `DreamService` separado del temporizador de inactividad de HOME | Mantiene geometría, perspectiva e iluminación con coste acotado. HOME sólo cuenta mientras está en primer plano; Android conserva el control de su apagado y del salvapantallas al cargar |
+| 2026-11-05 | Negro puro OLED en el salvapantallas, los fondos incluidos y la base del escritorio; token `WhDefaults.oledBackground` en designsystem y negro fijo en el generador | Petición explícita del usuario: esas zonas deben apagar los píxeles. Excepción acotada a R6: el negro de hardware es independiente de la paleta de superficies del tema, que se conserva. Las imágenes importadas mantienen sus colores |
+| 2026-11-05 | Barra llena: primero modo compacto (relleno 5 → 2 dp, celdas 26 → 20 dp) y, si no basta, ocultar de derecha a izquierda los módulos en reposo (metrónomo parado, media en pausa); nunca se pisan. El módulo `media` muestra el icono del botón (`⏸` sonando, `▶` en pausa) | Elección del usuario tras ver el escritorio 6 con el pomodoro en marcha (faltaban ~79 dp); el icono de estado (`♫`/`⏸`) se leía al revés |
 
 ### 11.2 Riesgos
 
@@ -1269,17 +1283,18 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-05:** 58 de 75 tareas marcadas (77 % del plan completo);
+- **Balance al 2026-11-05:** 63 de 75 tareas marcadas (84 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
-  Quedan los Hitos 9–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito siguiente:** Hito 9 (experimental, sin empezar). **Hitos 0–8 terminados**; versión `0.4.0`. Los
+  Quedan los Hitos 11 y 9, en ese orden; el 9 es experimental y queda para después de la 1.0.
+- **Hito en curso:** Hito 11 (sin empezar). **Hitos 0–8 y 10 terminados**; versión `0.5.0`. Los
   cierres y sus pruebas siguen en §13.
-- **Última tarea completada:** **Hito 8 cerrado**: scratchpad, notificaciones e insignias por perfil,
-  panel propio y aviso opcional con cuenta atrás, módulo media y atajos. Ver cierre y pruebas en §7 y §13.
+- **Última tarea completada:** **Hito 10 cerrado**: editor de estilo, fondos W/lunas con selector propio,
+  W girando (vista previa, inactividad de HOME y Dream) e importación/exportación SAF. Además, barra sin
+  solapes (compacta y oculta módulos en reposo) e icono de media como botón. Ver §13.
 - **Incidencia de la sesión (resuelta):** la primera versión de la animación de vuelta cerraba el
   launcher al volver; HyperOS mostró el selector de launcher. Se cerró sin elegir, se reafirmó el
   rol HOME de `com.wh01s17.launcher.debug` y se corrigió (§13).
-- **Siguiente tarea:** Hito 9, detectar soporte freeform y pantallas externas (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
+- **Siguiente tarea:** Hito 11, rendimiento (arranque en frío y 120 fps con Macrobenchmark + Baseline Profile; modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
   Bluetooth y los gestos de dos dedos a mano; medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj;
   probar a mano en el Redmi agrupar por arrastre y con los botones. Tras reinstalar, la vigilancia puede devolver los botones un instante hasta que el servicio
@@ -1301,7 +1316,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   funciona. Se restauró `0` (3 botones). La capa 3 pasa a ser la navegación
   principal (Hito 2). Observaciones, ajustes y matriz de pruebas en
   [`docs/xiaomi.md`](docs/xiaomi.md).
-- **Versión:** `0.4.0` (Hito 8); antes `0.3.0` (Hito 7), `0.2.0` (Hito 6, etiqueta `v0.2.0`) y el MVP `0.1.0`. En el Redmi va la compilación
+- **Versión:** `0.5.0` (Hito 10); antes `0.4.0` (Hito 8), `0.3.0` (Hito 7), `0.2.0` (Hito 6, etiqueta `v0.2.0`) y el MVP `0.1.0`. En el Redmi va la compilación
   `fast` (`./gradlew installFast`, mismo id y datos que la debug; ver `docs/setup.md`);
   firma y distribución de APK release siguen en el Hito 11. Historial en `CHANGELOG.md`.
 
@@ -1313,6 +1328,9 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-05 | 10 | `check` en verde (lint `RestrictedApi` en `ScreensaverActivity`). En el Redmi (`installFast`): índice, menú → Estilo y editor con los valores del usuario sin tocarlos. Corregido a petición del usuario: la barra se solapaba con el escritorio 6 y el pomodoro en marcha (`BarCompaction`, `collapsedSlots`, `requiredWidth`, tokens compactos en `WhSpacing`; probado en el Redmi) y el icono de `media` se leía al revés. 4 pruebas nuevas y captura `bar-states` regrabada. Tras desbloquear: `▶` en pausa, selector de fondos (Luna llena con vista previa y en HOME; se devolvió «Sin fondo»), vista previa de la W (fotogramas distintos, tocar sale) y selector SAF de exportación de HyperOS (cancelado, sin escribir). **Hito 10 cerrado → 0.5.0 (500)** | `feature/bar/BarLayout.kt`, `Bar.kt`, `module/BarItem.kt`, `module/MediaModule.kt`, `core/designsystem/theme/WhSpacing.kt`, `docs/bar.md` |
+| 2026-11-05 | 10 | En curso: editor de estilo con config validada/atómica, fondos W/lunas y selector/importación propia, comando `wallpaper.open`, SAF para JSON, W ASCII y servicio Dream con inactividad en HOME. Pruebas de config/imagen/geometría y capturas añadidas. Versión `0.5.0` preparada; pendientes controles generales y validación real antes de cerrar | `core/config/`, `core/system/wallpaper/`, `core/designsystem/screensaver/`, `feature/settings/style/`, `feature/screensaver/`, `app/StyleActivity.kt`, `tools/render-wallpapers.py` |
+| 2026-11-05 | Planificación | A petición del usuario, el Hito 9 experimental queda al final, después de los Hitos 10 y 11 y de la versión 1.0. Siguiente hito: 10. Numeración y alcance conservados; protocolo de retoma y estado actual ajustados | `plan.md` |
 | 2026-11-05 | 8 | **Hito 8 cerrado → 0.4.0 (400).** Listener con filtro y estado por perfil, badges y contador, panel y aviso opcional en `feature/notifications`; media de cualquier app en barra y comandos/atajos O/P/I. Corregidas las pruebas del aviso (snapshots/reloj), observación de todas las sesiones de media y complejidad/formato del parser. Revisión local documentada. `check assembleDebug` en verde, capturas del panel y de Sistema; `installFast` y pruebas ADB del panel, descarte, apertura, scratchpad y transporte multimedia. Escritorio conservado, pista original en pausa y HOME/gestos confirmados | `core/system/notifications/`, `core/system/media/`, `feature/notifications/`, `feature/bar/`, `feature/workspaces/ui/TileBadges.kt`, `app/ui/HomeNotifications.kt`, `docs/notifications.md`, `docs/review-hito8.md` |
 | 2026-11-05 | 8 | Scratchpad: `Desk.scratchpad`/`scratchpadVisible`/`active`/`toggleScratchpad` (un solo `copy` por cambio), `DeskCodec` con `scratchpad` opcional, `ScratchpadOverlay`, «S» en la tira (`STRIP_TARGETS`) y en `core.workspaces`, comandos y atajos de fábrica. Pruebas de modelo, guardado, ViewModel y captura de la barra. En el Redmi sólo se instaló (el usuario usaba el teléfono) | `feature/workspaces/model/Desk.kt`, `ui/ScratchpadOverlay.kt`, `feature/bar/module/WorkspacesModule.kt`, `core/input/` |
 | 2026-11-05 | 7 | Vista previa y deshacer (petición del usuario: mover WhatsApp estiró Cámara y no se podía volver atrás; su distribución anterior no se pudo recuperar). `afterDrop` + `rememberDropPreview`/`DragOverlay`: los tiles se colocan donde quedarán y se resalta el hueco del arrastrado; `UndoHistory` + `DeskEditor` (todo cambio de los escritorios pasa por él) y botón `deshacer`. Pruebas de historial y de deshacer en el ViewModel | `feature/workspaces/model/UndoHistory.kt`, `data/DeskEditor.kt`, `ui/WorkspacePage.kt`, `ui/EditToolbar.kt` |

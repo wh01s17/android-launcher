@@ -163,3 +163,9 @@ Capturas del dispositivo: [raíz](screenshots/menu-redmi.png),
 Sistema ofrece Notificaciones (panel propio), Cortina de notificaciones (Android) y reproducir
 o pausar, pista siguiente y anterior. También aparecen en la búsqueda de comandos. El acceso
 opcional y los controles se explican en [notifications.md](notifications.md).
+
+## Estilo y configuración (Hito 10)
+
+Style y Setup ofrecen el editor propio de [estilo](style.md): escala de fuente, transparencia,
+huecos, radio, iconos, fondos, salvapantallas e importación/exportación de JSON. La entrada Fondos
+abre el selector propio; Pantalla conserva el acceso a los ajustes de Android.

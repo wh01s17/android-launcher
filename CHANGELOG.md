@@ -3,6 +3,29 @@
 El proyecto usa [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
+## [0.5.0] — 2026-11-05
+
+Hito 10: estilo, fondos, salvapantallas y configuración. El Hito 9 experimental queda para después de la 1.0.
+
+### Añadido
+
+- Editor de estilo con cambios inmediatos: escala de Departure Mono, transparencia de barra,
+  huecos y radio de tiles, iconos monocromos/originales/pixelados. Tema instalado: wh01s17.
+- Fondos W y lunas en tres resoluciones, selector propio (`SUPER + CTRL + SPACE`), vista previa,
+  importación de imágenes y opción explícita de fijar el fondo de inicio de Android.
+- W ASCII animada desde `w-spin.py`, vista previa, inactividad de HOME configurable y servicio
+  de salvapantallas de Android al cargar. Tocar para salir consume el gesto.
+- Importación/exportación de `launcher.json` mediante SAF, con validación antes de escribir y
+  conservación de atajos y claves desconocidas al editar. Los escritorios y widgets se conservan.
+- Negro puro OLED en los fondos incluidos, base del escritorio y salvapantallas; el render se
+  desplaza suavemente y el servicio no fuerza brillo alto.
+
+### Corregido
+
+- La barra ya no superpone módulos cuando no caben (p. ej. escritorio 6 con el pomodoro en marcha):
+  primero se compacta y, si hace falta, oculta el metrónomo parado y la media en pausa.
+- El módulo `media` muestra el icono del botón: `⏸` mientras suena y `▶` en pausa.
+
 ## [0.4.0] — 2026-11-05
 
 Hito 8: scratchpad, notificaciones y media.
