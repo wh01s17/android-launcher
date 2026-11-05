@@ -27,10 +27,11 @@ class SpectrumMathTest {
 
     @Test
     fun `the DC and the first bin do not light anything`() {
-        val fft = ByteArray(1024).also {
-            it[0] = 127
-            it[2] = 127
-        }
+        val fft =
+            ByteArray(1024).also {
+                it[0] = 127
+                it[2] = 127
+            }
         assertTrue(SpectrumMath.bands(fft, 48).all { it == 0f })
     }
 }

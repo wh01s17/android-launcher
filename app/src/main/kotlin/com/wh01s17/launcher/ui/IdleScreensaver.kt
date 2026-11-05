@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
-/** Only counts inactivity while HOME is resumed; leaving HOME always removes the overlay. */
+/** Sólo cuenta la inactividad con HOME reanudado; salir de HOME siempre quita la capa. */
 internal class IdleScreensaver(
     private val activity: ComponentActivity,
     private val config: ConfigRepository,

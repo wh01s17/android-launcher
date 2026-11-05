@@ -3,7 +3,7 @@ package com.wh01s17.launcher.core.config
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
-/** Presentation preferences; the bundled theme remains the source of all design tokens. */
+/** Preferencias de presentación; el tema incluido sigue siendo la fuente de todos los tokens. */
 data class AppearanceConfig(
     val theme: String = "wh01s17",
     val fontScale: Float = DEFAULT_FONT_SCALE,

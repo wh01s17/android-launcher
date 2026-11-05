@@ -8,8 +8,8 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/** Ray-box renderer ported from dotfiles fastfetch/w-spin.py, on its 40 × 20 ASCII grid. */
-@Suppress("MagicNumber") // Geometry, lighting and camera are data from w-spin.py.
+/** Trazado de rayos contra cajas portado de `fastfetch/w-spin.py` de los dotfiles, en su rejilla ASCII de 40 × 20. */
+@Suppress("MagicNumber") // Geometría, luz y cámara son datos de w-spin.py.
 object SpinGeometry {
     const val WIDTH = 40
     const val HEIGHT = 20

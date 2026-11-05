@@ -1,6 +1,6 @@
 package com.wh01s17.launcher.feature.settings.style
 
-/** Android document pickers and navigation belong to the application. */
+/** Los selectores de documentos de Android y la navegación son de la aplicación. */
 data class StyleActions(
     val wallpapers: () -> Unit,
     val importImage: () -> Unit,

@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-/** Merge editor-owned fields without losing unknown settings or user bindings. */
+/** Combina los campos de los editores sin perder claves desconocidas ni atajos del usuario. */
 internal object ConfigDocuments {
     private val json = Json { prettyPrint = true }
     const val MAX_BYTES = 1_048_576

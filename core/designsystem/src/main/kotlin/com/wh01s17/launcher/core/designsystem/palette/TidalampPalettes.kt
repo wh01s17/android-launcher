@@ -21,7 +21,7 @@ data class PlayerPalette(
 
 /**
  * Las paletas incluidas en tidalamp (`tidalamp/theme.py`, `_BUILTIN_SOURCES`), para el widget de
- * TIDAL. Aquí y no en el widget por la regla R6 (los colores sólo salen del sistema de diseño).
+ * todo el launcher (se eligen en Estilo). Aquí por la regla R6 (los colores sólo salen del sistema de diseño).
  * `phosphor` es la de wh01s17 y va primero: es la de fábrica.
  */
 @Suppress("MagicNumber") // Datos copiados tal cual de tidalamp.
@@ -177,7 +177,4 @@ object TidalampPalettes {
     val default: PlayerPalette get() = all.first()
 
     fun byName(name: String?): PlayerPalette = all.firstOrNull { it.name == name } ?: default
-
-    /** La siguiente de la lista, para cambiar con un toque. */
-    fun after(palette: PlayerPalette): PlayerPalette = all[(all.indexOf(palette) + 1) % all.size]
 }
