@@ -26,6 +26,7 @@ import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.feature.settings.R
+import kotlin.math.roundToInt
 
 @Composable
 fun StyleScreen(
@@ -69,7 +70,7 @@ private fun Appearance(
 ) {
     WhText(stringResource(R.string.style_theme), color = WhTheme.colors.accent)
     WhText(stringResource(R.string.style_theme_hint), color = WhTheme.colors.darkForeground)
-    NumberSetting(R.string.style_font, (config.appearance.fontScale * PERCENT).toInt(), FONT_RANGE) {
+    NumberSetting(R.string.style_font, (config.appearance.fontScale * PERCENT).roundToInt(), FONT_RANGE) {
         onChange("appearance", "fontScale", it.toFloat() / PERCENT)
     }
     WhToggle(config.bar.transparent, { onChange("bar", "transparent", it) }, label = stringResource(R.string.style_transparent))

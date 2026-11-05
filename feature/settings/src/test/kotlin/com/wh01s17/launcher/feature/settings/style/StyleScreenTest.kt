@@ -3,11 +3,13 @@ package com.wh01s17.launcher.feature.settings.style
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.wh01s17.launcher.core.config.AppearanceConfig
 import com.wh01s17.launcher.core.config.BarConfig
 import com.wh01s17.launcher.core.config.LauncherConfig
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
@@ -70,5 +72,24 @@ class StyleScreenTest {
         compose.onNodeWithText("Importar imagen…").performClick()
         assertEquals(1, imports)
         compose.onRoot().captureRoboImage("src/test/screenshots/wallpapers.png")
+    }
+
+    @Test
+    fun `the font scale is rounded so plus moves past 104`() {
+        compose.setContent {
+            WhTheme {
+                StyleScreen(
+                    LauncherConfig(1, BarConfig(), appearance = AppearanceConfig(fontScale = 1.05f)),
+                    null,
+                    false,
+                    { section, key, value -> changed += Triple(section, key, value) },
+                    actions,
+                )
+            }
+        }
+        // 1.05f × 100 = 104,99…: truncado se veía 104 y «+» volvía a guardar 1.05.
+        compose.onNodeWithText("105").assertExists()
+        compose.onAllNodesWithText("+")[0].performClick()
+        assertEquals(Triple("appearance", "fontScale", 1.06f), changed.last())
     }
 }
