@@ -71,7 +71,11 @@ import android.graphics.Color as AndroidColor
 /**
  * Pantalla de inicio (rol HOME): los escritorios en mosaico (Hito 4), la barra encima (Hito 3) y el
  * menú y paleta unificados (Hito 5), también usados para seleccionar apps para tiles.
+ *
+ * Casi todas sus funciones son callbacks de Android (ciclo de vida y reparto de teclas, toques y
+ * ratón) que sólo pueden vivir aquí; la lógica está delegada en otras clases.
  */
+@Suppress("TooManyFunctions")
 class MainActivity : ComponentActivity() {
     private val container get() = (application as LauncherApplication).container
 
@@ -325,6 +329,16 @@ class MainActivity : ComponentActivity() {
         if (menu.page.value == null) return super.dispatchKeyEvent(event)
         if (event.action == KeyEvent.ACTION_UP && !event.isCanceled) menuController.back()
         return true
+    }
+
+    /**
+     * Rueda, puntero y trackpad (teclado y ratón por Bluetooth o DeX) también son actividad: reinician
+     * la inactividad y, con la W a la vista, la quitan sin llegar a la interfaz de abajo.
+     */
+    override fun dispatchGenericMotionEvent(event: android.view.MotionEvent): Boolean {
+        val waking = idle.visible.value
+        idle.touch()
+        return waking || super.dispatchGenericMotionEvent(event)
     }
 
     override fun dispatchTouchEvent(event: android.view.MotionEvent): Boolean {
