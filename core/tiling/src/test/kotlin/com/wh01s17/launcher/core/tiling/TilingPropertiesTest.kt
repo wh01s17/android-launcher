@@ -31,7 +31,7 @@ class TilingPropertiesTest {
     ): Workspace {
         val existing = ws.tiles
         val direction = Direction.entries.random(random)
-        return when (random.nextInt(15)) {
+        return when (random.nextInt(16)) {
             0, 1, 2 -> ws.insert(newId())
             3 -> if (existing.isEmpty()) ws else ws.remove(existing.random(random))
             4 -> if (existing.isEmpty()) ws else ws.focus(existing.random(random))
@@ -44,6 +44,7 @@ class TilingPropertiesTest {
             11 -> ws.moveIntoGroup(direction, area, gaps)
             12 -> if (random.nextBoolean()) ws.toggleGroup() else ws.moveOutOfGroup()
             13 -> if (existing.size < 2) ws else ws.groupWith(existing.random(random), existing.random(random))
+            14 -> if (existing.size < 2) ws else ws.moveNextTo(existing.random(random), existing.random(random), direction)
             else -> ws.withLayout(TilingLayout.entries.random(random))
         }
     }
