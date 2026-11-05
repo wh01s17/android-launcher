@@ -31,6 +31,8 @@ internal fun EditToolbar(
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
     onAddWidget: () -> Unit = {},
+    canUndo: Boolean = false,
+    onUndo: () -> Unit = {},
 ) {
     val spacing = WhTheme.spacing
     val focused = workspace.focused
@@ -44,6 +46,7 @@ internal fun EditToolbar(
             horizontalArrangement = Arrangement.spacedBy(spacing.controlGap),
             verticalArrangement = Arrangement.spacedBy(spacing.controlGap),
         ) {
+            Action(stringResource(R.string.edit_undo), enabled = canUndo, onClick = onUndo)
             Action(stringResource(R.string.edit_add), onClick = onAddTile)
             Action(stringResource(R.string.edit_add_widget), onClick = onAddWidget)
             Action(

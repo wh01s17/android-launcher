@@ -30,6 +30,7 @@ import com.wh01s17.launcher.core.tiling.toggleFullscreen
 import com.wh01s17.launcher.core.tiling.toggleGroup
 import com.wh01s17.launcher.core.tiling.toggleSplit
 import com.wh01s17.launcher.core.tiling.withFloatingBounds
+import com.wh01s17.launcher.feature.workspaces.data.DeskEditor
 import com.wh01s17.launcher.feature.workspaces.data.DeskRepository
 import com.wh01s17.launcher.feature.workspaces.model.Desk
 import com.wh01s17.launcher.feature.workspaces.model.TileContent
@@ -59,6 +60,9 @@ class WorkspacesViewModel(
     private val actions: AppActions,
 ) : ViewModel() {
     private val editing = MutableStateFlow(false)
+
+    /** Todo cambio de los escritorios pasa por aquí: se aplica y, si mueve algo, se puede deshacer. */
+    private val editor = DeskEditor(desk)
     private val message = MutableStateFlow<WorkspaceMessage?>(null)
     private var metrics: CanvasMetrics? = null
 
@@ -68,8 +72,11 @@ class WorkspacesViewModel(
             .map { Settings(it.general, it.animations) }
             .distinctUntilChanged()
 
+    /** Modo edición y si hay algo que deshacer, juntos (`combine` admite cinco flujos). */
+    private val edit = combine(editing, editor.undoSteps) { editing, steps -> editing to (steps > 0) }
+
     val state: StateFlow<WorkspacesUiState> =
-        combine(desk.state, catalog, settings.onStart { emit(Settings()) }, editing, message) { desk, catalog, settings, editing, message ->
+        combine(desk.state, catalog, settings.onStart { emit(Settings()) }, edit, message) { desk, catalog, settings, edit, message ->
             val base = WorkspacesUiState(general = settings.general, animation = settings.animations.workspaces)
             if (desk == null) {
                 base
@@ -80,7 +87,8 @@ class WorkspacesViewModel(
                     workspaces = desk.workspaces,
                     tiles = tileInfos(desk, catalog),
                     appsLoaded = catalog.loaded,
-                    editing = editing,
+                    editing = edit.first,
+                    canUndo = edit.second,
                     message = message,
                 )
             }
@@ -91,17 +99,17 @@ class WorkspacesViewModel(
     }
 
     /** Añade un tile con [app] al escritorio actual (desde el selector de apps del modo edición). */
-    fun addApp(app: AppKey) = desk.update { it.add(TileContent.App(app)) }
+    fun addApp(app: AppKey) = editor.change { it.add(TileContent.App(app)) }
 
     /** Añade un widget ya enlazado (y configurado) al escritorio actual. */
-    fun addWidget(appWidgetId: Int) = desk.update { it.add(TileContent.Widget(appWidgetId)) }
+    fun addWidget(appWidgetId: Int) = editor.change { it.add(TileContent.Widget(appWidgetId)) }
 
     /** Añade un widget propio ([TileContent.Native]) al escritorio actual. */
-    fun addNative(id: String) = desk.update { it.add(TileContent.Native(id)) }
+    fun addNative(id: String) = editor.change { it.add(TileContent.Native(id)) }
 
     fun onIntent(intent: WorkspacesIntent) {
         when (intent) {
-            is WorkspacesIntent.PageSettled -> desk.update { it.focusWorkspace(intent.workspace) }
+            is WorkspacesIntent.PageSettled -> editor.change { it.focusWorkspace(intent.workspace) }
             is WorkspacesIntent.TapTile -> tap(intent.tile, intent.origin)
             is WorkspacesIntent.SelectTab -> focusTile(intent.tile)
             is WorkspacesIntent.LongPressTile -> {
@@ -110,23 +118,35 @@ class WorkspacesViewModel(
             }
             WorkspacesIntent.LongPressBackground -> editing.value = true
             WorkspacesIntent.ExitEdit -> editing.value = false
-            is WorkspacesIntent.MoveNextTo -> current { it.moveNextTo(intent.dragged, intent.target, intent.side) }
-            is WorkspacesIntent.GroupTiles -> current { it.groupWith(intent.dragged, intent.target) }
-            is WorkspacesIntent.DropOnWorkspace -> desk.update { it.move(intent.tile, intent.workspace, follow = false) }
-            is WorkspacesIntent.DragDivider -> geometry { ws, m -> ws.moveDivider(intent.divider, intent.positionPx, m.gaps) }
-            is WorkspacesIntent.MoveFloating -> current { it.withFloatingBounds(intent.tile, intent.bounds) }
             is WorkspacesIntent.CanvasChanged -> metrics = intent.metrics
             WorkspacesIntent.MessageShown -> message.value = null
+            else -> onEditIntent(intent)
+        }
+    }
+
+    /** Lo que cambia la distribución desde el modo edición (arrastres, tamaño, deshacer). */
+    private fun onEditIntent(intent: WorkspacesIntent) {
+        when (intent) {
+            is WorkspacesIntent.MoveNextTo -> current { it.moveNextTo(intent.dragged, intent.target, intent.side) }
+            is WorkspacesIntent.GroupTiles -> current { it.groupWith(intent.dragged, intent.target) }
+            is WorkspacesIntent.DropOnWorkspace -> editor.change { it.move(intent.tile, intent.workspace, follow = false) }
+            is WorkspacesIntent.DragDivider ->
+                geometry(
+                    DIVIDER_GESTURE,
+                ) { ws, m -> ws.moveDivider(intent.divider, intent.positionPx, m.gaps) }
+            is WorkspacesIntent.MoveFloating -> current { it.withFloatingBounds(intent.tile, intent.bounds) }
+            WorkspacesIntent.Undo -> editor.undo()
+            else -> Unit // Los atiende `onIntent`.
         }
     }
 
     fun onCommand(command: WorkspaceCommand) {
         when (command) {
-            is WorkspaceCommand.FocusWorkspace -> desk.update { it.focusWorkspace(command.id) }
-            is WorkspaceCommand.CycleWorkspace -> desk.update { it.cycleWorkspace(command.forward) }
+            is WorkspaceCommand.FocusWorkspace -> editor.change { it.focusWorkspace(command.id) }
+            is WorkspaceCommand.CycleWorkspace -> editor.change { it.cycleWorkspace(command.forward) }
             is WorkspaceCommand.MoveTileToWorkspace ->
-                desk.update { d -> d.currentWorkspace.focused?.let { d.move(it, command.workspace, command.follow) } ?: d }
-            WorkspaceCommand.CloseTile -> desk.update { d -> d.currentWorkspace.focused?.let(d::close) ?: d }
+                editor.change { d -> d.currentWorkspace.focused?.let { d.move(it, command.workspace, command.follow) } ?: d }
+            WorkspaceCommand.CloseTile -> editor.change { d -> d.currentWorkspace.focused?.let(d::close) ?: d }
             WorkspaceCommand.ToggleEditMode -> editing.update { !it }
             else -> onTileCommand(command)
         }
@@ -165,25 +185,13 @@ class WorkspacesViewModel(
         val info = state.value.tiles[tile]
         // Un widget recibe sus propios toques; aquí sólo llega el de las apps.
         if (editing.value || info !is TileInfo.App) return
-        message.value = launch(info, origin)
+        message.value = launchTile(actions, info, origin, state.value.appsLoaded)
     }
 
-    /** Abre la app del tile; devuelve el aviso si no se pudo (o `null` si se abrió). */
-    private fun launch(
-        info: TileInfo.App,
-        origin: LaunchOrigin?,
-    ): WorkspaceMessage? {
-        // Sin app: desinstalada si el índice ya se leyó; si no, aún no se sabe y no se avisa.
-        val app = info.app ?: return WorkspaceMessage.NotInstalled.takeIf { state.value.appsLoaded }
-        return when (val result = actions.launch(app, origin)) {
-            LaunchResult.Launched -> null
-            is LaunchResult.ProfilePaused ->
-                if (result.resumeRequested) WorkspaceMessage.ProfileResumeRequested else WorkspaceMessage.ProfilePaused
-            is LaunchResult.Failed -> WorkspaceMessage.LaunchFailed
-        }
-    }
-
-    private fun current(transform: (Workspace) -> Workspace) = desk.update { it.updateCurrent(transform) }
+    private fun current(
+        key: String? = null,
+        transform: (Workspace) -> Workspace,
+    ) = editor.change(key) { it.updateCurrent(transform) }
 
     /**
      * Enfoca [tile] y hace actual **su** escritorio: lo que el usuario toca es lo que se ve, así que
@@ -191,12 +199,15 @@ class WorkspacesViewModel(
      * se hubiera quedado en otro.
      */
     private fun focusTile(tile: TileId) =
-        desk.update { d -> d.workspaceOf(tile)?.let { w -> d.focusWorkspace(w).update(w) { it.focus(tile) } } ?: d }
+        editor.change { d -> d.workspaceOf(tile)?.let { w -> d.focusWorkspace(w).update(w) { it.focus(tile) } } ?: d }
 
     /** Operaciones que dependen de dónde cae cada tile: sin medidas del lienzo aún, no hacen nada. */
-    private fun geometry(transform: (Workspace, CanvasMetrics) -> Workspace) {
+    private fun geometry(
+        key: String? = null,
+        transform: (Workspace, CanvasMetrics) -> Workspace,
+    ) {
         val metrics = metrics ?: return
-        current { transform(it, metrics) }
+        current(key) { transform(it, metrics) }
     }
 
     private data class Settings(
@@ -206,6 +217,9 @@ class WorkspacesViewModel(
 
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L
+
+        /** Los pasos de un arrastre de borde, que se deshacen como uno. */
+        const val DIVIDER_GESTURE = "divider"
 
         fun tileInfos(
             desk: Desk,
@@ -234,5 +248,22 @@ class WorkspacesViewModel(
             }
 
         fun TilingLayout.other(): TilingLayout = if (this == TilingLayout.Dwindle) TilingLayout.Master else TilingLayout.Dwindle
+    }
+}
+
+/** Abre la app del tile; devuelve el aviso si no se pudo (o `null` si se abrió). */
+private fun launchTile(
+    actions: AppActions,
+    info: TileInfo.App,
+    origin: LaunchOrigin?,
+    appsLoaded: Boolean,
+): WorkspaceMessage? {
+    // Sin app: desinstalada si el índice ya se leyó; si no, aún no se sabe y no se avisa.
+    val app = info.app ?: return WorkspaceMessage.NotInstalled.takeIf { appsLoaded }
+    return when (val result = actions.launch(app, origin)) {
+        LaunchResult.Launched -> null
+        is LaunchResult.ProfilePaused ->
+            if (result.resumeRequested) WorkspaceMessage.ProfileResumeRequested else WorkspaceMessage.ProfilePaused
+        is LaunchResult.Failed -> WorkspaceMessage.LaunchFailed
     }
 }

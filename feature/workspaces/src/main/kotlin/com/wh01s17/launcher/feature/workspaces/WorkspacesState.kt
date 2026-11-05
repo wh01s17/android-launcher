@@ -50,6 +50,8 @@ data class WorkspacesUiState(
     /** El índice de apps ya se leyó: un tile sin app es una app desinstalada, no una que carga. */
     val appsLoaded: Boolean = false,
     val editing: Boolean = false,
+    /** Hay algún cambio de la distribución que deshacer («deshacer» del modo edición). */
+    val canUndo: Boolean = false,
     val general: GeneralConfig = GeneralConfig(),
     val animation: WorkspaceAnimation = WorkspaceAnimation(),
     val message: WorkspaceMessage? = null,
@@ -92,6 +94,9 @@ sealed interface WorkspacesIntent {
     data object LongPressBackground : WorkspacesIntent
 
     data object ExitEdit : WorkspacesIntent
+
+    /** Deshace el último cambio de la distribución (mover, agrupar, tamaño, quitar…). */
+    data object Undo : WorkspacesIntent
 
     /**
      * Soltar un tile cerca del borde de otro: queda a ese lado ([side]) y el destino no se mueve,

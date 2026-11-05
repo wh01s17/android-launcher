@@ -9,6 +9,7 @@
     <string name="tile_open">Abrir</string>
     <string name="tile_edit">Editar</string>
     <string name="tile_drop_here">Soltar en el escritorio %1$s</string>
+    <string name="edit_undo">deshacer</string>
     <string name="edit_add">+ app</string>
     <string name="edit_add_widget">+ widget</string>
     <string name="edit_split">split</string>

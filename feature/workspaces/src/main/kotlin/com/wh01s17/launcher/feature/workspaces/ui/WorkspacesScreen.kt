@@ -109,6 +109,8 @@ fun WorkspacesScreen(
                 onAddWidget = onAddWidget,
                 onOpenSettings = onOpenSettings,
                 onDone = { onIntent(WorkspacesIntent.ExitEdit) },
+                canUndo = state.canUndo,
+                onUndo = { onIntent(WorkspacesIntent.Undo) },
             )
         }
     }

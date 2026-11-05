@@ -333,6 +333,19 @@ class WorkspacesViewModelTest {
             vm.addApp(termux.key)
             vm.addApp(notes.key)
             vm.addApp(teams.key)
+            // Soltar el 3 a la izquierda del 1 y deshacerlo: vuelve como estaba.
+            val before = desk.state.value!!.workspace(1)
+            vm.onIntent(WorkspacesIntent.MoveNextTo(TileId(3), TileId(1), Direction.Left))
+            vm.settle(this)
+            assertTrue(vm.state.value.canUndo)
+            vm.onIntent(WorkspacesIntent.Undo)
+            vm.settle(this)
+            assertEquals(
+                before.root,
+                desk.state.value!!
+                    .workspace(1)
+                    .root,
+            )
             // Soltar el 3 a la izquierda del 1: queda ahí, sin intercambiarse con él.
             vm.onIntent(WorkspacesIntent.MoveNextTo(TileId(3), TileId(1), Direction.Left))
             vm.settle(this)
