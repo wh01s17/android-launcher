@@ -14,12 +14,15 @@ Un tile es un *lanzador vivo* (plan.md §2.2): tocarlo abre la app, no la incrus
 | Tocar un hueco | Abre el menú wh01s17 | Sale de edición |
 | Deslizar a los lados | Cambia de escritorio | Desactivado (para poder arrastrar) |
 | Deslizar hacia arriba / abajo | Lo que digan `bindings` (de fábrica, arriba abre el menú; ver [bindings.md](bindings.md)) | — |
-| Soltar un tile cerca del borde de otro | — | Los intercambia |
+| Soltar un tile cerca del borde de otro | — | Lo deja a ese lado: el destino se queda donde estaba y comparte su hueco con él; el hueco que deja lo ocupa su vecino (como arrastrar una ventana en Hyprland, sin intercambiar) |
 | Soltar un tile en el centro de otro (la mitad central) | — | Los agrupa: el arrastrado entra como pestaña visible |
 | Arrastrar un tile a la tira `[1] … [0]` de arriba | — | Lo lleva a ese escritorio (sin seguirlo) |
 | Arrastrar una asa verde de un borde | — | Cambia el tamaño de los dos lados |
 | Arrastrar un flotante / su punto de la esquina | — | Lo mueve / le cambia el tamaño |
 | *Atrás* o *Inicio* | — | Sale de edición |
+
+Mientras se arrastra, se resalta dónde quedará: la mitad del destino de ese lado, o el destino entero
+con «agrupar». Para intercambiar dos tiles, `Super + Shift + flechas`.
 
 En edición el escritorio se encoge entero para dejar sitio a la barra de herramientas, sin cambiar
 la distribución. La barra de herramientas actúa sobre el tile con el foco:
