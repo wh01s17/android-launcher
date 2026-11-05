@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.SystemClock
 import android.view.View
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.res.ResourcesCompat
 import com.wh01s17.launcher.core.designsystem.R
@@ -26,10 +27,11 @@ import kotlin.math.sin
 @Suppress("MagicNumber") // Camera timing and relative framing, independent of Android density.
 class WhSpinView(
     context: Context,
+    accent: Color = WhTokens.Colors.accent,
 ) : View(context) {
     private val paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = WhTokens.Colors.accent.toArgb()
+            color = accent.toArgb()
             typeface = ResourcesCompat.getFont(context, R.font.departure_mono)
         }
     private var frames: Job? = null

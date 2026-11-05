@@ -42,30 +42,39 @@ data class WhControls(
         }
 
     companion object {
-        fun create(): WhControls {
+        fun create(remap: (Color) -> Color = { it }): WhControls {
             val c = WhTokens.Controls
-            return WhControls(
-                normal = style(c.normalColor, c.normalFillAlpha, c.normalBorder, c.normalBorderAlpha, c.normalBorderWidth),
-                hover =
-                    style(
-                        c.hoverCursorColor,
-                        c.hoverCursorFillAlpha,
-                        c.hoverCursorBorder,
-                        c.hoverCursorBorderAlpha,
-                        c.hoverCursorBorderWidth,
-                    ),
-                focus = style(c.focusColor, c.focusFillAlpha, c.focusBorder, c.focusBorderAlpha, c.focusBorderWidth),
-                selected = style(c.selectedColor, c.selectedFillAlpha, c.selectedBorder, c.selectedBorderAlpha, c.selectedBorderWidth),
-                // El TOML sólo define el relleno de *pressed*: color y borde son los de hover.
-                pressed =
-                    style(
-                        c.hoverCursorColor,
-                        c.pressedFillAlpha,
-                        c.hoverCursorBorder,
-                        c.hoverCursorBorderAlpha,
-                        c.hoverCursorBorderWidth,
-                    ),
-                textSelection = c.selectedColor.copy(alpha = c.selectionFillAlpha),
+            val base =
+                WhControls(
+                    normal = style(c.normalColor, c.normalFillAlpha, c.normalBorder, c.normalBorderAlpha, c.normalBorderWidth),
+                    hover =
+                        style(
+                            c.hoverCursorColor,
+                            c.hoverCursorFillAlpha,
+                            c.hoverCursorBorder,
+                            c.hoverCursorBorderAlpha,
+                            c.hoverCursorBorderWidth,
+                        ),
+                    focus = style(c.focusColor, c.focusFillAlpha, c.focusBorder, c.focusBorderAlpha, c.focusBorderWidth),
+                    selected = style(c.selectedColor, c.selectedFillAlpha, c.selectedBorder, c.selectedBorderAlpha, c.selectedBorderWidth),
+                    // El TOML sólo define el relleno de *pressed*: color y borde son los de hover.
+                    pressed =
+                        style(
+                            c.hoverCursorColor,
+                            c.pressedFillAlpha,
+                            c.hoverCursorBorder,
+                            c.hoverCursorBorderAlpha,
+                            c.hoverCursorBorderWidth,
+                        ),
+                    textSelection = c.selectedColor.copy(alpha = c.selectionFillAlpha),
+                )
+            return base.copy(
+                normal = base.normal.remapped(remap),
+                hover = base.hover.remapped(remap),
+                focus = base.focus.remapped(remap),
+                selected = base.selected.remapped(remap),
+                pressed = base.pressed.remapped(remap),
+                textSelection = remap(base.textSelection),
             )
         }
 
@@ -76,5 +85,8 @@ data class WhControls(
             borderAlpha: Float,
             borderWidth: Dp,
         ) = WhControlStyle(color, color.copy(alpha = fillAlpha), border.copy(alpha = borderAlpha), borderWidth)
+
+        private fun WhControlStyle.remapped(remap: (Color) -> Color) =
+            copy(content = remap(content), fill = remap(fill), border = remap(border))
     }
 }

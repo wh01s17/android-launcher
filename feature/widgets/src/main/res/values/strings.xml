@@ -12,7 +12,6 @@
     <string name="native_section">wh01s17</string>
     <string name="native_tidal">TIDAL (tidalamp nova)</string>
     <string name="native_tidal_title">tidalamp</string>
-    <string name="native_tidal_palette">Cambiar la paleta</string>
     <string name="native_tidal_idle">TIDAL no está sonando.</string>
     <string name="native_tidal_no_access">Para ver y controlar lo que suena, da a wh01s17 el acceso a notificaciones (sólo lee la sesión de música).</string>
     <string name="native_tidal_open">abrir TIDAL</string>

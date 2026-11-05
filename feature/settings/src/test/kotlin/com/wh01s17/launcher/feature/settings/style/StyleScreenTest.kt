@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.wh01s17.launcher.core.config.BarConfig
 import com.wh01s17.launcher.core.config.LauncherConfig
@@ -41,9 +42,11 @@ class StyleScreenTest {
                 )
             }
         }
-        compose.onNodeWithText("Originales").performClick()
+        compose.onNodeWithText("nord").performScrollTo().performClick()
+        assertEquals(Triple("appearance", "palette", "nord"), changed.last())
+        compose.onNodeWithText("Originales").performScrollTo().performClick()
         assertEquals(Triple("apps", "iconStyle", "original"), changed.last())
-        compose.onNodeWithText("Barra transparente").performClick()
+        compose.onNodeWithText("Barra transparente").performScrollTo().performClick()
         assertEquals(Triple("bar", "transparent", false), changed.last())
         compose.onRoot().captureRoboImage("src/test/screenshots/style.png")
     }

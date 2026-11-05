@@ -91,16 +91,24 @@ class ConfigDocumentsTest {
         }
 
     @Test
+    fun `the palette defaults to phosphor and reads a name`() {
+        val factory = (ConfigParser.parse(Source().readDefaultConfig()) as ParseResult.Success).config
+        assertEquals(AppearanceConfig.DEFAULT_PALETTE, factory.appearance.palette)
+        val result = ConfigParser.parse("""{"version":1,"appearance":{"palette":"tokyo-night"}}""", factory)
+        assertEquals("tokyo-night", (result as ParseResult.Success).config.appearance.palette)
+    }
+
+    @Test
     fun `unsupported theme icon wallpaper and timeout report precise paths`() {
         val factory = (ConfigParser.parse(Source().readDefaultConfig()) as ParseResult.Success).config
         val result =
             ConfigParser.parse(
                 """{"version":1,"theme":"missing","apps":{"iconStyle":"broken"},
-                "appearance":{"wallpaper":"bad"},"idle":{"screensaver":-1}}""",
+                "appearance":{"wallpaper":"bad","palette":"Tokyo Night"},"idle":{"screensaver":-1}}""",
                 factory,
             )
         assertEquals(
-            setOf("theme", "apps.iconStyle", "appearance.wallpaper", "idle.screensaver"),
+            setOf("theme", "apps.iconStyle", "appearance.wallpaper", "appearance.palette", "idle.screensaver"),
             (result as ParseResult.Failure).errors.map { it.path }.toSet(),
         )
     }

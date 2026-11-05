@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.wh01s17.launcher.core.config.ConfigRepository
 import com.wh01s17.launcher.core.designsystem.screensaver.WhSpinView
+import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -77,7 +78,8 @@ internal fun IdleOverlay(idle: IdleScreensaver) {
             idle.immersive(true)
             onDispose { idle.immersive(false) }
         }
-        AndroidView(factory = { WhSpinView(it) }, modifier = Modifier.fillMaxSize())
+        val accent = WhTheme.colors.accent
+        AndroidView(factory = { WhSpinView(it, accent) }, modifier = Modifier.fillMaxSize())
     }
 }
 

@@ -1,11 +1,14 @@
 package com.wh01s17.launcher.feature.settings.style
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +22,8 @@ import com.wh01s17.launcher.core.designsystem.components.WhNumberField
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.components.WhToggle
 import com.wh01s17.launcher.core.designsystem.layout.chromeAndKeyboard
+import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
+import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.feature.settings.R
 
@@ -71,11 +76,36 @@ private fun Appearance(
     NumberSetting(R.string.style_gaps_in, config.general.gapsIn ?: DEFAULT_GAP, GAP_RANGE) { onChange("general", "gapsIn", it) }
     NumberSetting(R.string.style_gaps_out, config.general.gapsOut ?: DEFAULT_GAP, GAP_RANGE) { onChange("general", "gapsOut", it) }
     NumberSetting(R.string.style_rounding, config.general.rounding ?: DEFAULT_RADIUS, GAP_RANGE) { onChange("general", "rounding", it) }
+    Heading(R.string.style_palette)
+    TidalampPalettes.all.forEach { palette ->
+        PaletteButton(palette, selected = TidalampPalettes.byName(config.appearance.palette) == palette) {
+            onChange("appearance", "palette", palette.name)
+        }
+    }
+    Action(R.string.style_wallpapers, actions.wallpapers)
     Heading(R.string.style_icons)
     ICONS.forEach { (value, label) ->
         WhButton({ onChange("apps", "iconStyle", value) }, selected = config.apps.iconStyle == value) { WhText(stringResource(label)) }
     }
-    Action(R.string.style_wallpapers, actions.wallpapers)
+}
+
+/** Una paleta: muestras de fondo, banda y acento junto a su nombre. */
+@Composable
+private fun PaletteButton(
+    palette: PlayerPalette,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    WhButton(onClick, selected = selected) {
+        Row(horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap), verticalAlignment = Alignment.CenterVertically) {
+            Row {
+                listOf(palette.background, palette.band, palette.foreground, palette.accent).forEach { color ->
+                    Box(Modifier.size(WhTheme.spacing.iconSize).background(color))
+                }
+            }
+            WhText(palette.name)
+        }
+    }
 }
 
 @Composable

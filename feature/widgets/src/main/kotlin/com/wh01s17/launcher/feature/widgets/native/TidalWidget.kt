@@ -37,7 +37,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
 import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
-import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.system.media.MediaAction
 import com.wh01s17.launcher.core.system.media.MediaSource
@@ -52,8 +51,8 @@ internal const val TIDAL_PACKAGE = "com.aspiro.tidal"
  * Control de TIDAL con el tema *nova* de tidalamp: sin marcos, «▍ tidalamp» en acento, carátula
  * junto al tiempo grande, la canción en acento, la línea de avance con punto (tocar salta) y la
  * banda de transporte con ⏮ ⏯ ■ ⏭ sin cajas (el que suena, con su regla de acento). La paleta es
- * de tidalamp: *phosphor* (la de wh01s17) de fábrica; tocar el título pasa a la siguiente y se
- * recuerda. Necesita el acceso a notificaciones (opt-in); sin él, o con TIDAL cerrado, ofrece abrirlo.
+ * la de todo el launcher ([WhTheme.palette], se elige en Estilo); tocar el visualizador cambia su
+ * forma. Necesita el acceso a notificaciones (opt-in); sin él, o con TIDAL cerrado, ofrece abrirlo.
  */
 @Composable
 internal fun TidalWidget(
@@ -65,7 +64,7 @@ internal fun TidalWidget(
     val state by remember(media) { media.session(TIDAL_PACKAGE) }.collectAsStateWithLifecycle(MediaState.Idle)
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
-    var palette by remember { mutableStateOf(TidalampPalettes.byName(prefs.getString(KEY_PALETTE, null))) }
+    val palette = WhTheme.palette
     var shape by remember { mutableStateOf(VisualizerShape.fromConfig(prefs.getString(KEY_SHAPE, null))) }
     BoxWithConstraints(modifier.fillMaxSize().background(palette.background).padding(WhTheme.spacing.controlGap)) {
         // Pequeño: canción, avance y teclas; mediano: con carátula; grande: además el visualizador.
@@ -76,16 +75,8 @@ internal fun TidalWidget(
                     stringResource(R.string.native_tidal_title),
                     "${palette.name} · ${shape.configName}",
                     palette,
-                    stringResource(R.string.native_tidal_palette),
-                    onClick =
-                        if (interactive) {
-                            {
-                                palette = TidalampPalettes.after(palette)
-                                prefs.edit().putString(KEY_PALETTE, palette.name).apply()
-                            }
-                        } else {
-                            null
-                        },
+                    stringResource(R.string.native_tidal_title),
+                    onClick = null,
                 )
             }
             when (val current = state) {
@@ -317,7 +308,6 @@ private const val TICK_MILLIS = 500L
 private const val COVER_WEIGHT = 0.4f
 private const val SPECTRUM_BANDS = 48
 private const val PREFS = "native-widgets"
-private const val KEY_PALETTE = "tidal.palette"
 private const val KEY_SHAPE = "tidal.visualizer"
 private const val MILLIS_PER_SECOND = 1000L
 private const val SECONDS_PER_MINUTE = 60L

@@ -8,6 +8,9 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import com.wh01s17.launcher.core.designsystem.palette.PaletteRemap
+import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
+import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 
 /** Valores por defecto del tema que no vienen de los dotfiles. */
 object WhDefaults {
@@ -26,6 +29,7 @@ internal val LocalWhSpacing = staticCompositionLocalOf<WhSpacing> { missing("WhS
 internal val LocalWhControls = staticCompositionLocalOf<WhControls> { missing("WhControls") }
 internal val LocalWhSurfaces = staticCompositionLocalOf<WhSurfaces> { missing("WhSurfaces") }
 internal val LocalWhBorders = staticCompositionLocalOf<WhBorders> { missing("WhBorders") }
+internal val LocalWhPalette = staticCompositionLocalOf<PlayerPalette> { missing("PlayerPalette") }
 
 /** Color por defecto de texto e iconos; cada superficie lo cambia para su contenido. */
 val LocalWhContentColor = staticCompositionLocalOf<Color> { missing("LocalWhContentColor") }
@@ -50,23 +54,31 @@ object WhTheme {
     val borders: WhBorders
         @Composable @ReadOnlyComposable
         get() = LocalWhBorders.current
+
+    /** La paleta de tidalamp elegida en Estilo: tiñe todo el tema y la usan los widgets nova. */
+    val palette: PlayerPalette
+        @Composable @ReadOnlyComposable
+        get() = LocalWhPalette.current
 }
 
 /**
  * Tema `wh01s17`: los valores salen de los tokens generados desde los dotfiles
- * (plan.md §4.1), nunca de literales.
+ * (plan.md §4.1), nunca de literales. Con otra [palette] de tidalamp, sus colores toman el papel
+ * de los de phosphor en todo el tema ([PaletteRemap]); los avisos (rojo, amarillo…) se mantienen.
  */
 @Composable
 fun WhTheme(
     fontScale: Float = WhDefaults.FONT_SCALE,
+    palette: PlayerPalette = TidalampPalettes.default,
     content: @Composable () -> Unit,
 ) {
-    val colors = remember { WhColors() }
+    val remap = remember(palette) { PaletteRemap(palette) }
+    val colors = remember(remap) { WhColors().remapped(remap::invoke) }
     val typography = remember(fontScale) { WhTypography.create(fontScale) }
     val spacing = remember(fontScale) { WhSpacing.create(fontScale) }
-    val controls = remember { WhControls.create() }
-    val surfaces = remember(spacing) { WhSurfaces.create(spacing) }
-    val borders = remember { WhBorders() }
+    val controls = remember(remap) { WhControls.create(remap::invoke) }
+    val surfaces = remember(spacing, remap) { WhSurfaces.create(spacing, remap::invoke) }
+    val borders = remember(remap) { WhBorders().remapped(remap::invoke) }
     val selection =
         remember(colors, controls) { TextSelectionColors(handleColor = colors.accent, backgroundColor = controls.textSelection) }
 
@@ -77,6 +89,7 @@ fun WhTheme(
         LocalWhControls provides controls,
         LocalWhSurfaces provides surfaces,
         LocalWhBorders provides borders,
+        LocalWhPalette provides palette,
         LocalWhContentColor provides colors.foreground,
         LocalTextSelectionColors provides selection,
         content = content,

@@ -36,4 +36,36 @@ data class WhColors(
     val brightCyan: Color = WhTokens.Colors.brightCyan,
     val brightBlue: Color = WhTokens.Colors.brightBlue,
     val brightMagenta: Color = WhTokens.Colors.brightMagenta,
-)
+) {
+    /** Los mismos papeles con otra paleta (`PaletteRemap`); el negro OLED no cambia. */
+    fun remapped(remap: (Color) -> Color): WhColors =
+        copy(
+            background = remap(background),
+            darkBackground = remap(darkBackground),
+            darkerBackground = remap(darkerBackground),
+            lighterBackground = remap(lighterBackground),
+            border = remap(border),
+            muted = remap(muted),
+            foreground = remap(foreground),
+            darkForeground = remap(darkForeground),
+            lightForeground = remap(lightForeground),
+            brightForeground = remap(brightForeground),
+            accent = remap(accent),
+            selectionBackground = remap(selectionBackground),
+            selectionForeground = remap(selectionForeground),
+            red = remap(red),
+            orange = remap(orange),
+            yellow = remap(yellow),
+            green = remap(green),
+            cyan = remap(cyan),
+            blue = remap(blue),
+            magenta = remap(magenta),
+            brown = remap(brown),
+            brightRed = remap(brightRed),
+            brightYellow = remap(brightYellow),
+            brightGreen = remap(brightGreen),
+            brightCyan = remap(brightCyan),
+            brightBlue = remap(brightBlue),
+            brightMagenta = remap(brightMagenta),
+        )
+}

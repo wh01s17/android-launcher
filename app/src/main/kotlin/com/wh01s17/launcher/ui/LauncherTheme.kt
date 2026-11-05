@@ -7,6 +7,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wh01s17.launcher.core.apps.icons.IconStyle
 import com.wh01s17.launcher.core.apps.icons.LocalIconStyle
 import com.wh01s17.launcher.core.config.AppearanceConfig
+import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.di.AppContainer
 
@@ -18,6 +19,10 @@ internal fun LauncherTheme(
     val state by container.configRepository.state.collectAsStateWithLifecycle()
     val config = state.config
     CompositionLocalProvider(LocalIconStyle provides IconStyle.fromConfig(config?.apps?.iconStyle)) {
-        WhTheme(fontScale = config?.appearance?.fontScale ?: AppearanceConfig.DEFAULT_FONT_SCALE, content = content)
+        WhTheme(
+            fontScale = config?.appearance?.fontScale ?: AppearanceConfig.DEFAULT_FONT_SCALE,
+            palette = TidalampPalettes.byName(config?.appearance?.palette),
+            content = content,
+        )
     }
 }

@@ -8,6 +8,7 @@
     <string name="style_gaps_out">Hueco exterior</string>
     <string name="style_rounding">Radio de los tiles</string>
     <string name="style_icons">Iconos</string>
+    <string name="style_palette">Paleta</string>
     <string name="style_monochrome">Monocromos</string>
     <string name="style_original">Originales</string>
     <string name="style_pixelated">Pixelados</string>

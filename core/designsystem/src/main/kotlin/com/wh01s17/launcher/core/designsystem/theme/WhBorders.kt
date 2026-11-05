@@ -17,4 +17,8 @@ data class WhBorders(
     val activeAngleDegrees: Float = WhTokens.Border.activeAngleDegrees,
     val inactive: Color = WhTokens.Border.inactive,
     val shape: Shape = RoundedCornerShape(WhTokens.Border.rounding),
-)
+) {
+    /** Los mismos bordes con otra paleta (`PaletteRemap`). */
+    fun remapped(remap: (Color) -> Color): WhBorders =
+        copy(activeStart = remap(activeStart), activeEnd = remap(activeEnd), inactive = remap(inactive))
+}

@@ -23,7 +23,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wh01s17.launcher.core.designsystem.components.WhNumberField
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
-import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.system.timer.ClickVoice
 import com.wh01s17.launcher.core.system.timer.MetronomeMath
@@ -85,7 +84,7 @@ private fun Keys(
     interactive: Boolean,
     extended: Boolean,
 ) {
-    val palette = TidalampPalettes.default
+    val palette = WhTheme.palette
     val settings = state.settings
     NovaBand(palette) {
         NovaKey(stringResource(R.string.native_metronome_slower), { metronome.edit { it.copy(bpm = it.bpm - 1) } }, palette, interactive) {

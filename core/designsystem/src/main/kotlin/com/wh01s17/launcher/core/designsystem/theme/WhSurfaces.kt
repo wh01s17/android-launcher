@@ -68,79 +68,105 @@ data class WhSurfaces(
     val tooltip: WhTooltipStyle,
 ) {
     companion object {
-        fun create(spacing: WhSpacing): WhSurfaces {
+        fun create(
+            spacing: WhSpacing,
+            remap: (Color) -> Color = { it },
+        ): WhSurfaces {
             val bar = WhTokens.Bar
             val launcher = WhTokens.Launcher
             val menu = WhTokens.Menu
             val popups = WhTokens.Popups
             val notifications = WhTokens.Notifications
             val tooltip = WhTokens.Tooltip
-            return WhSurfaces(
-                bar =
-                    WhBarStyle(
-                        surface =
-                            WhSurfaceStyle(
-                                bar.background.copy(alpha = bar.backgroundAlpha),
-                                bar.text,
-                                bar.borderAlpha,
-                                spacing.borderSize,
-                            ),
-                        active = bar.active,
-                        height = spacing.barHeight,
-                    ),
-                launcher =
-                    WhMenuStyle(
-                        surface =
-                            WhSurfaceStyle(
-                                launcher.background.copy(alpha = launcher.backgroundAlpha),
-                                launcher.text,
-                                launcher.borderAlpha,
-                                spacing.menuBorderSize,
-                            ),
-                        scrim = launcher.scrim.copy(alpha = launcher.scrimAlpha),
-                        selectedBackground = launcher.selectedBackground.copy(alpha = launcher.selectedBackgroundAlpha),
-                        selectedText = launcher.selectedText,
-                        selectedBorder = launcher.selectedBorder.copy(alpha = launcher.selectedBorderAlpha),
-                    ),
-                menu =
-                    WhMenuStyle(
-                        surface =
-                            WhSurfaceStyle(
-                                menu.background.copy(alpha = menu.backgroundAlpha),
-                                menu.text,
-                                menu.borderAlpha,
-                                spacing.menuBorderSize,
-                            ),
-                        scrim = menu.scrim.copy(alpha = menu.scrimAlpha),
-                        selectedBackground = menu.selectedBackground.copy(alpha = menu.selectedBackgroundAlpha),
-                        selectedText = menu.selectedText,
-                        selectedBorder = menu.selectedBorder.copy(alpha = menu.selectedBorderAlpha),
-                    ),
-                popup =
-                    WhSurfaceStyle(
-                        popups.background.copy(alpha = popups.backgroundAlpha),
-                        popups.text,
-                        popups.borderAlpha,
-                        popups.borderWidth,
-                    ),
-                notification =
-                    WhNotificationStyle(
-                        surface =
-                            WhSurfaceStyle(
-                                notifications.background.copy(alpha = notifications.backgroundAlpha),
-                                notifications.text,
-                                notifications.borderAlpha,
-                                notifications.borderWidth,
-                            ),
-                        countdown = notifications.countdown,
-                    ),
-                tooltip =
-                    WhTooltipStyle(
-                        background = tooltip.background.copy(alpha = tooltip.backgroundAlpha),
-                        text = tooltip.text,
-                        border = tooltip.border.copy(alpha = tooltip.borderAlpha),
-                    ),
-            )
+            val base =
+                WhSurfaces(
+                    bar =
+                        WhBarStyle(
+                            surface =
+                                WhSurfaceStyle(
+                                    bar.background.copy(alpha = bar.backgroundAlpha),
+                                    bar.text,
+                                    bar.borderAlpha,
+                                    spacing.borderSize,
+                                ),
+                            active = bar.active,
+                            height = spacing.barHeight,
+                        ),
+                    launcher =
+                        WhMenuStyle(
+                            surface =
+                                WhSurfaceStyle(
+                                    launcher.background.copy(alpha = launcher.backgroundAlpha),
+                                    launcher.text,
+                                    launcher.borderAlpha,
+                                    spacing.menuBorderSize,
+                                ),
+                            scrim = launcher.scrim.copy(alpha = launcher.scrimAlpha),
+                            selectedBackground = launcher.selectedBackground.copy(alpha = launcher.selectedBackgroundAlpha),
+                            selectedText = launcher.selectedText,
+                            selectedBorder = launcher.selectedBorder.copy(alpha = launcher.selectedBorderAlpha),
+                        ),
+                    menu =
+                        WhMenuStyle(
+                            surface =
+                                WhSurfaceStyle(
+                                    menu.background.copy(alpha = menu.backgroundAlpha),
+                                    menu.text,
+                                    menu.borderAlpha,
+                                    spacing.menuBorderSize,
+                                ),
+                            scrim = menu.scrim.copy(alpha = menu.scrimAlpha),
+                            selectedBackground = menu.selectedBackground.copy(alpha = menu.selectedBackgroundAlpha),
+                            selectedText = menu.selectedText,
+                            selectedBorder = menu.selectedBorder.copy(alpha = menu.selectedBorderAlpha),
+                        ),
+                    popup =
+                        WhSurfaceStyle(
+                            popups.background.copy(alpha = popups.backgroundAlpha),
+                            popups.text,
+                            popups.borderAlpha,
+                            popups.borderWidth,
+                        ),
+                    notification =
+                        WhNotificationStyle(
+                            surface =
+                                WhSurfaceStyle(
+                                    notifications.background.copy(alpha = notifications.backgroundAlpha),
+                                    notifications.text,
+                                    notifications.borderAlpha,
+                                    notifications.borderWidth,
+                                ),
+                            countdown = notifications.countdown,
+                        ),
+                    tooltip =
+                        WhTooltipStyle(
+                            background = tooltip.background.copy(alpha = tooltip.backgroundAlpha),
+                            text = tooltip.text,
+                            border = tooltip.border.copy(alpha = tooltip.borderAlpha),
+                        ),
+                )
+            return base.remapped(remap)
         }
+    }
+
+    private fun remapped(remap: (Color) -> Color): WhSurfaces {
+        fun WhSurfaceStyle.map() = copy(background = remap(background), text = remap(text))
+
+        fun WhMenuStyle.map() =
+            copy(
+                surface = surface.map(),
+                scrim = remap(scrim),
+                selectedBackground = remap(selectedBackground),
+                selectedText = remap(selectedText),
+                selectedBorder = remap(selectedBorder),
+            )
+        return WhSurfaces(
+            bar = bar.copy(surface = bar.surface.map(), active = remap(bar.active)),
+            launcher = launcher.map(),
+            menu = menu.map(),
+            popup = popup.map(),
+            notification = notification.copy(surface = notification.surface.map(), countdown = remap(notification.countdown)),
+            tooltip = tooltip.copy(background = remap(tooltip.background), text = remap(tooltip.text), border = remap(tooltip.border)),
+        )
     }
 }

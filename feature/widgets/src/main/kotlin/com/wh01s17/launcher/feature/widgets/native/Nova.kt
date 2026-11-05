@@ -29,7 +29,6 @@ import androidx.compose.ui.text.TextStyle
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
 import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
-import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 
 /*
@@ -143,7 +142,7 @@ private const val STOP_FRACTION = 0.5f
 internal fun NovaHeading(
     text: String,
     trailing: String = "",
-) = NovaTitle(text, trailing, TidalampPalettes.default, text, onClick = null)
+) = NovaTitle(text, trailing, WhTheme.palette, text, onClick = null)
 
 /** La barra de avance fina de nova, en [color] sobre `muted`, sin etiquetas. */
 @Composable
@@ -151,7 +150,7 @@ internal fun NovaMeter(
     fraction: Float,
     color: Color,
 ) {
-    val muted = TidalampPalettes.default.muted
+    val muted = WhTheme.palette.muted
     Box(
         Modifier.fillMaxWidth().height(WhTheme.spacing.controlGap).drawBehind {
             drawRect(muted)

@@ -21,7 +21,6 @@ import com.wh01s17.launcher.core.designsystem.components.WhIcon
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.icons.WhIcons
 import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
-import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.system.timer.PomodoroPhase
 import com.wh01s17.launcher.core.system.timer.PomodoroPreset
@@ -70,7 +69,7 @@ internal fun PomodoroWidget(
     }
     val remaining = state.remainingAt(now)
     val color = phaseColor(state.phase)
-    val palette = TidalampPalettes.default
+    val palette = WhTheme.palette
     BoxWithConstraints(modifier.fillMaxSize().background(WhTheme.colors.background).padding(WhTheme.spacing.controlGap)) {
         // Pequeño: cuenta atrás y la banda principal; mediano: además encabezado y avance; grande: todo.
         val size = WidgetSize.of(maxWidth, maxHeight)
