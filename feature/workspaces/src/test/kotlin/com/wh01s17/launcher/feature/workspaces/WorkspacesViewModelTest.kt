@@ -395,10 +395,18 @@ class WorkspacesViewModelTest {
                     .maxTiles,
             )
             assertEquals(6, vm.state.value.general.gapsIn)
-            // Con el máximo lleno, el tercero entra en el grupo del foco.
+            // Una app nueva nunca se agrupa sola (el límite ya no se aplica); agrupar es explícito.
             vm.addApp(termux.key)
             vm.addApp(notes.key)
             vm.addApp(teams.key)
+            vm.settle(this)
+            assertEquals(
+                3,
+                desk.state.value!!
+                    .workspace(1)
+                    .slots,
+            )
+            vm.onCommand(WorkspaceCommand.ToggleGroup)
             vm.settle(this)
             assertEquals(
                 2,

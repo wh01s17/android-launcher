@@ -22,6 +22,7 @@ import com.wh01s17.launcher.core.apps.model.AppKey
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.input.WorkspaceCommand
 import com.wh01s17.launcher.core.tiling.TileId
+import com.wh01s17.launcher.core.tiling.groupWith
 import com.wh01s17.launcher.feature.workspaces.TileInfo
 import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesUiState
@@ -85,6 +86,12 @@ class WorkspacesScreenTest {
     ): WorkspacesUiState {
         var desk = Desk().withDefaults(com.wh01s17.launcher.core.tiling.TilingLayout.Dwindle, maxTiles = 3)
         apps.forEach { desk = desk.add(TileContent.App(it.key)) }
+        // Las dos últimas se agrupan con la tercera a mano (los grupos ya no se crean solos).
+        desk =
+            desk.update(1) { ws ->
+                val (third, fourth, fifth) = ws.tiles.drop(2)
+                ws.groupWith(fourth, third).groupWith(fifth, third)
+            }
         desk = desk.add(TileContent.App(AppKey("com.gone", "com.gone.Main", 0)), workspace = 2)
         val tiles =
             desk.contents.mapValues { (_, content) ->

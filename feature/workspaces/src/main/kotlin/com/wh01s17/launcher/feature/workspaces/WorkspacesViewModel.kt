@@ -17,13 +17,17 @@ import com.wh01s17.launcher.core.tiling.TileId
 import com.wh01s17.launcher.core.tiling.TilingLayout
 import com.wh01s17.launcher.core.tiling.Workspace
 import com.wh01s17.launcher.core.tiling.cycleGroup
+import com.wh01s17.launcher.core.tiling.groupWith
 import com.wh01s17.launcher.core.tiling.moveDivider
 import com.wh01s17.launcher.core.tiling.moveFocus
+import com.wh01s17.launcher.core.tiling.moveIntoGroup
+import com.wh01s17.launcher.core.tiling.moveOutOfGroup
 import com.wh01s17.launcher.core.tiling.resizeBy
 import com.wh01s17.launcher.core.tiling.swap
 import com.wh01s17.launcher.core.tiling.swapInDirection
 import com.wh01s17.launcher.core.tiling.toggleFloating
 import com.wh01s17.launcher.core.tiling.toggleFullscreen
+import com.wh01s17.launcher.core.tiling.toggleGroup
 import com.wh01s17.launcher.core.tiling.toggleSplit
 import com.wh01s17.launcher.core.tiling.withFloatingBounds
 import com.wh01s17.launcher.feature.workspaces.data.DeskRepository
@@ -107,6 +111,7 @@ class WorkspacesViewModel(
             WorkspacesIntent.LongPressBackground -> editing.value = true
             WorkspacesIntent.ExitEdit -> editing.value = false
             is WorkspacesIntent.SwapTiles -> current { it.swap(intent.dragged, intent.target).focus(intent.dragged) }
+            is WorkspacesIntent.GroupTiles -> current { it.groupWith(intent.dragged, intent.target) }
             is WorkspacesIntent.DropOnWorkspace -> desk.update { it.move(intent.tile, intent.workspace, follow = false) }
             is WorkspacesIntent.DragDivider -> geometry { ws, m -> ws.moveDivider(intent.divider, intent.positionPx, m.gaps) }
             is WorkspacesIntent.MoveFloating -> current { it.withFloatingBounds(intent.tile, intent.bounds) }
@@ -144,6 +149,9 @@ class WorkspacesViewModel(
             WorkspaceCommand.ToggleFullscreen -> current { it.toggleFullscreen() }
             WorkspaceCommand.ToggleLayout -> current { it.withLayout(it.layout.other()) }
             is WorkspaceCommand.CycleGroup -> current { it.cycleGroup(command.forward) }
+            WorkspaceCommand.ToggleGroup -> current { it.toggleGroup() }
+            WorkspaceCommand.MoveOutOfGroup -> current { it.moveOutOfGroup() }
+            is WorkspaceCommand.MoveIntoGroup -> geometry { ws, m -> ws.moveIntoGroup(command.direction.toTiling(), m.area, m.gaps) }
             else -> Unit // Los atiende `onCommand`.
         }
     }

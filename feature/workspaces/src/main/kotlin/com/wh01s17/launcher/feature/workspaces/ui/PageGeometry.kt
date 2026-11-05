@@ -84,3 +84,14 @@ internal fun stripCellAt(
     if (point.y >= stripHeight || point.y < 0 || width <= 0) return null
     return (point.x / width * count).toInt().coerceIn(0, count - 1) + 1
 }
+
+/** La mitad central de [rect] (un cuarto de margen por lado): soltar ahí agrupa en vez de intercambiar. */
+internal fun centerOf(rect: Rect): Rect =
+    Rect(
+        rect.left + rect.width / CENTER_MARGIN,
+        rect.top + rect.height / CENTER_MARGIN,
+        rect.right - rect.width / CENTER_MARGIN,
+        rect.bottom - rect.height / CENTER_MARGIN,
+    )
+
+private const val CENTER_MARGIN = 4

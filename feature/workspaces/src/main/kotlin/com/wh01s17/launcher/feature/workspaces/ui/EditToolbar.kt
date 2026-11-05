@@ -58,6 +58,16 @@ internal fun EditToolbar(
             }
             // El nombre del layout actual, como el `Super + L` del escritorio: tocar cambia al otro.
             Action(workspace.layout.configName) { onCommand(WorkspaceCommand.ToggleLayout) }
+            // Agrupar: con el tile tocado antes (toca uno, luego otro, y agrupar). En un grupo, lo deshace.
+            val inGroup = tiled && workspace.root?.leaves()?.any { focused in it.tiles && it.isGroup } == true
+            Action(
+                stringResource(if (inGroup) R.string.edit_ungroup else R.string.edit_group),
+                enabled =
+                    tiled && workspace.slots > 1 || inGroup,
+            ) {
+                onCommand(WorkspaceCommand.ToggleGroup)
+            }
+            if (inGroup) Action(stringResource(R.string.edit_group_out)) { onCommand(WorkspaceCommand.MoveOutOfGroup) }
             Action(stringResource(R.string.edit_close), enabled = focused != null) { onCommand(WorkspaceCommand.CloseTile) }
             Action(stringResource(R.string.edit_settings), onClick = onOpenSettings)
             Action(stringResource(R.string.edit_done), selected = true, onClick = onDone)

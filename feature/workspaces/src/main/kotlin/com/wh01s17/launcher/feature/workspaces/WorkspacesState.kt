@@ -92,8 +92,14 @@ sealed interface WorkspacesIntent {
 
     data object ExitEdit : WorkspacesIntent
 
-    /** Soltar un tile sobre otro. */
+    /** Soltar un tile sobre el borde de otro: se intercambian. */
     data class SwapTiles(
+        val dragged: TileId,
+        val target: TileId,
+    ) : WorkspacesIntent
+
+    /** Soltar un tile sobre el centro de otro: se agrupan (el arrastrado entra como pestaña). */
+    data class GroupTiles(
         val dragged: TileId,
         val target: TileId,
     ) : WorkspacesIntent

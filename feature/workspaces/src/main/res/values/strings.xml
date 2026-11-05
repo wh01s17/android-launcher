@@ -15,9 +15,12 @@
     <string name="edit_float">flotar</string>
     <string name="edit_fullscreen">completa</string>
     <string name="edit_close">quitar</string>
+    <string name="edit_group">agrupar</string>
+    <string name="edit_ungroup">desagrupar</string>
+    <string name="edit_group_out">sacar</string>
     <string name="edit_settings">ajustes</string>
     <string name="edit_done">listo</string>
-    <string name="edit_hint">Arrastra un tile sobre otro para cambiarlos, o arriba sobre un número para llevarlo a otro escritorio. Arrastra los bordes para cambiar el tamaño.</string>
+    <string name="edit_hint">Suelta un tile en el borde de otro para cambiarlos, en su centro para agruparlos, o arriba sobre un número para llevarlo a otro escritorio. Arrastra los bordes para cambiar el tamaño.</string>
     <string name="message_not_installed">Esa app ya no está instalada.</string>
     <string name="message_paused">El perfil de trabajo está en pausa.</string>
     <string name="message_paused_requested">El perfil de trabajo está en pausa: se pidió reanudarlo.</string>

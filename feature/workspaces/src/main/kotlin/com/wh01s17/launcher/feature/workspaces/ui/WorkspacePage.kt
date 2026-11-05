@@ -268,7 +268,18 @@ private fun drop(
         else ->
             result.tiled.entries
                 .firstOrNull { (other, rect) -> other != drag.tile && drag.pointer in rect }
-                ?.let { onIntent(WorkspacesIntent.SwapTiles(drag.tile, it.key)) }
+                ?.let { (other, rect) ->
+                    // El centro del tile agrupa; el resto (cerca de los bordes) intercambia.
+                    val intent =
+                        if (drag.pointer in
+                            centerOf(rect)
+                        ) {
+                            WorkspacesIntent.GroupTiles(drag.tile, other)
+                        } else {
+                            WorkspacesIntent.SwapTiles(drag.tile, other)
+                        }
+                    onIntent(intent)
+                }
     }
 }
 
