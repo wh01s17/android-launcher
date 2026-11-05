@@ -8,6 +8,9 @@ import com.wh01s17.launcher.core.tiling.Direction
 import com.wh01s17.launcher.core.tiling.FloatingBounds
 import com.wh01s17.launcher.core.tiling.Rect
 import com.wh01s17.launcher.core.tiling.TileId
+import com.wh01s17.launcher.core.tiling.Workspace
+import com.wh01s17.launcher.core.tiling.groupWith
+import com.wh01s17.launcher.core.tiling.moveNextTo
 import kotlin.math.roundToInt
 
 /** Coloca el elemento exactamente en [rect] (píxeles del lienzo), como lo calcula el motor. */
@@ -95,17 +98,16 @@ internal sealed interface DropZone {
     ) : DropZone
 }
 
-/** El tile sobre el que se soltaría, la zona y el rectángulo a resaltar mientras se arrastra. */
+/** El tile sobre el que se soltaría y la zona (lado o centro). */
 internal data class DropTarget(
     val tile: TileId,
     val zone: DropZone,
-    val highlight: Rect,
 )
 
 /**
- * Dónde caería [drag] entre los tiles del mosaico ([tiled]): la mitad central de un tile (un cuarto
+ * Dónde caería [point] entre los tiles del mosaico ([tiled]): la mitad central de un tile (un cuarto
  * de margen por lado) agrupa; fuera de ella, el borde más cercano dice a qué lado queda, como al
- * arrastrar una ventana en Hyprland. Fuera de todo tile (o sobre sí mismo), `null`.
+ * arrastrar una ventana en Hyprland. Fuera de todo tile (o sobre el que se arrastra), `null`.
  */
 internal fun dropTargetAt(
     point: Offset,
@@ -113,9 +115,18 @@ internal fun dropTargetAt(
     tiled: Map<TileId, Rect>,
 ): DropTarget? {
     val (tile, rect) = tiled.entries.firstOrNull { (other, rect) -> other != dragged && point in rect } ?: return null
-    val zone = dropZone(rect, point)
-    return DropTarget(tile, zone, highlightOf(rect, zone))
+    return DropTarget(tile, dropZone(rect, point))
 }
+
+/** El escritorio tal como quedará si [tile] se suelta en [target]: lo que se pinta de vista previa. */
+internal fun Workspace.afterDrop(
+    tile: TileId,
+    target: DropTarget,
+): Workspace =
+    when (val zone = target.zone) {
+        DropZone.Group -> groupWith(tile, target.tile)
+        is DropZone.Side -> moveNextTo(tile, target.tile, zone.side)
+    }
 
 internal fun dropZone(
     rect: Rect,
@@ -139,21 +150,5 @@ internal fun dropZone(
         )
     return DropZone.Side(distances.minBy { it.value }.key)
 }
-
-/** Lo que ocuparía el tile al soltarlo: la mitad del destino de ese lado, o el destino entero si agrupa. */
-private fun highlightOf(
-    rect: Rect,
-    zone: DropZone,
-): Rect =
-    when (zone) {
-        DropZone.Group -> rect
-        is DropZone.Side ->
-            when (zone.side) {
-                Direction.Left -> Rect(rect.left, rect.top, rect.left + rect.width / 2, rect.bottom)
-                Direction.Right -> Rect(rect.left + rect.width / 2, rect.top, rect.right, rect.bottom)
-                Direction.Up -> Rect(rect.left, rect.top, rect.right, rect.top + rect.height / 2)
-                Direction.Down -> Rect(rect.left, rect.top + rect.height / 2, rect.right, rect.bottom)
-            }
-    }
 
 private const val CENTER_MARGIN = 4

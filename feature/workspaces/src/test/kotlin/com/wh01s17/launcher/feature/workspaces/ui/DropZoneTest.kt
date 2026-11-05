@@ -27,12 +27,11 @@ class DropZoneTest {
     }
 
     @Test
-    fun `the highlight is the half that the tile will take`() {
+    fun `the target is the tile under the finger with its zone`() {
         val chess = TileId(1)
         val target = dropTargetAt(Offset(200f, 760f), TileId(2), mapOf(chess to tile))!!
-        assertEquals(chess, target.tile)
-        assertEquals(Rect(0, 400, 400, 800), target.highlight)
-        assertEquals(tile, dropTargetAt(Offset(200f, 400f), TileId(2), mapOf(chess to tile))!!.highlight)
+        assertEquals(DropTarget(chess, DropZone.Side(Direction.Down)), target)
+        assertEquals(DropZone.Group, dropTargetAt(Offset(200f, 400f), TileId(2), mapOf(chess to tile))!!.zone)
         // Sobre sí mismo o fuera de todo tile no hay destino.
         assertNull(dropTargetAt(Offset(200f, 400f), chess, mapOf(chess to tile)))
         assertNull(dropTargetAt(Offset(900f, 400f), TileId(2), mapOf(chess to tile)))

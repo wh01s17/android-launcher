@@ -37,6 +37,7 @@ import com.wh01s17.launcher.core.apps.icons.AppIconLoader
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.input.binding.Gesture
+import com.wh01s17.launcher.core.tiling.Gaps
 import com.wh01s17.launcher.core.tiling.LayoutResult
 import com.wh01s17.launcher.core.tiling.Rect
 import com.wh01s17.launcher.core.tiling.TileId
@@ -84,37 +85,32 @@ internal fun WorkspacePage(
         val canvas = PageCanvas(area, area.inset(gaps.outer), stripHeight, number)
         Background(editing, gestures, onIntent, onOpenMenu)
         if (workspace.isEmpty) EmptyHint(number, Modifier.align(Alignment.Center))
+        val dropPreview = rememberDropPreview(workspace, result, area, gaps, drag, stripHeight)
         for ((tile, rect) in result.visible) {
             key(tile) {
-                Tile(tile, rect, workspace, result, state, style, iconLoader, canvas, drag, { drag = it }, gestures, onIntent)
+                // El arrastrado sigue en su sitio (ahí vive el gesto), invisible durante la vista previa.
+                val shown = if (dropPreview == null || drag?.tile == tile) rect else dropPreview.result.visible[tile]
+                if (shown != null) {
+                    Tile(
+                        tile,
+                        shown,
+                        workspace,
+                        result,
+                        state,
+                        style,
+                        iconLoader,
+                        canvas,
+                        drag,
+                        { drag = it },
+                        gestures,
+                        onIntent,
+                        dropPreview != null,
+                    )
+                }
             }
         }
         if (editing) DividerHandles(workspace, area, gaps, onIntent, Modifier.zIndex(Z_EDIT))
-        drag?.let { current ->
-            val preview = current.preview(canvas.outer, stripHeight)
-            TileView(
-                info = state.tiles[current.tile],
-                appsLoaded = state.appsLoaded,
-                focused = true,
-                tabs = null,
-                shown = current.tile,
-                style = style,
-                iconLoader = iconLoader,
-                onSelectTab = {},
-                modifier = Modifier.placeAt(preview).zIndex(Z_DRAG).alpha(DRAG_ALPHA),
-                editing = true,
-            )
-            if (!current.resize && !current.floating && stripCellAt(current.pointer, area.width, stripHeight, Desk.COUNT) == null) {
-                // Dónde quedará al soltarlo: la mitad del destino de ese lado, o el destino entero si agrupa.
-                dropTargetAt(current.pointer, current.tile, result.tiled)?.let { target ->
-                    DropHint(target.zone == DropZone.Group, Modifier.placeAt(target.highlight).zIndex(Z_EDIT))
-                }
-            }
-            if (!current.resize) {
-                val hovered = stripCellAt(current.pointer, area.width, stripHeight, Desk.COUNT)
-                DropStrip(number, hovered, Modifier.placeAt(Rect(0, 0, area.width, stripHeight)).zIndex(Z_DRAG))
-            }
-        }
+        drag?.let { DragOverlay(it, dropPreview, canvas, number, state, style, iconLoader) }
     }
 }
 
@@ -146,13 +142,14 @@ private fun Tile(
     onDrag: (TileDrag?) -> Unit,
     gestures: PageGestures,
     onIntent: (WorkspacesIntent) -> Unit,
+    previewing: Boolean = false,
 ) {
     val floating = tile in result.floating
     val dragging = drag?.tile == tile
     val touch = rememberTileGestures(tile, rect, floating, result, canvas, state.editing, onDrag, gestures, onIntent)
     Box(Modifier.placeAt(rect).zIndex(if (floating) Z_FLOATING else 0f).then(touch)) {
         if (dragging) {
-            TileGhost(style)
+            if (!previewing) TileGhost(style)
         } else {
             TileView(
                 info = state.tiles[tile],
@@ -417,5 +414,71 @@ private fun Modifier.verticalSwipes(onGesture: (Gesture) -> Unit): Modifier {
                 }
             },
         )
+    }
+}
+
+/** El escritorio tal como quedará al soltar el tile arrastrado, y sobre qué tile y zona cae. */
+private class DropPreview(
+    val target: DropTarget,
+    val result: LayoutResult,
+)
+
+/**
+ * La vista previa del arrastre: sobre otro tile (no sobre la tira de escritorios ni con un flotante
+ * o un cambio de tamaño), el escritorio se pinta como quedará al soltar, para ver si algo se estira.
+ * Soltarlo fuera o sobre sí mismo no cambia nada.
+ */
+@Composable
+private fun rememberDropPreview(
+    workspace: Workspace,
+    result: LayoutResult,
+    area: Rect,
+    gaps: Gaps,
+    drag: TileDrag?,
+    stripHeight: Int,
+): DropPreview? {
+    val target =
+        drag?.takeIf { !it.resize && !it.floating && stripCellAt(it.pointer, area.width, stripHeight, Desk.COUNT) == null }?.let {
+            dropTargetAt(it.pointer, it.tile, result.tiled)
+        }
+    return remember(workspace, area, gaps, drag?.tile, target) {
+        val dragged = drag?.tile
+        if (dragged == null || target == null) null else DropPreview(target, layout(workspace.afterDrop(dragged, target), area, gaps))
+    }
+}
+
+/** Lo que se pinta encima mientras se arrastra: el tile bajo el dedo, su hueco nuevo y la tira de escritorios. */
+@Composable
+private fun DragOverlay(
+    current: TileDrag,
+    dropPreview: DropPreview?,
+    canvas: PageCanvas,
+    number: Int,
+    state: WorkspacesUiState,
+    style: TilingStyle,
+    iconLoader: AppIconLoader,
+) {
+    val preview = current.preview(canvas.outer, canvas.stripHeight)
+    TileView(
+        info = state.tiles[current.tile],
+        appsLoaded = state.appsLoaded,
+        focused = true,
+        tabs = null,
+        shown = current.tile,
+        style = style,
+        iconLoader = iconLoader,
+        onSelectTab = {},
+        modifier = Modifier.placeAt(preview).zIndex(Z_DRAG).alpha(DRAG_ALPHA),
+        editing = true,
+    )
+    // Su hueco en la vista previa (el del grupo entero si se agrupa).
+    if (dropPreview != null) {
+        dropPreview.result.visible[current.tile]?.let { slot ->
+            DropHint(dropPreview.target.zone == DropZone.Group, Modifier.placeAt(slot).zIndex(Z_EDIT))
+        }
+    }
+    if (!current.resize) {
+        val hovered = stripCellAt(current.pointer, canvas.area.width, canvas.stripHeight, Desk.COUNT)
+        DropStrip(number, hovered, Modifier.placeAt(Rect(0, 0, canvas.area.width, canvas.stripHeight)).zIndex(Z_DRAG))
     }
 }
