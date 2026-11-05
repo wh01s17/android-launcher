@@ -16,6 +16,7 @@ class CommandEncodingTest {
             LauncherCommand.OpenNotificationShade,
             LauncherCommand.ShowShortcuts,
             LauncherCommand.OpenTerminal,
+            LauncherCommand.OpenWallpapers,
             LauncherCommand.ToggleNotificationPanel,
             LauncherCommand.ControlMedia(MediaKey.PlayPause),
             LauncherCommand.ControlMedia(MediaKey.Next),

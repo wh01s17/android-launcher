@@ -42,6 +42,7 @@ enum class MenuAction {
     Audio,
     Display,
     Wallpaper,
+    Style,
     InstallApps,
     Notifications,
     NotificationPanel,
@@ -102,12 +103,14 @@ internal fun menuEntries(page: MenuPage): List<MenuEntry> =
         MenuPage.Trigger -> triggerEntries()
         MenuPage.Style ->
             listOf(
+                MenuEntry(R.string.menu_style_settings, WhIcons.Theme, action = MenuAction.Style),
                 MenuEntry(R.string.menu_display, WhIcons.Font, action = MenuAction.Display),
                 MenuEntry(R.string.menu_wallpaper, WhIcons.Image, action = MenuAction.Wallpaper),
                 MenuEntry(R.string.menu_layout, WhIcons.Layout, action = MenuAction.Layout),
             )
         MenuPage.Setup ->
             listOf(
+                MenuEntry(R.string.menu_style_settings, WhIcons.Theme, action = MenuAction.Style),
                 MenuEntry(R.string.menu_compat, WhIcons.Android, action = MenuAction.Settings),
                 MenuEntry(R.string.menu_accessibility, WhIcons.Eye, action = MenuAction.Accessibility),
                 MenuEntry(R.string.menu_system_settings, WhIcons.Settings, action = MenuAction.SystemSettings),

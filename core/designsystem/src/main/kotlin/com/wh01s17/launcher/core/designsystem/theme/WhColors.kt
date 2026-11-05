@@ -7,6 +7,7 @@ import com.wh01s17.launcher.core.designsystem.tokens.WhTokens
 /** Paleta de `colors.toml` (plan.md §4.2). Los nombres siguen a los del TOML. */
 @Immutable
 data class WhColors(
+    val oledBackground: Color = WhDefaults.oledBackground,
     val background: Color = WhTokens.Colors.background,
     val darkBackground: Color = WhTokens.Colors.darkBackground,
     val darkerBackground: Color = WhTokens.Colors.darkerBackground,

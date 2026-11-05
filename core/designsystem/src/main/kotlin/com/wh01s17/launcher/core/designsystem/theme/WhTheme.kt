@@ -11,6 +11,9 @@ import androidx.compose.ui.graphics.Color
 
 /** Valores por defecto del tema que no vienen de los dotfiles. */
 object WhDefaults {
+    /** Hardware invariant for OLED wallpapers and dreams: fully off pixels, independent of theme surfaces. */
+    val oledBackground = Color.Black
+
     /** Factor px de escritorio → sp del teléfono (plan.md §4.4). Se ajustará en Ajustes. */
     const val FONT_SCALE = 1.25f
 }

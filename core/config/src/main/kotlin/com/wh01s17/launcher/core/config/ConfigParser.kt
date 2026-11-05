@@ -74,21 +74,24 @@ object ConfigParser {
         fallback: LauncherConfig?,
         errors: MutableList<ConfigError>,
     ): LauncherConfig? {
+        val base = fallback ?: LauncherConfig(SUPPORTED_VERSION, BarConfig())
         val version = readVersion(root["version"], errors)
         val bar = readRootBar(root["bar"], fallback?.bar, errors)
-        val general = GeneralSections.readGeneral(root["general"], fallback?.general ?: GeneralConfig(), errors)
-        val animations = GeneralSections.readAnimations(root["animations"], fallback?.animations ?: AnimationsConfig(), errors)
-        val bindings = BindingSections.readBindings(root["bindings"], fallback?.bindings.orEmpty(), errors)
-        val keyboard = BindingSections.readKeyboard(root["keyboard"], fallback?.keyboard ?: KeyboardConfig(), errors)
-        val apps = GeneralSections.readApps(root["apps"], fallback?.apps ?: AppsConfig(), errors)
+        val general = GeneralSections.readGeneral(root["general"], base.general, errors)
+        val animations = GeneralSections.readAnimations(root["animations"], base.animations, errors)
+        val bindings = BindingSections.readBindings(root["bindings"], base.bindings, errors)
+        val keyboard = BindingSections.readKeyboard(root["keyboard"], base.keyboard, errors)
+        val apps = GeneralSections.readApps(root["apps"], base.apps, errors)
         val notifications =
             GeneralSections.readNotifications(
                 root["notifications"],
-                fallback?.notifications ?: NotificationsConfig(),
+                base.notifications,
                 errors,
             )
+        val appearance = AppearanceSections.read(root, base.appearance, errors)
+        val idle = AppearanceSections.idle(root["idle"], base.idle, errors)
         return if (version != null && bar != null) {
-            LauncherConfig(version, bar, general, animations, bindings, keyboard, apps, notifications)
+            LauncherConfig(version, bar, general, animations, bindings, keyboard, apps, notifications, appearance, idle)
         } else {
             null
         }

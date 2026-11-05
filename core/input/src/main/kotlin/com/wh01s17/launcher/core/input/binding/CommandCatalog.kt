@@ -41,6 +41,7 @@ object CommandCatalog {
             CommandSpec("media.next") { LauncherCommand.ControlMedia(MediaKey.Next) },
             CommandSpec("media.previous") { LauncherCommand.ControlMedia(MediaKey.Previous) },
             CommandSpec("shortcuts.show") { LauncherCommand.ShowShortcuts },
+            CommandSpec("wallpaper.open") { LauncherCommand.OpenWallpapers },
             CommandSpec("terminal.open") { LauncherCommand.OpenTerminal },
             CommandSpec("audio.volume", "step") { LauncherCommand.AdjustVolume(it.int("step", VOLUME_STEP)) },
             CommandSpec("workspace.focus", "id") { WorkspaceCommand.FocusWorkspace(it.int("id", WORKSPACE)) },

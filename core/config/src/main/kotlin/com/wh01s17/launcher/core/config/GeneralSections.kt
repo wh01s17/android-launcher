@@ -63,14 +63,22 @@ internal object GeneralSections {
         errors: MutableList<ConfigError>,
     ): AppsConfig {
         val apps = section(element, "apps", errors) ?: return defaults
-        val terminal = ConfigValues.readString(apps["terminal"], "apps.terminal", errors) ?: return defaults
+        val iconStyle = ConfigValues.readString(apps["iconStyle"], "apps.iconStyle", errors) ?: defaults.iconStyle
+        if (iconStyle !in
+            setOf("monochrome", "original", "pixelated")
+        ) {
+            errors += ConfigError("apps.iconStyle", "estilo desconocido: $iconStyle")
+        }
+        val terminal =
+            ConfigValues.readString(apps["terminal"], "apps.terminal", errors)
+                ?: return defaults.copy(iconStyle = iconStyle)
         val slash = terminal.indexOf('/')
         val valid = terminal.isNotBlank() && ' ' !in terminal && (slash == -1 || slash in 1 until terminal.lastIndex)
         if (!valid) {
             errors +=
                 ConfigError("apps.terminal", "debe ser un paquete (com.termux) o una actividad (com.termux/.app.TermuxActivity)")
         }
-        return AppsConfig(terminal.takeIf { valid } ?: defaults.terminal)
+        return AppsConfig(terminal.takeIf { valid } ?: defaults.terminal, iconStyle)
     }
 
     /** `notifications.toast` y `notifications.toastSeconds`; lo que falta conserva [defaults]. */

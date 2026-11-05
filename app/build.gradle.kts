@@ -5,8 +5,8 @@ plugins {
 
 android {
     defaultConfig {
-        versionCode = 400
-        versionName = "0.4.0"
+        versionCode = 500
+        versionName = "0.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 }
@@ -21,6 +21,7 @@ dependencies {
     implementation(project(":feature:menu"))
     implementation(project(":feature:notifications"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:screensaver"))
     implementation(project(":feature:widgets"))
     implementation(project(":feature:workspaces"))
     implementation(libs.androidx.lifecycle.viewmodel.compose)

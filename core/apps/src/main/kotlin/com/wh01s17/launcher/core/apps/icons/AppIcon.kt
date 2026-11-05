@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -18,6 +19,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import com.wh01s17.launcher.core.apps.model.AppEntry
 
+val LocalIconStyle = compositionLocalOf { IconStyle.Default }
+
 /**
  * Icono de una app. Si ya está en la caché se pinta en el primer fotograma; si no, el hueco queda
  * vacío hasta que el cargador lo genera fuera del hilo principal. El monocromo se tiñe con [tint]
@@ -30,7 +33,7 @@ fun AppIcon(
     size: Dp,
     tint: Color,
     modifier: Modifier = Modifier,
-    style: IconStyle = IconStyle.Default,
+    style: IconStyle = LocalIconStyle.current,
 ) {
     val sizePx = with(LocalDensity.current) { size.roundToPx() }
     val tint = tint.toArgb()

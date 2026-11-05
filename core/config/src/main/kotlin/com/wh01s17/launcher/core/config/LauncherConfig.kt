@@ -24,6 +24,8 @@ data class LauncherConfig(
     val keyboard: KeyboardConfig = KeyboardConfig(),
     val apps: AppsConfig = AppsConfig(),
     val notifications: NotificationsConfig = NotificationsConfig(),
+    val appearance: AppearanceConfig = AppearanceConfig(),
+    val idle: IdleConfig = IdleConfig(),
 )
 
 /**
@@ -45,6 +47,7 @@ data class NotificationsConfig(
 data class AppsConfig(
     /** La terminal de `Super + Return`: un paquete o una actividad (`paquete/.Clase`). */
     val terminal: String? = null,
+    val iconStyle: String = "monochrome",
 )
 
 /**

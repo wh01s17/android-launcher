@@ -31,6 +31,7 @@ fun LauncherCommand.encode(): EncodedCommand =
                 },
             )
         LauncherCommand.ShowShortcuts -> EncodedCommand("shortcuts.show")
+        LauncherCommand.OpenWallpapers -> EncodedCommand("wallpaper.open")
         LauncherCommand.OpenTerminal -> EncodedCommand("terminal.open")
         is LauncherCommand.AdjustVolume -> EncodedCommand("audio.volume", mapOf("step" to steps))
         is WorkspaceCommand.FocusWorkspace -> EncodedCommand("workspace.focus", mapOf("id" to id))

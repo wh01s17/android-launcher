@@ -29,6 +29,7 @@ private fun labelOf(command: EncodedCommand): Pair<Int, Array<Any>> {
         "media.next" -> R.string.cmd_media_next to emptyArray()
         "media.previous" -> R.string.cmd_media_previous to emptyArray()
         "shortcuts.show" -> R.string.cmd_shortcuts to emptyArray()
+        "wallpaper.open" -> R.string.style_wallpapers to emptyArray()
         "terminal.open" -> R.string.cmd_terminal to emptyArray()
         "audio.volume" -> (if ((args["step"] as? Int ?: 0) > 0) R.string.cmd_volume_up else R.string.cmd_volume_down) to emptyArray()
         "workspace.focus" -> R.string.cmd_workspace_focus to arrayOf(id)

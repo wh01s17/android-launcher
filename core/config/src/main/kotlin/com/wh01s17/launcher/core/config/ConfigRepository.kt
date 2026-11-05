@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
 import java.io.IOException
 
 /** De dónde salen los textos de config; un doble los sustituye en las pruebas. */
@@ -73,6 +74,50 @@ class ConfigRepository(
             if (result == EditResult.Saved) mutableState.value = withContext(ioDispatcher) { load(mutableState.value.config) }
             result
         }
+
+    /** A style edit validates the existing document before merging only the owned keys. */
+    suspend fun editValues(patch: JsonObject): EditResult =
+        documentEdit { current ->
+            when (val parsed = current?.let { ConfigParser.parse(it, defaults) }) {
+                is ParseResult.Failure -> EditResult.Refused(parsed.errors) to null
+                else -> validateDocument(ConfigDocuments.merge(current, patch))
+            }
+        }
+
+    /** Import replaces only config, never workspace/widget state. Validation happens before writing. */
+    suspend fun importDocument(text: String): EditResult = documentEdit { validateDocument(text) }
+
+    /** Export the original document (including unknown keys), or the complete factory document. */
+    suspend fun exportDocument(): String =
+        reloadLock.withLock {
+            withContext(ioDispatcher) { source.readUserConfig() ?: source.readDefaultConfig() }
+        }
+
+    private suspend fun documentEdit(transform: (String?) -> Pair<EditResult, String?>): EditResult =
+        reloadLock.withLock {
+            val result =
+                withContext(ioDispatcher) {
+                    try {
+                        val (result, text) = transform(source.readUserConfig())
+                        if (result == EditResult.Saved && text != null) source.writeUserConfig(text)
+                        result
+                    } catch (error: IOException) {
+                        EditResult.Refused(listOf(ConfigError("launcher.json", "no se pudo guardar: ${error.message}")))
+                    }
+                }
+            if (result == EditResult.Saved) mutableState.value = withContext(ioDispatcher) { load(mutableState.value.config) }
+            result
+        }
+
+    private fun validateDocument(text: String): Pair<EditResult, String?> {
+        if (text.toByteArray().size > ConfigDocuments.MAX_BYTES) {
+            return EditResult.Refused(listOf(ConfigError("launcher.json", "supera el máximo de 1 MiB"))) to null
+        }
+        return when (val parsed = ConfigParser.parse(text, defaults)) {
+            is ParseResult.Failure -> EditResult.Refused(parsed.errors) to null
+            is ParseResult.Success -> EditResult.Saved to text
+        }
+    }
 
     private fun writeEdit(edit: BindingEdit): EditResult =
         try {

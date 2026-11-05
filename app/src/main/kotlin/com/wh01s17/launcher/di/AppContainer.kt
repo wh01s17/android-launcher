@@ -112,6 +112,11 @@ class AppContainer(
     /** Lo pone la pantalla de inicio: lanza el diálogo de permiso de micrófono. */
     var requestAudioPermission: () -> Unit = {}
 
+    val wallpapers by lazy {
+        com.wh01s17.launcher.core.system.wallpaper
+            .WallpaperStore(appContext)
+    }
+
     /** Sesiones multimedia de otras apps (acceso a notificaciones, opt-in). */
     val mediaSource: MediaSource by lazy { MediaSource(appContext) }
 

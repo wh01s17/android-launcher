@@ -11,6 +11,12 @@ private const val ALPHA_TOLERANCE = 0.005f
 /** Los valores del tema salen de theme/wh01s17 (plan.md §4): si los dotfiles cambian, esto avisa. */
 class WhThemeValuesTest {
     @Test
+    fun `OLED background is fully opaque pure black`() {
+        assertEquals(Color.Black, WhColors().oledBackground)
+        assertEquals(1f, WhColors().oledBackground.alpha, 0f)
+    }
+
+    @Test
     fun `palette matches colors toml`() {
         val c = WhColors()
         assertEquals(Color(0xFF0A0E0F), c.background)
@@ -96,6 +102,8 @@ class WhThemeValuesTest {
         assertEquals(26f, normal.barWorkspaceWidth.value, 0.001f)
         assertEquals(44f, normal.gridCell.value, 0.001f)
         assertEquals(5f, normal.barItemPaddingX.value, 0.001f)
+        assertEquals(2f, normal.barItemPaddingXCompact.value, 0.001f)
+        assertEquals(20f, normal.barWorkspaceWidthCompact.value, 0.001f)
         val large = WhSpacing.create(1.5f)
         assertEquals(26f * 1.5f / 1.25f, large.barWorkspaceWidth.value, 0.001f)
         assertEquals(44f * 1.5f / 1.25f, large.gridCell.value, 0.001f)

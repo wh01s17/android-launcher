@@ -62,6 +62,9 @@
             android:name=".timer.PomodoroAlarmReceiver"
             android:exported="false" />
 
+        <activity android:name=".StyleActivity" android:exported="false" android:label="@string/app_name" />
+        <activity android:name=".ScreensaverActivity" android:exported="false" android:label="@string/app_name" />
+
         <!-- Ajustes (Compatibilidad): sólo desde el propio launcher. -->
         <activity
             android:name=".SettingsActivity"

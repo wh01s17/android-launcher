@@ -1,0 +1,34 @@
+<resources>
+    <string name="style_title">estilo</string>
+    <string name="style_theme">Tema · wh01s17</string>
+    <string name="style_theme_hint">Tema instalado, sincronizado con tus dotfiles.</string>
+    <string name="style_font">Escala de fuente (%)</string>
+    <string name="style_transparent">Barra transparente</string>
+    <string name="style_gaps_in">Hueco interior</string>
+    <string name="style_gaps_out">Hueco exterior</string>
+    <string name="style_rounding">Radio de los tiles</string>
+    <string name="style_icons">Iconos</string>
+    <string name="style_monochrome">Monocromos</string>
+    <string name="style_original">Originales</string>
+    <string name="style_pixelated">Pixelados</string>
+    <string name="style_wallpapers">Fondos</string>
+    <string name="style_none">Sin fondo</string>
+    <string name="style_mark">Marca W</string>
+    <string name="style_moon">Luna llena</string>
+    <string name="style_moon_wordmark">Luna y wh01s17</string>
+    <string name="style_imported">Imagen importada</string>
+    <string name="style_import_image">Importar imagen…</string>
+    <string name="style_system_wallpaper">Fijar también como fondo de inicio de Android</string>
+    <string name="style_wallpaper_hint">Se dibuja detrás de los tiles. Puedes importar tus propios fondos, incluidos Gengar y Opeth. El fondo de Android sólo cambia al pulsar el botón de arriba.</string>
+    <string name="style_screensaver">Salvapantallas</string>
+    <string name="style_idle">Inactividad en el inicio (segundos)</string>
+    <string name="style_idle_hint">0 lo desactiva. Tocar o pulsar una tecla vuelve al escritorio. Para usarlo al cargar, elige wh01s17 en los ajustes de salvapantallas de Android.</string>
+    <string name="style_preview">Ver la W girando</string>
+    <string name="style_dream_settings">Salvapantallas de Android</string>
+    <string name="style_config">Configuración</string>
+    <string name="style_import_config">Importar launcher.json…</string>
+    <string name="style_export_config">Exportar launcher.json…</string>
+    <string name="style_config_hint">La importación sustituye los ajustes tras validarlos. No modifica los escritorios ni los widgets.</string>
+    <string name="style_saved">Guardado</string>
+    <string name="style_failure">No se pudo completar: %1$s</string>
+</resources>

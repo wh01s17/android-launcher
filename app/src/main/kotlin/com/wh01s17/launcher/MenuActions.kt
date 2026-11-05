@@ -37,6 +37,7 @@ internal class MenuActions(
                 true
             }
             MenuAction.Settings -> open(Intent(activity, SettingsActivity::class.java))
+            MenuAction.Style -> open(StyleActivity.intent(activity))
             MenuAction.Shortcuts -> open(SettingsActivity.shortcuts(activity))
             MenuAction.InstallApps -> open(activity.packageManager.getLaunchIntentForPackage("com.android.vending"))
             MenuAction.Lock -> requestAccessibility(navigationActions.lockScreen())
@@ -74,7 +75,6 @@ internal class MenuActions(
                 MenuAction.Bluetooth -> Settings.ACTION_BLUETOOTH_SETTINGS
                 MenuAction.Audio -> Settings.ACTION_SOUND_SETTINGS
                 MenuAction.Display -> Settings.ACTION_DISPLAY_SETTINGS
-                MenuAction.Wallpaper -> Intent.ACTION_SET_WALLPAPER
                 else -> return false
             }
         return open(Intent(screen))
@@ -103,6 +103,7 @@ internal class MenuActions(
 
 private val LAUNCHER_ACTIONS: Map<MenuAction, LauncherCommand> =
     mapOf(
+        MenuAction.Wallpaper to LauncherCommand.OpenWallpapers,
         MenuAction.NotificationPanel to LauncherCommand.ToggleNotificationPanel,
         MenuAction.MediaPlayPause to LauncherCommand.ControlMedia(MediaKey.PlayPause),
         MenuAction.MediaNext to LauncherCommand.ControlMedia(MediaKey.Next),

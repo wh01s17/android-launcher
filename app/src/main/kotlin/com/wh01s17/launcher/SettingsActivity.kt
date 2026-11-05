@@ -40,6 +40,7 @@ import com.wh01s17.launcher.feature.settings.shortcuts.ShortcutEditorViewModel
 import com.wh01s17.launcher.feature.settings.shortcuts.ShortcutTable
 import com.wh01s17.launcher.feature.settings.shortcuts.ShortcutsScreen
 import com.wh01s17.launcher.feature.settings.shortcuts.rowFor
+import com.wh01s17.launcher.ui.LauncherTheme
 import kotlinx.coroutines.launch
 import android.graphics.Color as AndroidColor
 
@@ -72,7 +73,7 @@ class SettingsActivity : ComponentActivity() {
             return
         }
         setContent {
-            WhTheme {
+            LauncherTheme(container) {
                 val state by compatibility.state.collectAsStateWithLifecycle()
                 CompatibilityScreen(
                     state = state,
@@ -106,7 +107,7 @@ class SettingsActivity : ComponentActivity() {
     /** `Super + K` y su editor: tocar una fila captura una combinación nueva (plan.md §7 Hito 6). */
     @Composable
     private fun ShortcutsPage() {
-        WhTheme {
+        LauncherTheme(container) {
             val config by container.configRepository.state.collectAsStateWithLifecycle()
             val table = config.config?.let { ShortcutTable.of(it, container.superKeyDelivered) }
             Box(Modifier.fillMaxSize().background(WhTheme.colors.background)) {

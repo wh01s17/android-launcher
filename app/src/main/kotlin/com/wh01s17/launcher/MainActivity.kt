@@ -57,6 +57,10 @@ import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
 import com.wh01s17.launcher.input.Shortcuts
 import com.wh01s17.launcher.ui.HomeNotifications
 import com.wh01s17.launcher.ui.HomeReturn
+import com.wh01s17.launcher.ui.HomeWallpaper
+import com.wh01s17.launcher.ui.IdleOverlay
+import com.wh01s17.launcher.ui.IdleScreensaver
+import com.wh01s17.launcher.ui.LauncherTheme
 import com.wh01s17.launcher.ui.NotificationOptIn
 import com.wh01s17.launcher.ui.screenReaderSemantics
 import com.wh01s17.launcher.widgets.HomeWidgets
@@ -81,6 +85,8 @@ class MainActivity : ComponentActivity() {
 
     private val menu: MenuViewModel by viewModels()
     private val homeReturn = HomeReturn()
+    private val idle by lazy { IdleScreensaver(this, container.configRepository) }
+    private var wakingGesture = false
     private lateinit var widgets: HomeWidgets
 
     /** El permiso de notificaciones, tras explicarlo ([NotificationOptIn]). */
@@ -146,6 +152,7 @@ class MainActivity : ComponentActivity() {
             },
         )
         handleCommands()
+        idle.start()
         // Registra el resultado del diálogo de enlace de widgets: tiene que ser antes de onStart.
         widgets =
             HomeWidgets(
@@ -163,7 +170,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun HomeContent() {
-        WhTheme {
+        LauncherTheme(container) {
             val state by search.state.collectAsStateWithLifecycle()
             val menuPage by menu.page.collectAsStateWithLifecycle()
             val barState by bar.state.collectAsStateWithLifecycle()
@@ -173,13 +180,14 @@ class MainActivity : ComponentActivity() {
                 Modifier
                     .fillMaxSize()
                     .background(
-                        WhTheme.colors.background,
+                        WhTheme.colors.oledBackground,
                     ).then(homeReturn.modifier(config.config?.animations?.workspaces))
                     .then(screenReaderSemantics()),
             ) {
                 // Los escritorios ocupan lo que dejan la barra y los insets (la exclusive zone de
                 // la barra en Hyprland): ningún tile queda debajo. El teclado no cuenta: los tapa sin
                 // cambiar su tamaño (ver `WhInsets`).
+                HomeWallpaper(config.config?.appearance?.wallpaper, container.wallpapers)
                 val notificationState by container.notifications.state.collectAsStateWithLifecycle(NotificationState())
                 val tileBadges = remember(notificationState.badges) { badgesOf(notificationState.badges) }
                 CompositionLocalProvider(LocalWidgetRenderer provides widgets.renderer, LocalTileBadges provides tileBadges) {
@@ -213,7 +221,9 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
                     )
                 }
-                HomeNotifications(container, ::openNotificationAccess, notificationState, config.config?.notifications)
+                HomeNotifications(container, {
+                    openNotificationAccess(this@MainActivity, container.notifications)
+                }, notificationState, config.config?.notifications)
                 LauncherMenu(
                     page = menuPage,
                     onNavigate = {
@@ -236,15 +246,8 @@ class MainActivity : ComponentActivity() {
                         onDecline = { container.timers.notificationsAnswered(declined = true) },
                     )
                 }
+                IdleOverlay(idle)
             }
-        }
-    }
-
-    private fun openNotificationAccess() {
-        try {
-            startActivity(container.notifications.accessSettings())
-        } catch (ignored: ActivityNotFoundException) {
-            Toast.makeText(this, R.string.notification_access_unavailable, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -308,6 +311,7 @@ class MainActivity : ComponentActivity() {
      */
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (idle.onKey(event)) return true
         if (shortcuts.onKeyEvent(event, typing = menu.page.value != null)) return true
         if (event.keyCode != KeyEvent.KEYCODE_ESCAPE) return super.dispatchKeyEvent(event)
         if (container.notificationPanelOpen.value) {
@@ -321,6 +325,22 @@ class MainActivity : ComponentActivity() {
         if (menu.page.value == null) return super.dispatchKeyEvent(event)
         if (event.action == KeyEvent.ACTION_UP && !event.isCanceled) menuController.back()
         return true
+    }
+
+    override fun dispatchTouchEvent(event: android.view.MotionEvent): Boolean {
+        if (event.action == android.view.MotionEvent.ACTION_DOWN) {
+            wakingGesture = idle.visible.value
+            idle.touch()
+        }
+        if (wakingGesture) {
+            if (event.action == android.view.MotionEvent.ACTION_UP ||
+                event.action == android.view.MotionEvent.ACTION_CANCEL
+            ) {
+                wakingGesture = false
+            }
+            return true
+        }
+        return super.dispatchTouchEvent(event)
     }
 
     /** La configuración de un widget nuevo vuelve aquí (`AppWidgetHost` usa la API antigua). */
@@ -347,3 +367,14 @@ class MainActivity : ComponentActivity() {
 
 /** Lo que un tile pregunta: cuántas notificaciones tiene su app (y su perfil). */
 private fun badgesOf(badges: Map<BadgeKey, Int>) = TileBadges { app -> badges[BadgeKey(app.packageName, app.userSerial)] ?: 0 }
+
+private fun openNotificationAccess(
+    activity: ComponentActivity,
+    repository: com.wh01s17.launcher.core.system.notifications.NotificationRepository,
+) {
+    try {
+        activity.startActivity(repository.accessSettings())
+    } catch (ignored: ActivityNotFoundException) {
+        Toast.makeText(activity, R.string.notification_access_unavailable, Toast.LENGTH_LONG).show()
+    }
+}

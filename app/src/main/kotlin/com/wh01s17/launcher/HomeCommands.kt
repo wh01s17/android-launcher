@@ -34,6 +34,7 @@ internal class HomeCommands(
             LauncherCommand.OpenSystemMenu -> menu().toggle(MenuPage.System)
             LauncherCommand.OpenNotificationShade -> openNotificationShade()
             LauncherCommand.ShowShortcuts -> activity.startActivity(SettingsActivity.shortcuts(activity))
+            LauncherCommand.OpenWallpapers -> activity.startActivity(StyleActivity.intent(activity, wallpapers = true))
             LauncherCommand.OpenTerminal -> openTerminal()
             is LauncherCommand.AdjustVolume -> adjustVolume(command.steps)
             LauncherCommand.ToggleNotificationPanel -> container.notificationPanelOpen.update { !it }

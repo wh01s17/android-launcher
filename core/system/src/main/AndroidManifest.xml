@@ -20,6 +20,9 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+    <!-- Setting Android wallpaper is a separate user action (normal permission). -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+
     <application>
         <!--
             Capa 3: gestos de borde. En su propio proceso para que el launcher note al instante si

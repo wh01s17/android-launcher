@@ -17,6 +17,8 @@ sealed interface LauncherCommand {
     /** `Super + Return`: abre la terminal de `apps.terminal` (Termux por defecto). */
     data object OpenTerminal : LauncherCommand
 
+    data object OpenWallpapers : LauncherCommand
+
     /** `Super + K`: la tabla de atajos (plan.md §6.4), generada desde `bindings`. */
     data object ShowShortcuts : LauncherCommand
 

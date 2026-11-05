@@ -79,4 +79,5 @@
     <string name="menu_shrink_height">Reducir alto del tile</string>
     <string name="menu_next_group">Siguiente pestaña del grupo</string>
     <string name="menu_previous_group">Pestaña anterior del grupo</string>
+    <string name="menu_style_settings">Estilo y configuración</string>
 </resources>
