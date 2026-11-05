@@ -3,6 +3,7 @@ package com.wh01s17.launcher.feature.workspaces.data
 import com.wh01s17.launcher.core.config.GeneralConfig
 import com.wh01s17.launcher.feature.workspaces.model.Desk
 import com.wh01s17.launcher.feature.workspaces.model.DeskCodec
+import com.wh01s17.launcher.feature.workspaces.model.withDefaults
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview

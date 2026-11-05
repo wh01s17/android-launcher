@@ -34,6 +34,17 @@ class DeskCodecTest {
     }
 
     @Test
+    fun `the scratchpad is saved but not whether it is shown`() {
+        val desk = Desk().add(app("termux")).toggleScratchpad().add(app("notes"))
+        val read = (roundTrip(desk) as DeskCodec.DecodeResult.Success).desk
+        assertEquals(desk.scratchpad, read.scratchpad)
+        assertEquals(false, read.scratchpadVisible)
+        // Un guardado de antes del Hito 8 (sin scratchpad) se sigue leyendo.
+        val old = DeskCodec.encode(Desk().add(app("termux"))).toMutableMap().apply { remove("scratchpad") }
+        assertTrue(DeskCodec.decode(kotlinx.serialization.json.JsonObject(old)) is DeskCodec.DecodeResult.Success)
+    }
+
+    @Test
     fun `widget and native tiles keep their id`() {
         val desk = Desk().add(app("termux")).add(TileContent.Widget(42)).add(TileContent.Native("pomodoro"))
         assertEquals(DeskCodec.DecodeResult.Success(desk), roundTrip(desk))

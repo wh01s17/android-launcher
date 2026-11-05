@@ -41,6 +41,7 @@ import com.wh01s17.launcher.feature.workspaces.R
 import com.wh01s17.launcher.feature.workspaces.WorkspaceMessage
 import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesUiState
+import com.wh01s17.launcher.feature.workspaces.activeWorkspace
 import com.wh01s17.launcher.feature.workspaces.model.Desk
 
 /** Lo menos que se encoge el escritorio en el modo edición, aunque la barra de herramientas crezca. */
@@ -96,6 +97,7 @@ fun WorkspacesScreen(
                 },
             )
         }
+        ScratchpadOverlay(state, iconLoader, onIntent, onOpenMenu, gestures)
         AnimatedVisibility(
             visible = state.editing && state.loaded,
             modifier = Modifier.align(Alignment.BottomCenter).onSizeChanged { toolbarHeight = it.height },
@@ -103,7 +105,7 @@ fun WorkspacesScreen(
             exit = slideOutVertically { it } + fadeOut(),
         ) {
             EditToolbar(
-                workspace = state.workspaces[state.current - Desk.FIRST],
+                workspace = state.activeWorkspace,
                 onCommand = onCommand,
                 onAddTile = onAddTile,
                 onAddWidget = onAddWidget,

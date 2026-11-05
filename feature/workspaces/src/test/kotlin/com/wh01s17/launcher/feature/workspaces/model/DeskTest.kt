@@ -110,4 +110,37 @@ class DeskTest {
             Desk(workspaces = listOf(one) + ten.drop(1), contents = mapOf(TileId(1) to termux), nextId = 1)
         }
     }
+
+    @Test
+    fun `the scratchpad is the active workspace while it is shown`() {
+        val shown = Desk().add(termux).toggleScratchpad()
+        assertEquals(Desk.SCRATCHPAD, shown.active)
+        // Lo que se añade con el scratchpad a la vista va a él, no al escritorio actual.
+        val added = shown.add(notes)
+        assertEquals(listOf(TileId(2)), added.scratchpad.tiles)
+        assertEquals(listOf(TileId(1)), added.workspace(1).tiles)
+        assertEquals(Desk.SCRATCHPAD, added.workspaceOf(TileId(2)))
+        // Cambiar de escritorio lo oculta; con SCRATCHPAD se muestra sin cambiar el actual.
+        assertEquals(false, added.focusWorkspace(3).scratchpadVisible)
+        assertEquals(3, added.focusWorkspace(3).active)
+        assertEquals(Desk.SCRATCHPAD, added.focusWorkspace(3).focusWorkspace(Desk.SCRATCHPAD).active)
+        assertEquals(3, added.focusWorkspace(3).focusWorkspace(Desk.SCRATCHPAD).current)
+        assertEquals(false, added.cycleWorkspace(forward = true).scratchpadVisible)
+    }
+
+    @Test
+    fun `tiles move to and from the scratchpad keeping floating`() {
+        val desk = Desk().add(termux).add(notes)
+        val sent = desk.move(TileId(2), Desk.SCRATCHPAD, follow = false)
+        assertEquals(listOf(TileId(2)), sent.scratchpad.tiles)
+        assertEquals(false, sent.scratchpadVisible)
+        assertEquals(true, desk.move(TileId(2), Desk.SCRATCHPAD, follow = true).scratchpadVisible)
+        val back = sent.move(TileId(2), 4, follow = false)
+        assertEquals(listOf(TileId(2)), back.workspace(4).tiles)
+        assertEquals(true, back.scratchpad.isEmpty)
+        val floating = desk.updateCurrent { it.toggleFloating(TileId(2)) }.move(TileId(2), Desk.SCRATCHPAD, follow = false)
+        assertEquals(listOf(TileId(2)), floating.scratchpad.floating.map { it.id })
+        // Quitar un tile del scratchpad también suelta su contenido.
+        assertNull(sent.close(TileId(2)).contents[TileId(2)])
+    }
 }

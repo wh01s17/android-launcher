@@ -28,6 +28,7 @@ import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesUiState
 import com.wh01s17.launcher.feature.workspaces.model.Desk
 import com.wh01s17.launcher.feature.workspaces.model.TileContent
+import com.wh01s17.launcher.feature.workspaces.model.withDefaults
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule

@@ -433,6 +433,45 @@ class WorkspacesViewModelTest {
         }
 
     @Test
+    fun `the scratchpad overlays the desk and takes the tile commands while shown`() =
+        runTest(dispatcher) {
+            val (vm, desk) = viewModel()
+            vm.addApp(termux.key)
+            vm.onCommand(WorkspaceCommand.ToggleScratchpad)
+            vm.settle(this)
+            assertTrue(vm.state.value.scratchpadVisible)
+            // Con el scratchpad a la vista, lo nuevo va a él.
+            vm.addApp(notes.key)
+            vm.settle(this)
+            assertEquals(
+                listOf(TileId(2)),
+                desk.state.value!!
+                    .scratchpad.tiles,
+            )
+            // Llevarlo a un escritorio y ocultar el scratchpad.
+            vm.onCommand(WorkspaceCommand.MoveTileToWorkspace(4, follow = false))
+            vm.onIntent(WorkspacesIntent.HideScratchpad)
+            vm.settle(this)
+            assertEquals(
+                listOf(TileId(2)),
+                desk.state.value!!
+                    .workspace(4)
+                    .tiles,
+            )
+            assertFalse(vm.state.value.scratchpadVisible)
+            // Y de vuelta al scratchpad sin seguirlo.
+            vm.onIntent(WorkspacesIntent.SelectTab(TileId(1)))
+            vm.onCommand(WorkspaceCommand.MoveTileToScratchpad)
+            vm.settle(this)
+            assertEquals(
+                listOf(TileId(1)),
+                desk.state.value!!
+                    .scratchpad.tiles,
+            )
+            assertFalse(vm.state.value.scratchpadVisible)
+        }
+
+    @Test
     fun `without canvas metrics geometry commands wait`() =
         runTest(dispatcher) {
             val desk = DeskRepository(NoStorage, backgroundScope, dispatcher)

@@ -136,9 +136,10 @@ internal fun DropStrip(
             .background(WhTheme.surfaces.launcher.surface.background, WhTheme.borders.shape)
             .whBorder(active = hovered != null, alpha = WhTheme.surfaces.launcher.surface.borderAlpha),
     ) {
-        for (id in Desk.FIRST..Desk.LAST) {
+        for (id in STRIP_TARGETS) {
             val label = workspaceLabel(id)
-            val description = stringResource(R.string.tile_drop_here, label)
+            val description =
+                if (id == Desk.SCRATCHPAD) stringResource(R.string.tile_drop_scratchpad) else stringResource(R.string.tile_drop_here, label)
             Box(
                 Modifier
                     .weight(1f)
@@ -153,6 +154,8 @@ internal fun DropStrip(
                         when (id) {
                             hovered -> colors.accent
                             current -> colors.darkForeground
+                            // El scratchpad en magenta, el color de «especial» del tema.
+                            Desk.SCRATCHPAD -> colors.magenta
                             else -> colors.foreground
                         },
                     maxLines = 1,

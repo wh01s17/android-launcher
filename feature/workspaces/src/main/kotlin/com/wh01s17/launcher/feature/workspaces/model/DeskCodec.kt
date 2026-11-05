@@ -2,6 +2,7 @@ package com.wh01s17.launcher.feature.workspaces.model
 
 import com.wh01s17.launcher.core.apps.model.AppKey
 import com.wh01s17.launcher.core.tiling.TileId
+import com.wh01s17.launcher.core.tiling.Workspace
 import com.wh01s17.launcher.core.tiling.WorkspaceCodec
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -18,9 +19,11 @@ import kotlinx.serialization.json.put
  *
  * ```json
  * {"version":1,"current":2,"nextId":4,
- *  "workspaces":[{…WorkspaceCodec…}, … 10 …],
+ *  "workspaces":[{…WorkspaceCodec…}, … 10 …], "scratchpad":{…WorkspaceCodec…},
  *  "tiles":[{"id":1,"app":{"package":"com.termux","class":"com.termux.HomeActivity","user":0}}]}
  * ```
+ *
+ * `scratchpad` es opcional (los guardados antes del Hito 8 no lo tienen) y si se ve no se guarda.
  *
  * Leer nunca da un estado inválido: o un [Desk] que cumple sus invariantes o un error legible.
  */
@@ -43,6 +46,7 @@ object DeskCodec {
             put("current", desk.current)
             put("nextId", desk.nextId)
             put("workspaces", JsonArray(desk.workspaces.map(WorkspaceCodec::encode)))
+            put("scratchpad", WorkspaceCodec.encode(desk.scratchpad))
             put(
                 "tiles",
                 JsonArray(
@@ -72,9 +76,17 @@ object DeskCodec {
                     is WorkspaceCodec.DecodeResult.Failure -> fail("workspace ${index + 1}: ${result.message}")
                 }
             }
+        val scratchpad =
+            json["scratchpad"]?.let { element ->
+                when (val result = WorkspaceCodec.decode(element)) {
+                    is WorkspaceCodec.DecodeResult.Success -> result.workspace
+                    is WorkspaceCodec.DecodeResult.Failure -> fail("scratchpad: ${result.message}")
+                }
+            } ?: Workspace()
         val tiles = (json["tiles"] as? JsonArray ?: fail("tiles must be a list")).associate(::decodeTile)
         return Desk(
             workspaces = workspaces,
+            scratchpad = scratchpad,
             current = json.int("current") ?: Desk.FIRST,
             contents = tiles,
             nextId = (json["nextId"] as? JsonPrimitive)?.longOrNull ?: fail("nextId is missing"),

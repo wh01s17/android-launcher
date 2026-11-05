@@ -11,6 +11,7 @@ import com.wh01s17.launcher.core.tiling.TileId
 import com.wh01s17.launcher.core.tiling.Workspace
 import com.wh01s17.launcher.core.tiling.groupWith
 import com.wh01s17.launcher.core.tiling.moveNextTo
+import com.wh01s17.launcher.feature.workspaces.model.Desk
 import kotlin.math.roundToInt
 
 /** Coloca el elemento exactamente en [rect] (píxeles del lienzo), como lo calcula el motor. */
@@ -77,6 +78,16 @@ internal fun floatingBoundsOf(
         height = (rect.height.toFloat() / outer.height).coerceAtMost(1f),
     )
 }
+
+/** Los destinos de la tira de arriba al arrastrar: los escritorios 1…10 y, al final, el scratchpad. */
+internal val STRIP_TARGETS: List<Int> = (Desk.FIRST..Desk.LAST) + Desk.SCRATCHPAD
+
+/** El destino de la tira bajo [point] (un escritorio o [Desk.SCRATCHPAD]), o `null` fuera de ella. */
+internal fun stripTargetAt(
+    point: Offset,
+    width: Int,
+    stripHeight: Int,
+): Int? = stripCellAt(point, width, stripHeight, STRIP_TARGETS.size)?.let { STRIP_TARGETS[it - 1] }
 
 /** La celda de la tira de escritorios (1–10) bajo [point], o `null` si está fuera de la tira. */
 internal fun stripCellAt(

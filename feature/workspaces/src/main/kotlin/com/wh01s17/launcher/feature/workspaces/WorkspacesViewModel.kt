@@ -85,6 +85,8 @@ class WorkspacesViewModel(
                     loaded = true,
                     current = desk.current,
                     workspaces = desk.workspaces,
+                    scratchpad = desk.scratchpad,
+                    scratchpadVisible = desk.scratchpadVisible,
                     tiles = tileInfos(desk, catalog),
                     appsLoaded = catalog.loaded,
                     editing = edit.first,
@@ -136,6 +138,7 @@ class WorkspacesViewModel(
                 ) { ws, m -> ws.moveDivider(intent.divider, intent.positionPx, m.gaps) }
             is WorkspacesIntent.MoveFloating -> current { it.withFloatingBounds(intent.tile, intent.bounds) }
             WorkspacesIntent.Undo -> editor.undo()
+            WorkspacesIntent.HideScratchpad -> editor.change { it.focusWorkspace(it.current) }
             else -> Unit // Los atiende `onIntent`.
         }
     }
@@ -145,8 +148,11 @@ class WorkspacesViewModel(
             is WorkspaceCommand.FocusWorkspace -> editor.change { it.focusWorkspace(command.id) }
             is WorkspaceCommand.CycleWorkspace -> editor.change { it.cycleWorkspace(command.forward) }
             is WorkspaceCommand.MoveTileToWorkspace ->
-                editor.change { d -> d.currentWorkspace.focused?.let { d.move(it, command.workspace, command.follow) } ?: d }
-            WorkspaceCommand.CloseTile -> editor.change { d -> d.currentWorkspace.focused?.let(d::close) ?: d }
+                editor.change { d -> d.activeWorkspace.focused?.let { d.move(it, command.workspace, command.follow) } ?: d }
+            WorkspaceCommand.CloseTile -> editor.change { d -> d.activeWorkspace.focused?.let(d::close) ?: d }
+            WorkspaceCommand.ToggleScratchpad -> editor.change { it.toggleScratchpad() }
+            WorkspaceCommand.MoveTileToScratchpad ->
+                editor.change { d -> d.activeWorkspace.focused?.let { d.move(it, Desk.SCRATCHPAD, follow = false) } ?: d }
             WorkspaceCommand.ToggleEditMode -> editing.update { !it }
             else -> onTileCommand(command)
         }

@@ -46,6 +46,9 @@ data class WorkspacesUiState(
     val loaded: Boolean = false,
     val current: Int = Desk.FIRST,
     val workspaces: List<Workspace> = emptyList(),
+    /** El scratchpad y si se ve encima (Hito 8): mientras se ve, es el escritorio activo. */
+    val scratchpad: Workspace = Workspace(),
+    val scratchpadVisible: Boolean = false,
     val tiles: Map<TileId, TileInfo> = emptyMap(),
     /** El índice de apps ya se leyó: un tile sin app es una app desinstalada, no una que carga. */
     val appsLoaded: Boolean = false,
@@ -98,6 +101,9 @@ sealed interface WorkspacesIntent {
     /** Deshace el último cambio de la distribución (mover, agrupar, tamaño, quitar…). */
     data object Undo : WorkspacesIntent
 
+    /** Tocar fuera del scratchpad o *atrás*: se oculta. */
+    data object HideScratchpad : WorkspacesIntent
+
     /**
      * Soltar un tile cerca del borde de otro: queda a ese lado ([side]) y el destino no se mueve,
      * como al arrastrar una ventana en Hyprland (no es un intercambio).
@@ -139,3 +145,7 @@ sealed interface WorkspacesIntent {
     /** El aviso ya se mostró. */
     data object MessageShown : WorkspacesIntent
 }
+
+/** El escritorio sobre el que actúa el modo edición: el scratchpad si se ve, si no el actual. */
+val WorkspacesUiState.activeWorkspace: Workspace
+    get() = if (scratchpadVisible) scratchpad else workspaces.getOrElse(current - Desk.FIRST) { Workspace() }

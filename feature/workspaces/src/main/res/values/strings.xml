@@ -9,6 +9,7 @@
     <string name="tile_open">Abrir</string>
     <string name="tile_edit">Editar</string>
     <string name="tile_drop_here">Soltar en el escritorio %1$s</string>
+    <string name="tile_drop_scratchpad">Soltar en el scratchpad</string>
     <string name="edit_undo">deshacer</string>
     <string name="edit_add">+ app</string>
     <string name="edit_add_widget">+ widget</string>
@@ -28,4 +29,6 @@
     <string name="message_failed">No se pudo abrir.</string>
     <string name="tile_widget">widget</string>
     <string name="tile_drop_group">agrupar</string>
+    <string name="scratchpad_title">scratchpad</string>
+    <string name="scratchpad_hide">Ocultar el scratchpad</string>
 </resources>

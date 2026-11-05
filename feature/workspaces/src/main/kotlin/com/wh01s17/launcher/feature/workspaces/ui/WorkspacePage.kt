@@ -261,7 +261,7 @@ private fun drop(
     canvas: PageCanvas,
     onIntent: (WorkspacesIntent) -> Unit,
 ) {
-    val cell = if (drag.resize) null else stripCellAt(drag.pointer, canvas.area.width, canvas.stripHeight, Desk.COUNT)
+    val cell = if (drag.resize) null else stripTargetAt(drag.pointer, canvas.area.width, canvas.stripHeight)
     when {
         cell != null -> if (cell != canvas.number) onIntent(WorkspacesIntent.DropOnWorkspace(drag.tile, cell))
         drag.floating ->
@@ -371,7 +371,13 @@ private fun EmptyHint(
         verticalArrangement = Arrangement.spacedBy(spacing.controlGap),
     ) {
         WhText(
-            stringResource(R.string.workspace_empty_title, workspaceLabel(number)),
+            if (number ==
+                Desk.SCRATCHPAD
+            ) {
+                stringResource(R.string.scratchpad_title)
+            } else {
+                stringResource(R.string.workspace_empty_title, workspaceLabel(number))
+            },
             style = WhTheme.typography.subtitle,
             color = WhTheme.colors.darkForeground,
         )
@@ -385,7 +391,12 @@ private fun EmptyHint(
 }
 
 /** El escritorio 10 se llama «0», como la tecla `Super + 0` y la barra. */
-internal fun workspaceLabel(number: Int): String = if (number == Desk.LAST) "0" else number.toString()
+internal fun workspaceLabel(number: Int): String =
+    when (number) {
+        Desk.LAST -> "0"
+        Desk.SCRATCHPAD -> "S"
+        else -> number.toString()
+    }
 
 /**
  * Deslizar en vertical emite [Gesture.SwipeUp] o [Gesture.SwipeDown]; qué hacen lo deciden los
@@ -438,7 +449,7 @@ private fun rememberDropPreview(
     stripHeight: Int,
 ): DropPreview? {
     val target =
-        drag?.takeIf { !it.resize && !it.floating && stripCellAt(it.pointer, area.width, stripHeight, Desk.COUNT) == null }?.let {
+        drag?.takeIf { !it.resize && !it.floating && stripTargetAt(it.pointer, area.width, stripHeight) == null }?.let {
             dropTargetAt(it.pointer, it.tile, result.tiled)
         }
     return remember(workspace, area, gaps, drag?.tile, target) {
@@ -478,7 +489,7 @@ private fun DragOverlay(
         }
     }
     if (!current.resize) {
-        val hovered = stripCellAt(current.pointer, canvas.area.width, canvas.stripHeight, Desk.COUNT)
+        val hovered = stripTargetAt(current.pointer, canvas.area.width, canvas.stripHeight)
         DropStrip(number, hovered, Modifier.placeAt(Rect(0, 0, canvas.area.width, canvas.stripHeight)).zIndex(Z_DRAG))
     }
 }
