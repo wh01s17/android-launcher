@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.wh01s17.android.library)
 }
 
+// Robolectric necesita los textos de `strings.xml` (mensajes de error de los fondos).
+android { testOptions { unitTests { isIncludeAndroidResources = true } } }
+
 dependencies {
     api(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.core.ktx)

@@ -50,4 +50,12 @@ class WallpaperStoreTest {
         store.importImage(Uri.fromFile(source))
         assertTrue(store.load("imported")!!.width <= 2048)
     }
+
+    @Test
+    fun `built-in wallpapers use the size closest to the screen`() {
+        assertEquals("1220x2712", WallpaperStore.nearestSize(1220))
+        assertEquals("1080x2400", WallpaperStore.nearestSize(720))
+        assertEquals("1440x3200", WallpaperStore.nearestSize(1600))
+        assertEquals("1080x2400", WallpaperStore.nearestSize(1080))
+    }
 }

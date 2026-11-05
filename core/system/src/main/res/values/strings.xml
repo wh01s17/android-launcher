@@ -4,4 +4,9 @@
     <string name="nav_service_label">Gestos wh01s17</string>
     <string name="nav_service_description">Añade gestos en los bordes de la pantalla: desliza desde un lado para volver, desde abajo para ir al inicio, y desde abajo manteniendo el dedo para ver las apps recientes.\n\nSi activas el modo «gestos wh01s17» en el launcher, también oculta los botones de navegación de HyperOS mientras este servicio está activo; al desactivarlo, los botones vuelven.\n\nSólo comprueba si el teclado está abierto para no taparlo. No lee el contenido de ninguna app ni usa internet.</string>
     <string name="media_listener_label">wh01s17: notificaciones y música</string>
+    <string name="wallpaper_error_read">No se pudo leer la imagen</string>
+    <string name="wallpaper_error_format">Formato de imagen no compatible</string>
+    <string name="wallpaper_error_decode">No se pudo decodificar la imagen</string>
+    <string name="wallpaper_error_save">No se pudo guardar la imagen</string>
+    <string name="wallpaper_error_none">Selecciona un fondo disponible primero</string>
 </resources>

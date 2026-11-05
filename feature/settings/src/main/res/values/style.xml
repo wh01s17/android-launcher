@@ -31,5 +31,8 @@
     <string name="style_export_config">Exportar launcher.json…</string>
     <string name="style_config_hint">La importación sustituye los ajustes tras validarlos. No modifica los escritorios ni los widgets.</string>
     <string name="style_saved">Guardado</string>
+    <string name="style_error_open">No se pudo abrir el archivo</string>
+    <string name="style_error_too_large">El archivo supera 1 MiB</string>
+    <string name="style_error_write">No se pudo escribir el archivo</string>
     <string name="style_failure">No se pudo completar: %1$s</string>
 </resources>

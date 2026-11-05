@@ -41,7 +41,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import java.io.IOException
 import android.graphics.Color as AndroidColor
 
-/** Style and the SAF launchers live here; feature/settings only renders and edits config. */
+/** Estilo y los selectores de documentos (SAF) viven aquí; feature/settings sólo pinta y edita la config. */
 class StyleActivity : ComponentActivity() {
     private val container get() = (application as LauncherApplication).container
     private val model: StyleViewModel by viewModels {
@@ -63,8 +63,8 @@ class StyleActivity : ComponentActivity() {
                 perform {
                     val bytes =
                         contentResolver.openInputStream(uri)?.use { readConfigBytes(it) }
-                            ?: throw IOException("No se pudo abrir el archivo")
-                    if (bytes.size > MAX_CONFIG_BYTES) throw IOException("El archivo supera 1 MiB")
+                            ?: throw IOException(getString(R.string.style_error_open))
+                    if (bytes.size > MAX_CONFIG_BYTES) throw IOException(getString(R.string.style_error_too_large))
                     report(container.configRepository.importDocument(bytes.toString(Charsets.UTF_8)))
                 }
             }
@@ -75,7 +75,7 @@ class StyleActivity : ComponentActivity() {
                 perform {
                     val text = container.configRepository.exportDocument()
                     contentResolver.openOutputStream(uri, "wt")?.use { it.write(text.toByteArray()) }
-                        ?: throw IOException("No se pudo escribir el archivo")
+                        ?: throw IOException(getString(R.string.style_error_write))
                 }
             }
         }
@@ -133,7 +133,7 @@ class StyleActivity : ComponentActivity() {
         val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
         var count = input.read(buffer)
         while (count >= 0) {
-            if (output.size() + count > MAX_CONFIG_BYTES) throw IOException("El archivo supera 1 MiB")
+            if (output.size() + count > MAX_CONFIG_BYTES) throw IOException(getString(R.string.style_error_too_large))
             output.write(buffer, 0, count)
             count = input.read(buffer)
         }
