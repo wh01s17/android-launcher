@@ -11,7 +11,8 @@ class NotificationFilterTest {
         flags: Int = 0,
         title: String? = "Ana",
         text: String? = "hola",
-    ) = NotificationFilter.accepts(packageName, "com.wh01s17.launcher", flags, title, text)
+        media: Boolean = false,
+    ) = NotificationFilter.accepts(packageName, "com.wh01s17.launcher", flags, title, text, media)
 
     @Test
     fun `an ordinary message is shown`() = assertTrue(accepts())
@@ -40,4 +41,10 @@ class NotificationFilterTest {
 
     @Test
     fun `other flags do not hide it`() = assertTrue(accepts(flags = Notification.FLAG_AUTO_CANCEL))
+
+    @Test
+    fun `music is shown while it plays and hidden while paused`() {
+        assertTrue(accepts(flags = Notification.FLAG_ONGOING_EVENT, media = true))
+        assertFalse(accepts(media = true))
+    }
 }

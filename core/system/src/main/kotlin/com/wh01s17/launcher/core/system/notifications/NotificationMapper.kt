@@ -19,7 +19,8 @@ private fun StatusBarNotification.toItem(
     val extras = notification.extras
     val title = extras?.getCharSequence(Notification.EXTRA_TITLE)
     val text = extras?.getCharSequence(Notification.EXTRA_BIG_TEXT) ?: extras?.getCharSequence(Notification.EXTRA_TEXT)
-    if (!NotificationFilter.accepts(packageName, ownPackage, notification.flags, title, text)) return null
+    val media = extras?.containsKey(Notification.EXTRA_MEDIA_SESSION) == true || notification.category == Notification.CATEGORY_TRANSPORT
+    if (!NotificationFilter.accepts(packageName, ownPackage, notification.flags, title, text, media)) return null
     return NotificationItem(
         key = key,
         packageName = packageName,
