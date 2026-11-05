@@ -14,7 +14,8 @@ Un tile es un *lanzador vivo* (plan.md §2.2): tocarlo abre la app, no la incrus
 | Tocar un hueco | Abre el menú wh01s17 | Sale de edición |
 | Deslizar a los lados | Cambia de escritorio | Desactivado (para poder arrastrar) |
 | Deslizar hacia arriba / abajo | Lo que digan `bindings` (de fábrica, arriba abre el menú; ver [bindings.md](bindings.md)) | — |
-| Arrastrar un tile sobre otro | — | Los intercambia |
+| Soltar un tile cerca del borde de otro | — | Los intercambia |
+| Soltar un tile en el centro de otro (la mitad central) | — | Los agrupa: el arrastrado entra como pestaña visible |
 | Arrastrar un tile a la tira `[1] … [0]` de arriba | — | Lo lleva a ese escritorio (sin seguirlo) |
 | Arrastrar una asa verde de un borde | — | Cambia el tamaño de los dos lados |
 | Arrastrar un flotante / su punto de la esquina | — | Lo mueve / le cambia el tamaño |
@@ -31,6 +32,9 @@ la distribución. La barra de herramientas actúa sobre el tile con el foco:
 | `flotar` | `Super + T` | Flotante ↔ mosaico |
 | `completa` | `Super + F` | Pantalla completa (sólo se ve ese tile) |
 | `dwindle` / `master` | `Super + L` | Cambia el layout del escritorio |
+| `agrupar` | `Super + G` | Une el tile con el foco al último tile enfocado de otro hueco: toca uno, luego otro y `agrupar` |
+| `desagrupar` | `Super + G` | Sólo en un grupo: cada pestaña vuelve a su propio hueco |
+| `sacar` | `Super + Alt + G` | Sólo en un grupo: saca esa pestaña a un hueco propio, junto al grupo |
 | `quitar` | `Super + W` | Quita el tile (la app no se cierra ni se desinstala) |
 | `ajustes` | — | Ajustes de wh01s17 (Compatibilidad, etc.) |
 | `listo` | — | Sale de edición |
@@ -47,8 +51,10 @@ Como en Hyprland con la config de `~/dotfiles`:
   (girar la pantalla reorganiza); `split` la fija.
 - **Master**: el principal ocupa el 55 % del lado largo (arriba en vertical) y el resto se reparte
   en una pila. Un tile nuevo pasa a ser el principal (`new_status = "master"`).
-- **Grupos**: con `maxTilesPerWorkspace` huecos ocupados, un tile nuevo entra como pestaña en el
-  grupo del tile con el foco. Las pestañas se ven arriba del grupo; tocar una la muestra.
+- **Grupos**: como en Hyprland, sólo se crean a petición; un tile nuevo **nunca** se agrupa solo
+  (siempre toma su hueco y los demás se achican). Se agrupa soltando un tile en el centro de otro,
+  con `agrupar` o con los atajos de [bindings.md](bindings.md#comandos) (`group.toggle`,
+  `group.move-into`, `group.move-out`). Las pestañas se ven arriba del grupo; tocar una la muestra.
 - **Foco**: al quitar el tile con el foco, pasa al último que lo tuvo (`focus_on_close`).
 - Huecos, borde y radio salen del tema (`gaps_in 2`, `gaps_out 2`, `border_size 1`,
   `rounding 10`) salvo que `general` los cambie. Entre dos tiles hay dos `gapsIn`, como en Hyprland.
@@ -67,7 +73,9 @@ Como en Hyprland con la config de `~/dotfiles`:
 
 - `general.layout`: `dwindle` o `master`, para los escritorios vacíos (los que tienen tiles
   conservan el suyo).
-- `general.maxTilesPerWorkspace`: 1–16. Las medidas van en dp (`gapsIn`/`gapsOut` 0–32,
+- `general.maxTilesPerWorkspace`: 1–16, **obsoleto**. Antes, por encima de ese número de huecos un
+  tile nuevo se agrupaba solo; ya no limita nada (los grupos son explícitos) y sólo se lee para no
+  romper configs y `workspaces.json` guardados. Las medidas van en dp (`gapsIn`/`gapsOut` 0–32,
   `borderSize` 0–8, `rounding` 0–32); si faltan, las del tema.
 - `animations.workspaces`: `speed` en décimas de segundo como en Hyprland (2 = 200 ms); `bezier`,
   una de las curvas de `looknfeel.lua` (`easeOutQuint`, `easeInOutCubic`, `linear`,

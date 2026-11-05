@@ -34,10 +34,18 @@ Si prefieres no exportar `JAVA_HOME`, añade
 ./gradlew check            # todo: tests, Lint, ktlint, detekt, R1 (longitud), R6 (literales),
                            # integridad del tema y capturas Roborazzi
 ./gradlew assembleDebug    # APK en app/build/outputs/apk/debug/app-debug.apk
+./gradlew installFast      # la del uso diario: no depurable (varias veces más fluida), mismo id
+                           # y firma que debug, así que se instala encima conservando los datos
 ./gradlew ktlintFormat     # corrige el formato
 ./gradlew :core:designsystem:recordRoborazziDebug   # regrabar las capturas de referencia
 python3 tools/sync-theme.py                          # traer el tema desde ~/dotfiles
 ```
+
+**`fast` o `debug`.** En la debug, ART interpreta casi todo el código (la app es depurable): en el
+Redmi, al deslizar escritorios el 17 % de los fotogramas llegaba tarde, frente al 4 % con `fast`. Para
+el día a día, `fast`. Con `fast` no hay `run-as` (no se puede leer `files/` por ADB) pero sí
+simpleperf (`simpleperf record --app com.wh01s17.launcher.debug`); para inspeccionar el estado,
+instala la debug encima y vuelve después. Sin R8 ni Baseline Profile hasta el Hito 11.
 
 Hace falta `python3` (3.10 o superior) para las herramientas de `tools/`. Los tests con Robolectric
 descargan el `android-all` de la API que usan la primera vez.

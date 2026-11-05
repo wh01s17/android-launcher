@@ -38,6 +38,19 @@ La barra sigue a la del escritorio (`shell.json`): mismos nombres de opciones (`
   (`bar.layout.left[2].id: falta`). Si el archivo se arregla, el aviso desaparece.
 - Un `id` que no existe se pinta como `[ ?id ]` en amarillo, no desaparece sin avisar.
 
+## Barra de fábrica
+
+La barra de estado de Android sigue visible (se probó ocultarla y quedaba peor), así que la de
+fábrica no repite lo que ya muestra: hora, red, bluetooth y batería. Queda el menú y los
+escritorios a la izquierda y, a la derecha, los avisos, la fecha (`ddd d MMM`; mantener pulsado
+alterna a `HH:mm`) y el volumen. `wh01s17.network`, `wh01s17.bluetooth` y `wh01s17.power` siguen
+disponibles para quien los quiera en su `launcher.json`.
+
+**Recorte de la cámara:** si la barra llega a cruzar el recorte superior (el del Redmi está al
+centro), el grupo central se aparta a su derecha o, si no cabe, a su izquierda; los rellenos de los
+módulos pueden tocarse con los vecinos para hacerle sitio. Con la barra de estado visible la barra va
+debajo y no lo cruza.
+
 ## Opciones comunes a todos los módulos
 
 | Opción | Efecto |
@@ -53,9 +66,9 @@ Colores: `#RGB`, `#RRGGBB` o `#RRGGBBAA`.
 
 | `id` | Qué muestra | Clases | Por defecto |
 | --- | --- | --- | --- |
-| `core.menu` | Botón del menú; abre el panel wh01s17 (`menu.md`), con Apps y submenús | — | verde |
+| `core.menu` | Botón del menú, con la «W» de la barra del escritorio (`shell/plugins/menu/BarWidget.qml`: el mismo trazado, sólo el trazo). Abre el panel wh01s17 (`menu.md`), con Apps y submenús | — | verde |
 | `core.workspaces` | Números `1`–`persistent` (por defecto `5`, como el shell) más los que tienen tiles y el activo; los demás vacíos no se muestran. El 10 se llama `0`. Activo en verde con subrayado, ocupados en el color del texto, vacíos al 35 %. Tocar cambia de escritorio | — | — |
-| `wh01s17.clock` | Hora y fecha. Tocar: calendario. Mantener: alterna `format` y `formatAlt` | — | `format` `HH:mm` |
+| `wh01s17.clock` | Hora y fecha. Tocar: calendario. Mantener: alterna `format` y `formatAlt` | — | `format` `HH:mm` (la barra de fábrica usa `ddd d MMM`) |
 | `wh01s17.indicators` | No molestar (luna). Sólo ocupa sitio si hay algo activo | `dnd` | — |
 | `wh01s17.power` | Batería (icono + %). Sin batería, nada | `charging`, `full`, `low` (≤ 20 %), `critical` (≤ 10 %), `power-save` | cargando verde, `low` amarillo, `critical` rojo |
 | `wh01s17.network` | Red por defecto: Wi-Fi, datos móviles, cable o sin conexión | `wifi`, `cellular`, `ethernet`, `other`, `none`, `no-internet`, `vpn` | `none` atenuado, `no-internet` amarillo |

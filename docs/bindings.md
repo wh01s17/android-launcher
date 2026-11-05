@@ -104,6 +104,9 @@ Quedan fuera, con su motivo (plan.md §3):
 | `tile.float` / `tile.split` / `tile.fullscreen` | — | Alterna flotante / split / pantalla completa |
 | `tile.close` | — | Quita el tile (nunca cierra la app) |
 | `group.next` / `group.previous` | — | Pestaña del grupo |
+| `group.toggle` | — | En un grupo, lo deshace; si no, agrupa el tile con el último enfocado de otro hueco |
+| `group.move-into` | `direction`: `left`, `right`, `up`, `down` | Mete el tile en el grupo (o tile) vecino de ese lado (`moveintogroup`) |
+| `group.move-out` | — | Saca el tile de su grupo a un hueco propio (`moveoutofgroup`) |
 | `edit.toggle` | — | Entra o sale del modo edición |
 | `none` | — | Quita un atajo de fábrica |
 
@@ -127,7 +130,13 @@ apps y `SUPER + ESCAPE` sistema (alternan, como `wh01s17-menu toggle`); `CTRL + 
 escritorio; `SUPER + SHIFT + 1…0` mover tile (y `+ ALT` sin seguirlo); `SUPER (+ SHIFT) + TAB`
 siguiente/anterior; `SUPER + flechas` foco; `SUPER + SHIFT + flechas` intercambiar;
 `SUPER (+ SHIFT) + MINUS/EQUAL` tamaño; `SUPER + W/T/J/F/L`; `SUPER + ALT (+ SHIFT) + TAB` y
-`SUPER + CTRL + ←/→` grupo; dos dedos a los lados, escritorio siguiente/anterior.
+`SUPER + CTRL + ←/→` grupo; `SUPER + G` agrupar/desagrupar, `SUPER + ALT + G` sacar del grupo y
+`SUPER + ALT + flechas` meter en el grupo de ese lado; dos dedos a los lados, escritorio
+siguiente/anterior.
+
+En el Redmi (sin tecla Meta, `ALT` hace de `SUPER`) los `SUPER + ALT + …` no pueden funcionar: serían
+`ALT` dos veces, y la tabla los marca como no disponibles. `SUPER + G` sí (`ALT + G`); para meter en
+un grupo o sacar de él están el arrastre y los botones del modo edición.
 
 `SUPER + K` abre la tabla y `SUPER + RETURN` la terminal. La terminal es `apps.terminal`: un
 paquete (`"com.termux"`, su actividad principal) o una actividad (`"com.termux/.app.TermuxActivity"`).
