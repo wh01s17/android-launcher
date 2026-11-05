@@ -183,6 +183,7 @@ class MainActivity : ComponentActivity() {
                         registry = container.barRegistry,
                         state = barState,
                         onCommand = bar::send,
+                        // Debajo de la barra de estado de Android (plan.md §5.5).
                         modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
                     )
                 }

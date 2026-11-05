@@ -21,30 +21,34 @@ class ConfigParserTest {
     }
 
     @Test
-    fun `the factory config is valid and has every module of the mvp bar`() {
+    fun `the factory config is valid and its bar does not repeat the system status bar`() {
         val config = success(File("src/main/assets/default-launcher.json").readText())
         assertEquals(1, config.version)
+        // Hora, red, bluetooth y batería ya están en la barra de estado de Android: la de fábrica no
+        // los repite (los módulos siguen disponibles para quien los añada en su config).
         assertEquals(
             listOf(
                 "core.menu",
                 "core.workspaces",
-                "wh01s17.clock",
                 "wh01s17.indicators",
-                "wh01s17.network",
-                "wh01s17.bluetooth",
+                "wh01s17.clock",
                 "wh01s17.audio",
-                "wh01s17.power",
             ),
             config.bar.layout.all
                 .map { it.id },
         )
-        assertEquals("wh01s17.clock", config.bar.centerAnchor)
-        assertEquals(
-            "HH:mm",
+        // La fecha, a la derecha junto al volumen (la hora ya está en la barra de Android); mantener
+        // pulsado alterna a la hora. Sin grupo central.
+        assertEquals(null, config.bar.centerAnchor)
+        assertTrue(
             config.bar.layout.center
-                .single()
-                .string("format"),
+                .isEmpty(),
         )
+        val clock =
+            config.bar.layout.right
+                .single { it.id == "wh01s17.clock" }
+        assertEquals("ddd d MMM", clock.string("format"))
+        assertEquals("HH:mm", clock.string("formatAlt"))
     }
 
     @Test
@@ -82,7 +86,9 @@ class ConfigParserTest {
         val outline = success("""{"version":1,"bar":{"outline":true}}""", fallback).bar
         assertEquals(true, outline.outline)
         assertEquals(fallback.bar.layout, outline.layout)
-        assertEquals("wh01s17.clock", outline.centerAnchor)
+        // El ancla también se hereda (la barra de fábrica no tiene; se prueba con un respaldo que sí).
+        val anchored = success("""{"version":1,"bar":{"centerAnchor":"wh01s17.clock"}}""", fallback)
+        assertEquals("wh01s17.clock", success("""{"version":1,"bar":{"outline":true}}""", anchored).bar.centerAnchor)
         // Un grupo nuevo sustituye sólo ese grupo; `[]` lo vacía.
         val layout = success("""{"version":1,"bar":{"layout":{"right":[]}}}""", fallback).bar.layout
         assertEquals(fallback.bar.layout.left, layout.left)

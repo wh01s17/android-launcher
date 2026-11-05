@@ -11,26 +11,21 @@
     "position": "top",
     "transparent": true,
     "outline": false,
-    "centerAnchor": "wh01s17.clock",
     "layout": {
       "left": [
         { "id": "core.menu" },
         { "id": "core.workspaces" }
       ],
-      "center": [
-        {
-          "id": "wh01s17.clock",
-          "format": "HH:mm",
-          "formatAlt": "ddd d MMM",
-          "weekStartDay": "monday"
-        }
-      ],
+      "center": [],
       "right": [
         { "id": "wh01s17.indicators" },
-        { "id": "wh01s17.network" },
-        { "id": "wh01s17.bluetooth" },
-        { "id": "wh01s17.audio" },
-        { "id": "wh01s17.power" }
+        {
+          "id": "wh01s17.clock",
+          "format": "ddd d MMM",
+          "formatAlt": "HH:mm",
+          "weekStartDay": "monday"
+        },
+        { "id": "wh01s17.audio" }
       ]
     }
   },

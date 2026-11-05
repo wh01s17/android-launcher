@@ -122,7 +122,15 @@ class BarScreenshotTest {
                 )
             val registry = defaultBarRegistry(clock)
             Column {
-                states.forEach { Bar(config(), registry, it, onCommand = {}) }
+                // Todos los módulos de estado (la barra por defecto ya no lleva red, bluetooth ni batería).
+                val all =
+                    config(
+                        """{"version":1,"bar":{"layout":{"left":[{"id":"core.menu"},{"id":"core.workspaces"}],
+                        "center":[{"id":"wh01s17.clock"}],
+                        "right":[{"id":"wh01s17.indicators"},{"id":"wh01s17.network"},{"id":"wh01s17.bluetooth"},
+                        {"id":"wh01s17.audio"},{"id":"wh01s17.power"}]}}}""",
+                    )
+                states.forEach { Bar(all, registry, it, onCommand = {}) }
                 // Opciones de módulo: marco `[ ]`, color por clase y un módulo desconocido.
                 Bar(
                     config(

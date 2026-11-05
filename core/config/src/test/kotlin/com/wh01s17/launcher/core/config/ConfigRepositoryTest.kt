@@ -43,7 +43,7 @@ class ConfigRepositoryTest {
             val repo = repository()
             repo.reload()
             assertEquals(
-                8,
+                FACTORY_BAR_MODULES,
                 repo.state.value.config!!
                     .bar.layout.all.size,
             )
@@ -107,7 +107,7 @@ class ConfigRepositoryTest {
             source.user = "not json"
             repo.reload()
             assertEquals(
-                8,
+                FACTORY_BAR_MODULES,
                 repo.state.value.config!!
                     .bar.layout.all.size,
             )
@@ -147,7 +147,7 @@ class ConfigRepositoryTest {
             repo.reload()
             assertEquals(1, defaultReads)
             assertEquals(
-                8,
+                FACTORY_BAR_MODULES,
                 repo.state.value.config!!
                     .bar.layout.all.size,
             )
@@ -167,4 +167,9 @@ class ConfigRepositoryTest {
                     .bar.outline,
             )
         }
+
+    private companion object {
+        /** Módulos de la barra en `default-launcher.json`: así se reconoce que se usó la de fábrica. */
+        const val FACTORY_BAR_MODULES = 5
+    }
 }

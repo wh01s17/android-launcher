@@ -94,4 +94,18 @@ class BarLayoutTest {
         assertEquals(emptyList<Int>(), placeSlots(emptyList(), total, gap, gap))
         assertEquals(listOf(180), placeSlots(listOf(spec(BarGroup.Center, 40)), total, gap, gap))
     }
+
+    @Test
+    fun `the center group steps aside from the camera notch`() {
+        // Centro de 100 en [150, 250) y el recorte en [190, 210): pasa a su derecha, pegado al recorte.
+        val notch = 190..209
+        val xs = placeSlots(listOf(spec(BarGroup.Left, 40), spec(BarGroup.Center, 100), spec(BarGroup.Right, 40)), total, gap, gap, notch)
+        assertEquals(210, xs[1])
+        // Sin sitio a la derecha, a la izquierda.
+        val wide =
+            placeSlots(listOf(spec(BarGroup.Left, 40), spec(BarGroup.Center, 100), spec(BarGroup.Right, 120)), total, gap, gap, notch)
+        assertEquals(90, wide[1])
+        // Lejos del recorte, nada cambia.
+        assertEquals(150, placeSlots(listOf(spec(BarGroup.Center, 100)), total, gap, gap, 0..9)[0])
+    }
 }
