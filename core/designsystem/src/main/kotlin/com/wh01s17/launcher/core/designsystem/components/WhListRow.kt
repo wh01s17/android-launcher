@@ -175,6 +175,7 @@ private fun rowMetrics(size: WhListRowSize): RowMetrics {
     val typography = WhTheme.typography
     return when (size) {
         WhListRowSize.Popup -> RowMetrics(spacing.rowHeight, typography.body, spacing.iconSize)
-        WhListRowSize.Menu -> RowMetrics(spacing.menuRowHeight, typography.heading, spacing.iconSizeLarge)
+        // Mismo cuerpo de letra que el buscador del menú: todo el panel con un solo tamaño.
+        WhListRowSize.Menu -> RowMetrics(spacing.menuRowHeight, typography.body, spacing.iconSize)
     }
 }

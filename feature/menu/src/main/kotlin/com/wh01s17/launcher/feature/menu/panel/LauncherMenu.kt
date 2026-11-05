@@ -90,7 +90,7 @@ fun LauncherMenu(
                 .pointerInput(Unit) { detectTapGestures {} },
             contentPadding = WhTheme.spacing.controlGap,
         ) {
-            WhText(stringResource(page.title), style = WhTheme.typography.heading, color = WhTheme.colors.accent)
+            WhText(stringResource(page.title), color = WhTheme.colors.accent)
             MenuSearchInput(
                 text,
                 search.picking,

@@ -2,6 +2,7 @@ package com.wh01s17.launcher.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 // `Color` guarda el alfa en 8 bits: 0,70 se lee como 0,702. Un paso son 1/255 ≈ 0,0039.
@@ -103,7 +104,8 @@ class WhThemeValuesTest {
     @Test
     fun `menu measures follow Menu qml`() {
         val s = WhSpacing.create(1.25f)
-        assertEquals(62.5f, s.menuRowHeight.value, 0.001f)
+        assertEquals(50f, s.menuRowHeight.value, 0.001f)
+        assertTrue(s.menuRowHeight >= s.touchTarget)
         assertEquals(2f, WhSpacing.create(1f).menuBorderSize.value, 0f)
         val surfaces = WhSurfaces.create(s)
         // El menú y el launcher llevan el borde de 2 px del shell; los popups, el de su TOML.

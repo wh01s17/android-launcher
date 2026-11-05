@@ -53,8 +53,12 @@ data class WhSpacing(
     val touchTarget: Dp,
 ) {
     companion object {
-        /** Medidas que `Menu.qml` escribe en código (en px del shell) en vez de leerlas del TOML. */
-        private val SHELL_MENU_ROW_HEIGHT = 50.dp
+        /**
+         * Medidas que `Menu.qml` escribe en código (en px del shell) en vez de leerlas del TOML. La fila
+         * es más baja que la del shell (50): en el teléfono, con la letra del cuerpo, 40 (50 dp con la
+         * escala 1,25, por encima del área táctil de 48 dp).
+         */
+        private val SHELL_MENU_ROW_HEIGHT = 40.dp
         private val SHELL_MENU_BORDER = 2.dp
         private val SHELL_MENU_WIDTH = 300.dp
         private val SHELL_UNDERLINE_WIDTH = 8.dp

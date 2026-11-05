@@ -98,7 +98,7 @@ internal fun AppMenuOverlay(
                 contentPadding = WhTheme.spacing.controlGap,
             ) {
                 DrawerIcon(menu.app, iconLoader)
-                WhText(menu.app.label, style = WhTheme.typography.heading)
+                WhText(menu.app.label, color = WhTheme.colors.accent)
                 Column(Modifier.verticalScroll(scroll)) {
                     rows.forEachIndexed { index, row ->
                         WhListRow(
