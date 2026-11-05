@@ -17,6 +17,11 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 - El visualizador de TIDAL ya no dibuja un tramo plano a la izquierda: los graves no repiten el
   mismo bin ni se recortan arriba (bordes fraccionarios desde el bin 2, compensación de 3 dB por
   octava y margen sobre 0 dB).
+- Estilo: el botón «+» de la escala de fuente ya no se atasca en 104 % (redondeo en vez de truncado).
+- La rueda y el puntero del ratón cuentan como actividad para el salvapantallas de inicio.
+- El salvapantallas de Android usa la paleta elegida aunque arranque con el proceso dormido.
+- Los fondos incluidos se cargan en el tamaño más cercano a la pantalla (1080, 1220 o 1440 px).
+- Mensajes de error de fondos e importación en `strings.xml`.
 
 ## [0.5.0] — 2026-11-05
 
