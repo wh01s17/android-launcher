@@ -9,8 +9,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,9 +34,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wh01s17.launcher.core.designsystem.components.WhIcon
 import com.wh01s17.launcher.core.designsystem.components.WhText
-import com.wh01s17.launcher.core.designsystem.icons.WhIcons
+import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
 import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
@@ -66,33 +67,43 @@ internal fun TidalWidget(
     val prefs = remember { context.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
     var palette by remember { mutableStateOf(TidalampPalettes.byName(prefs.getString(KEY_PALETTE, null))) }
     var shape by remember { mutableStateOf(VisualizerShape.fromConfig(prefs.getString(KEY_SHAPE, null))) }
-    Column(
-        modifier.fillMaxSize().background(palette.background).padding(WhTheme.spacing.controlGap),
-        verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap),
-    ) {
-        NovaTitle(
-            stringResource(R.string.native_tidal_title),
-            "${palette.name} · ${shape.configName}",
-            palette,
-            stringResource(R.string.native_tidal_palette),
-            onClick =
-                if (interactive) {
-                    {
-                        palette = TidalampPalettes.after(palette)
-                        prefs.edit().putString(KEY_PALETTE, palette.name).apply()
-                    }
-                } else {
-                    null
-                },
-        )
-        when (val current = state) {
-            is MediaState.Session ->
-                Player(current, sources, interactive, palette, shape, {
-                    shape = shape.next()
-                    prefs.edit().putString(KEY_SHAPE, shape.configName).apply()
-                }, Modifier.weight(1f))
-            MediaState.Idle -> Waiting(R.string.native_tidal_idle, interactive, palette, Modifier.weight(1f), openTidal = true)
-            MediaState.NoAccess -> Waiting(R.string.native_tidal_no_access, interactive, palette, Modifier.weight(1f), openTidal = false)
+    BoxWithConstraints(modifier.fillMaxSize().background(palette.background).padding(WhTheme.spacing.controlGap)) {
+        // Pequeño: canción, avance y teclas; mediano: con carátula; grande: además el visualizador.
+        val size = WidgetSize.of(maxWidth, maxHeight)
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
+            if (size != WidgetSize.Small) {
+                NovaTitle(
+                    stringResource(R.string.native_tidal_title),
+                    "${palette.name} · ${shape.configName}",
+                    palette,
+                    stringResource(R.string.native_tidal_palette),
+                    onClick =
+                        if (interactive) {
+                            {
+                                palette = TidalampPalettes.after(palette)
+                                prefs.edit().putString(KEY_PALETTE, palette.name).apply()
+                            }
+                        } else {
+                            null
+                        },
+                )
+            }
+            when (val current = state) {
+                is MediaState.Session ->
+                    Player(current, sources, interactive, palette, shape, size, {
+                        shape = shape.next()
+                        prefs.edit().putString(KEY_SHAPE, shape.configName).apply()
+                    }, Modifier.weight(1f))
+                MediaState.Idle -> Waiting(R.string.native_tidal_idle, interactive, palette, Modifier.weight(1f), openTidal = true)
+                MediaState.NoAccess ->
+                    Waiting(
+                        R.string.native_tidal_no_access,
+                        interactive,
+                        palette,
+                        Modifier.weight(1f),
+                        openTidal = false,
+                    )
+            }
         }
     }
 }
@@ -104,6 +115,7 @@ private fun Player(
     interactive: Boolean,
     palette: PlayerPalette,
     shape: VisualizerShape,
+    size: WidgetSize,
     onShape: () -> Unit,
     modifier: Modifier,
 ) {
@@ -119,25 +131,27 @@ private fun Player(
     val fraction = if (state.durationMillis > 0) position.toFloat() / state.durationMillis else 0f
     // Arriba, pegado al título; el espacio que sobra es del visualizador.
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.panelGap)) {
-            state.art?.let { art ->
-                // Tocar la carátula abre TIDAL (como tocar un tile de app).
-                val context = LocalContext.current
-                val openLabel = stringResource(R.string.native_tidal_open)
-                Image(
-                    art.asImageBitmap(),
-                    contentDescription = state.album,
-                    modifier =
-                        Modifier
-                            .weight(COVER_WEIGHT)
-                            .aspectRatio(1f)
-                            .clickable(enabled = interactive, onClickLabel = openLabel) { open(context, openTidal = true) },
-                    contentScale = ContentScale.Crop,
-                )
-            }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap / 2)) {
-                WhText(clock(position), style = WhTheme.typography.displayLarge, color = palette.accent, maxLines = 1)
-                Details(state, palette)
+        if (size != WidgetSize.Small) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.panelGap)) {
+                state.art?.let { art ->
+                    // Tocar la carátula abre TIDAL (como tocar un tile de app).
+                    val context = LocalContext.current
+                    val openLabel = stringResource(R.string.native_tidal_open)
+                    Image(
+                        art.asImageBitmap(),
+                        contentDescription = state.album,
+                        modifier =
+                            Modifier
+                                .weight(COVER_WEIGHT)
+                                .aspectRatio(1f)
+                                .clickable(enabled = interactive, onClickLabel = openLabel) { open(context, openTidal = true) },
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap / 2)) {
+                    WhText(clock(position), style = WhTheme.typography.displayLarge, color = palette.accent, maxLines = 1)
+                    Details(state, palette)
+                }
             }
         }
         WhText(
@@ -150,7 +164,11 @@ private fun Player(
         val status = stringResource(if (state.playing) R.string.native_tidal_playing else R.string.native_tidal_paused)
         val total = if (state.durationMillis > 0) " · ${clock(state.durationMillis)}" else ""
         WhText("$status$total", style = WhTheme.typography.caption, color = palette.dim, maxLines = 1)
-        Visualizer(sources, state.playing, interactive, palette, shape, onShape, Modifier.weight(1f))
+        if (size >= WidgetSize.Large) {
+            Visualizer(sources, state.playing, interactive, palette, shape, onShape, Modifier.weight(1f))
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
         NovaProgress(
             fraction,
             palette,
@@ -230,25 +248,25 @@ private fun Transport(
     palette: PlayerPalette,
 ) {
     NovaBand(palette) {
-        NovaKey(stringResource(R.string.native_media_previous), { media.perform(state, MediaAction.Previous) }, palette, interactive) {
-            WhIcon(WhIcons.SkipPrevious, tint = it)
-        }
+        NovaKey(stringResource(R.string.native_media_previous), {
+            media.perform(state, MediaAction.Previous)
+        }, palette, interactive) { TransportGlyph(Transport.Previous, it) }
         NovaKey(
             stringResource(R.string.native_media_play_pause),
             { media.perform(state, MediaAction.PlayPause) },
             palette,
             interactive,
             lit = state.playing,
-        ) { WhIcon(if (state.playing) WhIcons.Pause else WhIcons.Play, tint = it) }
+        ) { TransportGlyph(if (state.playing) Transport.Pause else Transport.Play, it) }
         NovaKey(
             stringResource(R.string.native_media_stop),
             { media.perform(state, MediaAction.Stop) },
             palette,
             interactive,
-        ) { NovaStop(it) }
-        NovaKey(stringResource(R.string.native_media_next), { media.perform(state, MediaAction.Next) }, palette, interactive) {
-            WhIcon(WhIcons.SkipNext, tint = it)
-        }
+        ) { TransportGlyph(Transport.Stop, it) }
+        NovaKey(stringResource(R.string.native_media_next), {
+            media.perform(state, MediaAction.Next)
+        }, palette, interactive) { TransportGlyph(Transport.Next, it) }
     }
 }
 

@@ -53,4 +53,7 @@
     <string name="native_metronome_voice_accent">acento</string>
     <string name="native_metronome_voice_beat">tiempo</string>
     <string name="native_metronome_voice_sub">pulso</string>
+    <string name="native_usage_uptime">encendido hace %1$s</string>
+    <string name="native_clock_title">reloj</string>
+    <string name="native_clock_week">semana %1$d</string>
 </resources>

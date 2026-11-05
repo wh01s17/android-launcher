@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,9 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wh01s17.launcher.core.designsystem.components.WhIcon
 import com.wh01s17.launcher.core.designsystem.components.WhText
-import com.wh01s17.launcher.core.designsystem.icons.WhIcons
+import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
+import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.system.timer.ClickVoice
 import com.wh01s17.launcher.core.system.timer.MetronomeMath
@@ -43,49 +45,64 @@ internal fun MetronomeWidget(
     val state by metronome.state.collectAsStateWithLifecycle()
     val settings = state.settings
     val colors = WhTheme.colors
-    Column(
-        modifier.fillMaxSize().background(colors.background).padding(WhTheme.spacing.controlGap),
-        // Arriba, pegado al encabezado, como el widget de TIDAL.
-        verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap),
-    ) {
-        NovaHeading(stringResource(R.string.native_metronome_title), settings.signature)
-        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
-            WhText("${settings.bpm}", style = WhTheme.typography.displayLarge, color = colors.accent, maxLines = 1)
-            WhText(
-                "BPM · ${MetronomeMath.tempoName(settings.bpm)}",
-                style = WhTheme.typography.bodySmall,
-                color = colors.foreground,
-                maxLines = 1,
-            )
+    BoxWithConstraints(modifier.fillMaxSize().background(colors.background).padding(WhTheme.spacing.controlGap)) {
+        // Pequeño: tempo y la banda principal; mediano: además encabezado y compás; grande: todo.
+        val size = WidgetSize.of(maxWidth, maxHeight)
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
+            if (size != WidgetSize.Small) NovaHeading(stringResource(R.string.native_metronome_title), settings.signature)
+            if (size >= WidgetSize.Large) Spacer(Modifier.weight(1f))
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
+                WhText("${settings.bpm}", style = readoutStyle(size), color = colors.accent, maxLines = 1)
+                WhText(
+                    "BPM · ${MetronomeMath.tempoName(settings.bpm)}",
+                    style = WhTheme.typography.bodySmall,
+                    color = colors.foreground,
+                    maxLines = 1,
+                )
+            }
+            if (size != WidgetSize.Small) BeatDots(state, interactive) { metronome.edit { it.copy(accent = !it.accent) } }
+            if (size >= WidgetSize.Large) Legend(settings.accent, settings.subdivision != Subdivision.Quarter)
+            Spacer(Modifier.weight(1f))
+            Keys(metronome, state, interactive, extended = size >= WidgetSize.Large)
         }
-        BeatDots(state, interactive) { metronome.edit { it.copy(accent = !it.accent) } }
-        Legend(settings.accent, settings.subdivision != Subdivision.Quarter)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
-            val key = Modifier.weight(1f)
-            RetroKey(stringResource(R.string.native_metronome_slower), { metronome.edit { it.copy(bpm = it.bpm - 1) } }, key, interactive) {
-                WhText("−")
-            }
-            RetroKey(stringResource(R.string.native_metronome_toggle), metronome::toggle, key, interactive, lit = state.running) {
-                if (state.running) StopGlyph() else WhIcon(WhIcons.Play)
-            }
-            RetroKey(stringResource(R.string.native_metronome_faster), { metronome.edit { it.copy(bpm = it.bpm + 1) } }, key, interactive) {
-                WhText("+")
-            }
+    }
+}
+
+/** Las dos bandas nova de teclas: tempo e iniciar/parar; tap tempo, compás y subdivisión. */
+@Composable
+private fun Keys(
+    metronome: MetronomeRepository,
+    state: MetronomeState,
+    interactive: Boolean,
+    extended: Boolean,
+) {
+    val palette = TidalampPalettes.default
+    val settings = state.settings
+    NovaBand(palette) {
+        NovaKey(stringResource(R.string.native_metronome_slower), { metronome.edit { it.copy(bpm = it.bpm - 1) } }, palette, interactive) {
+            WhText("−", color = it)
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
-            val key = Modifier.weight(1f)
-            RetroKey(stringResource(R.string.native_metronome_tap), metronome::tap, key, interactive) { WhText("TAP") }
-            RetroKey(stringResource(R.string.native_metronome_beats), {
-                metronome.edit { it.copy(beats = it.beats % MAX_BEATS + 1) }
-            }, key, interactive) {
-                WhText("${settings.beats}/4")
-            }
-            RetroKey(stringResource(R.string.native_metronome_subdivision), {
-                metronome.edit { it.copy(subdivision = next(it.subdivision)) }
-            }, key, interactive) {
-                WhText(settings.subdivision.label, maxLines = 1)
-            }
+        NovaKey(stringResource(R.string.native_metronome_toggle), metronome::toggle, palette, interactive, lit = state.running) {
+            TransportGlyph(if (state.running) Transport.Stop else Transport.Play, it)
         }
+        NovaKey(stringResource(R.string.native_metronome_faster), { metronome.edit { it.copy(bpm = it.bpm + 1) } }, palette, interactive) {
+            WhText("+", color = it)
+        }
+    }
+    if (!extended) return
+    NovaBand(palette) {
+        NovaKey(stringResource(R.string.native_metronome_tap), metronome::tap, palette, interactive) { WhText("tap", color = it) }
+        NovaKey(stringResource(R.string.native_metronome_beats), {
+            metronome.edit { it.copy(beats = it.beats % MAX_BEATS + 1) }
+        }, palette, interactive) {
+            WhText("${settings.beats}/4", color = it)
+        }
+        NovaKey(
+            stringResource(R.string.native_metronome_subdivision),
+            { metronome.edit { it.copy(subdivision = next(it.subdivision)) } },
+            palette,
+            interactive,
+        ) { WhText(settings.subdivision.label.lowercase(), color = it, maxLines = 1) }
     }
 }
 

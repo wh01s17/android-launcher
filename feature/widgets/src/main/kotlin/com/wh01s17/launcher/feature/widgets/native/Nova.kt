@@ -25,7 +25,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import com.wh01s17.launcher.core.designsystem.components.WhText
+import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
 import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
@@ -130,12 +132,6 @@ internal fun NovaKey(
     }
 }
 
-/** El «parar» de nova, un cuadrado del color del texto. */
-@Composable
-internal fun NovaStop(tint: Color) {
-    Box(Modifier.size(WhTheme.spacing.iconSize * STOP_FRACTION).background(tint))
-}
-
 /** Los glifos pixel llenan la mitad de su caja: el cuadrado de parar, igual. */
 private const val STOP_FRACTION = 0.5f
 
@@ -148,3 +144,34 @@ internal fun NovaHeading(
     text: String,
     trailing: String = "",
 ) = NovaTitle(text, trailing, TidalampPalettes.default, text, onClick = null)
+
+/** La barra de avance fina de nova, en [color] sobre `muted`, sin etiquetas. */
+@Composable
+internal fun NovaMeter(
+    fraction: Float,
+    color: Color,
+) {
+    val muted = TidalampPalettes.default.muted
+    Box(
+        Modifier.fillMaxWidth().height(WhTheme.spacing.controlGap).drawBehind {
+            drawRect(muted)
+            drawRect(color, size = size.copy(width = size.width * fraction.coerceIn(0f, 1f)))
+        },
+    )
+}
+
+/** La cifra grande de un widget, más grande cuanto más sitio tiene (grande ×1,5, completo ×2). */
+@Composable
+internal fun readoutStyle(size: WidgetSize): TextStyle {
+    val base = WhTheme.typography.displayLarge
+    val scale =
+        when (size) {
+            WidgetSize.Large -> LARGE_SCALE
+            WidgetSize.Full -> FULL_SCALE
+            else -> 1f
+        }
+    return base.copy(fontSize = base.fontSize * scale)
+}
+
+private const val LARGE_SCALE = 1.5f
+private const val FULL_SCALE = 2f

@@ -2,10 +2,10 @@ package com.wh01s17.launcher.feature.widgets.native
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +20,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wh01s17.launcher.core.designsystem.components.WhIcon
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.icons.WhIcons
+import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
+import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.system.timer.PomodoroPhase
 import com.wh01s17.launcher.core.system.timer.PomodoroPreset
@@ -47,8 +49,9 @@ internal fun phaseLabel(phase: PomodoroPhase): String =
     )
 
 /**
- * Pomodoro (plan.md §7 Hito 7, `docs/pomodoro.md`): fase, cuenta atrás y progreso en su color,
- * teclas iniciar/pausar, saltar, reiniciar y ±1 min, y el sistema (tocar cambia al siguiente).
+ * Pomodoro (plan.md §7 Hito 7, `docs/pomodoro.md`) en el tema nova: encabezado con la sesión
+ * («1/4»), fase y cuenta atrás en su color con su avance, y al pie la banda con iniciar/pausar,
+ * saltar, reiniciar, ±1 min y el sistema (tocar pasa al siguiente: 40/10, 25/5, 50/10, 90/20).
  */
 @Composable
 internal fun PomodoroWidget(
@@ -67,35 +70,64 @@ internal fun PomodoroWidget(
     }
     val remaining = state.remainingAt(now)
     val color = phaseColor(state.phase)
-    Column(
-        modifier.fillMaxSize().background(WhTheme.colors.background).padding(WhTheme.spacing.controlGap),
-        // Arriba, pegado al encabezado, como el widget de TIDAL.
-        verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap),
-    ) {
-        NovaHeading(stringResource(R.string.native_pomodoro_title), presetLabel(state.preset))
-        WhText(phaseLabel(state.phase), color = color, maxLines = 1)
-        WhText(clock(remaining), style = WhTheme.typography.displayLarge, color = color, maxLines = 1)
-        RetroMeter(
-            stringResource(R.string.native_pomodoro_session, state.sessions + 1, state.preset.sessionsPerLongBreak),
-            1f - remaining.toFloat() / state.totalMillis,
-            presetLabel(state.preset),
-            color = color,
-        )
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
-            val key = Modifier.weight(1f)
-            RetroKey(stringResource(R.string.native_pomodoro_toggle), pomodoro::toggle, key, interactive, lit = state.running) {
-                WhIcon(if (state.running) WhIcons.Pause else WhIcons.Play)
+    val palette = TidalampPalettes.default
+    BoxWithConstraints(modifier.fillMaxSize().background(WhTheme.colors.background).padding(WhTheme.spacing.controlGap)) {
+        // Pequeño: cuenta atrás y la banda principal; mediano: además encabezado y avance; grande: todo.
+        val size = WidgetSize.of(maxWidth, maxHeight)
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
+            if (size != WidgetSize.Small) {
+                NovaHeading(
+                    stringResource(R.string.native_pomodoro_title),
+                    stringResource(R.string.native_pomodoro_session, state.sessions + 1, state.preset.sessionsPerLongBreak),
+                )
             }
-            RetroKey(stringResource(R.string.native_pomodoro_skip), pomodoro::skip, key, interactive) { WhIcon(WhIcons.SkipNext) }
-            RetroKey(stringResource(R.string.native_pomodoro_reset), pomodoro::reset, key, interactive) { WhIcon(WhIcons.Refresh) }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
-            val key = Modifier.weight(1f)
-            RetroKey(stringResource(R.string.native_pomodoro_less), { pomodoro.adjust(-1) }, key, interactive) { WhText("−1") }
-            RetroKey(stringResource(R.string.native_pomodoro_preset), { pomodoro.setPreset(nextPreset(state.preset)) }, key, interactive) {
-                WhText(presetLabel(state.preset), maxLines = 1)
+            // En grande, la lectura queda centrada entre el encabezado y las teclas.
+            if (size >= WidgetSize.Large) Spacer(Modifier.weight(1f))
+            if (size >= WidgetSize.Large) WhText(phaseLabel(state.phase), color = color, maxLines = 1)
+            WhText(clock(remaining), style = readoutStyle(size), color = color, maxLines = 1)
+            if (size != WidgetSize.Small) NovaMeter(1f - remaining.toFloat() / state.totalMillis, color)
+            Spacer(Modifier.weight(1f))
+            NovaBand(palette) {
+                NovaKey(stringResource(R.string.native_pomodoro_toggle), pomodoro::toggle, palette, interactive, lit = state.running) {
+                    TransportGlyph(if (state.running) Transport.Pause else Transport.Play, it)
+                }
+                NovaKey(
+                    stringResource(R.string.native_pomodoro_skip),
+                    pomodoro::skip,
+                    palette,
+                    interactive,
+                ) { TransportGlyph(Transport.Next, it) }
+                NovaKey(
+                    stringResource(R.string.native_pomodoro_reset),
+                    pomodoro::reset,
+                    palette,
+                    interactive,
+                ) { WhIcon(WhIcons.Refresh, tint = it) }
             }
-            RetroKey(stringResource(R.string.native_pomodoro_more), { pomodoro.adjust(1) }, key, interactive) { WhText("+1") }
+            if (size >= WidgetSize.Large) {
+                NovaBand(palette) {
+                    NovaKey(
+                        stringResource(R.string.native_pomodoro_less),
+                        { pomodoro.adjust(-1) },
+                        palette,
+                        interactive,
+                    ) { WhText("−1", color = it) }
+                    NovaKey(
+                        stringResource(R.string.native_pomodoro_preset),
+                        { pomodoro.setPreset(nextPreset(state.preset)) },
+                        palette,
+                        interactive,
+                    ) {
+                        WhText(presetLabel(state.preset), color = it, maxLines = 1)
+                    }
+                    NovaKey(
+                        stringResource(R.string.native_pomodoro_more),
+                        { pomodoro.adjust(1) },
+                        palette,
+                        interactive,
+                    ) { WhText("+1", color = it) }
+                }
+            }
         }
     }
 }
