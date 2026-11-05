@@ -175,3 +175,22 @@ internal fun ResizeGrip(modifier: Modifier = Modifier) {
         )
     }
 }
+
+/**
+ * Mientras se arrastra un tile: dónde quedará al soltarlo. La mitad del destino de ese lado, o el
+ * destino entero con «agrupar» si cae en su centro.
+ */
+@Composable
+internal fun DropHint(
+    group: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier
+            .background(WhTheme.surfaces.launcher.selectedBackground, WhTheme.borders.shape)
+            .whBorder(active = true, shape = WhTheme.borders.shape),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (group) WhText(stringResource(R.string.tile_drop_group), color = WhTheme.colors.accent)
+    }
+}

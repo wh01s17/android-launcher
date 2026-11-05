@@ -6,6 +6,7 @@ import com.wh01s17.launcher.core.apps.model.AppEntry
 import com.wh01s17.launcher.core.apps.model.AppKey
 import com.wh01s17.launcher.core.config.GeneralConfig
 import com.wh01s17.launcher.core.config.WorkspaceAnimation
+import com.wh01s17.launcher.core.tiling.Direction
 import com.wh01s17.launcher.core.tiling.Divider
 import com.wh01s17.launcher.core.tiling.FloatingBounds
 import com.wh01s17.launcher.core.tiling.Gaps
@@ -92,10 +93,14 @@ sealed interface WorkspacesIntent {
 
     data object ExitEdit : WorkspacesIntent
 
-    /** Soltar un tile sobre el borde de otro: se intercambian. */
-    data class SwapTiles(
+    /**
+     * Soltar un tile cerca del borde de otro: queda a ese lado ([side]) y el destino no se mueve,
+     * como al arrastrar una ventana en Hyprland (no es un intercambio).
+     */
+    data class MoveNextTo(
         val dragged: TileId,
         val target: TileId,
+        val side: Direction,
     ) : WorkspacesIntent
 
     /** Soltar un tile sobre el centro de otro: se agrupan (el arrastrado entra como pestaña). */

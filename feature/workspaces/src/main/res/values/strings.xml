@@ -20,10 +20,11 @@
     <string name="edit_group_out">sacar</string>
     <string name="edit_settings">ajustes</string>
     <string name="edit_done">listo</string>
-    <string name="edit_hint">Suelta un tile en el borde de otro para cambiarlos, en su centro para agruparlos, o arriba sobre un número para llevarlo a otro escritorio. Arrastra los bordes para cambiar el tamaño.</string>
+    <string name="edit_hint">Suelta un tile cerca del borde de otro para dejarlo a ese lado, en su centro para agruparlos, o arriba sobre un número para llevarlo a otro escritorio. Arrastra los bordes para cambiar el tamaño.</string>
     <string name="message_not_installed">Esa app ya no está instalada.</string>
     <string name="message_paused">El perfil de trabajo está en pausa.</string>
     <string name="message_paused_requested">El perfil de trabajo está en pausa: se pidió reanudarlo.</string>
     <string name="message_failed">No se pudo abrir.</string>
     <string name="tile_widget">widget</string>
+    <string name="tile_drop_group">agrupar</string>
 </resources>

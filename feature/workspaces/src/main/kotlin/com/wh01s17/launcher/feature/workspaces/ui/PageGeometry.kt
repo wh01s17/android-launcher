@@ -4,6 +4,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Constraints
+import com.wh01s17.launcher.core.tiling.Direction
 import com.wh01s17.launcher.core.tiling.FloatingBounds
 import com.wh01s17.launcher.core.tiling.Rect
 import com.wh01s17.launcher.core.tiling.TileId
@@ -85,13 +86,74 @@ internal fun stripCellAt(
     return (point.x / width * count).toInt().coerceIn(0, count - 1) + 1
 }
 
-/** La mitad central de [rect] (un cuarto de margen por lado): soltar ahí agrupa en vez de intercambiar. */
-internal fun centerOf(rect: Rect): Rect =
-    Rect(
-        rect.left + rect.width / CENTER_MARGIN,
-        rect.top + rect.height / CENTER_MARGIN,
-        rect.right - rect.width / CENTER_MARGIN,
-        rect.bottom - rect.height / CENTER_MARGIN,
-    )
+/** Lo que hace soltar un tile sobre otro: ponerlo a un lado ([Side]) o agruparlos ([Group]). */
+internal sealed interface DropZone {
+    data object Group : DropZone
+
+    data class Side(
+        val side: Direction,
+    ) : DropZone
+}
+
+/** El tile sobre el que se soltaría, la zona y el rectángulo a resaltar mientras se arrastra. */
+internal data class DropTarget(
+    val tile: TileId,
+    val zone: DropZone,
+    val highlight: Rect,
+)
+
+/**
+ * Dónde caería [drag] entre los tiles del mosaico ([tiled]): la mitad central de un tile (un cuarto
+ * de margen por lado) agrupa; fuera de ella, el borde más cercano dice a qué lado queda, como al
+ * arrastrar una ventana en Hyprland. Fuera de todo tile (o sobre sí mismo), `null`.
+ */
+internal fun dropTargetAt(
+    point: Offset,
+    dragged: TileId,
+    tiled: Map<TileId, Rect>,
+): DropTarget? {
+    val (tile, rect) = tiled.entries.firstOrNull { (other, rect) -> other != dragged && point in rect } ?: return null
+    val zone = dropZone(rect, point)
+    return DropTarget(tile, zone, highlightOf(rect, zone))
+}
+
+internal fun dropZone(
+    rect: Rect,
+    point: Offset,
+): DropZone {
+    val center =
+        Rect(
+            rect.left + rect.width / CENTER_MARGIN,
+            rect.top + rect.height / CENTER_MARGIN,
+            rect.right - rect.width / CENTER_MARGIN,
+            rect.bottom - rect.height / CENTER_MARGIN,
+        )
+    if (point in center) return DropZone.Group
+    // Distancia a cada borde en proporción al lado: en un tile alargado no gana siempre el lado corto.
+    val distances =
+        mapOf(
+            Direction.Left to (point.x - rect.left) / rect.width,
+            Direction.Right to (rect.right - point.x) / rect.width,
+            Direction.Up to (point.y - rect.top) / rect.height,
+            Direction.Down to (rect.bottom - point.y) / rect.height,
+        )
+    return DropZone.Side(distances.minBy { it.value }.key)
+}
+
+/** Lo que ocuparía el tile al soltarlo: la mitad del destino de ese lado, o el destino entero si agrupa. */
+private fun highlightOf(
+    rect: Rect,
+    zone: DropZone,
+): Rect =
+    when (zone) {
+        DropZone.Group -> rect
+        is DropZone.Side ->
+            when (zone.side) {
+                Direction.Left -> Rect(rect.left, rect.top, rect.left + rect.width / 2, rect.bottom)
+                Direction.Right -> Rect(rect.left + rect.width / 2, rect.top, rect.right, rect.bottom)
+                Direction.Up -> Rect(rect.left, rect.top, rect.right, rect.top + rect.height / 2)
+                Direction.Down -> Rect(rect.left, rect.top + rect.height / 2, rect.right, rect.bottom)
+            }
+    }
 
 private const val CENTER_MARGIN = 4

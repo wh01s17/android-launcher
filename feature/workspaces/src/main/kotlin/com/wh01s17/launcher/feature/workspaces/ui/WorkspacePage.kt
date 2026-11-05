@@ -59,8 +59,8 @@ private const val DRAG_ALPHA = 0.85f
 /**
  * Un escritorio (plan.md §7 Hito 4): los tiles donde los pone el motor de tiling. Fuera del modo
  * edición, tocar un tile abre su app, mantenerlo entra en edición y deslizar hacia arriba abre el
- * menú. En edición, tocar enfoca, arrastrar un tile lo intercambia o lo lleva a otro escritorio y
- * arrastrar un borde cambia el tamaño.
+ * menú. En edición, tocar enfoca; arrastrar un tile lo deja junto a otro (en el lado donde se suelta),
+ * lo agrupa (en su centro) o lo lleva a otro escritorio, y arrastrar un borde cambia el tamaño.
  */
 @Composable
 internal fun WorkspacePage(
@@ -104,6 +104,12 @@ internal fun WorkspacePage(
                 modifier = Modifier.placeAt(preview).zIndex(Z_DRAG).alpha(DRAG_ALPHA),
                 editing = true,
             )
+            if (!current.resize && !current.floating && stripCellAt(current.pointer, area.width, stripHeight, Desk.COUNT) == null) {
+                // Dónde quedará al soltarlo: la mitad del destino de ese lado, o el destino entero si agrupa.
+                dropTargetAt(current.pointer, current.tile, result.tiled)?.let { target ->
+                    DropHint(target.zone == DropZone.Group, Modifier.placeAt(target.highlight).zIndex(Z_EDIT))
+                }
+            }
             if (!current.resize) {
                 val hovered = stripCellAt(current.pointer, area.width, stripHeight, Desk.COUNT)
                 DropStrip(number, hovered, Modifier.placeAt(Rect(0, 0, area.width, stripHeight)).zIndex(Z_DRAG))
@@ -266,20 +272,14 @@ private fun drop(
                 onIntent(WorkspacesIntent.MoveFloating(drag.tile, it))
             }
         else ->
-            result.tiled.entries
-                .firstOrNull { (other, rect) -> other != drag.tile && drag.pointer in rect }
-                ?.let { (other, rect) ->
-                    // El centro del tile agrupa; el resto (cerca de los bordes) intercambia.
-                    val intent =
-                        if (drag.pointer in
-                            centerOf(rect)
-                        ) {
-                            WorkspacesIntent.GroupTiles(drag.tile, other)
-                        } else {
-                            WorkspacesIntent.SwapTiles(drag.tile, other)
-                        }
-                    onIntent(intent)
-                }
+            dropTargetAt(drag.pointer, drag.tile, result.tiled)?.let { target ->
+                val intent =
+                    when (val zone = target.zone) {
+                        DropZone.Group -> WorkspacesIntent.GroupTiles(drag.tile, target.tile)
+                        is DropZone.Side -> WorkspacesIntent.MoveNextTo(drag.tile, target.tile, zone.side)
+                    }
+                onIntent(intent)
+            }
     }
 }
 

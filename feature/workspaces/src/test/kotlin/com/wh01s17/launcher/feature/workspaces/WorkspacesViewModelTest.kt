@@ -14,6 +14,7 @@ import com.wh01s17.launcher.core.config.GeneralConfig
 import com.wh01s17.launcher.core.config.LauncherConfig
 import com.wh01s17.launcher.core.input.CommandDirection
 import com.wh01s17.launcher.core.input.WorkspaceCommand
+import com.wh01s17.launcher.core.tiling.Direction
 import com.wh01s17.launcher.core.tiling.FloatingBounds
 import com.wh01s17.launcher.core.tiling.Gaps
 import com.wh01s17.launcher.core.tiling.Rect
@@ -326,16 +327,17 @@ class WorkspacesViewModelTest {
         }
 
     @Test
-    fun `edit gestures swap, move, resize and float tiles`() =
+    fun `edit gestures place, move, resize and float tiles`() =
         runTest(dispatcher) {
             val (vm, desk) = viewModel()
             vm.addApp(termux.key)
             vm.addApp(notes.key)
             vm.addApp(teams.key)
-            vm.onIntent(WorkspacesIntent.SwapTiles(TileId(3), TileId(1)))
+            // Soltar el 3 a la izquierda del 1: queda ahí, sin intercambiarse con él.
+            vm.onIntent(WorkspacesIntent.MoveNextTo(TileId(3), TileId(1), Direction.Left))
             vm.settle(this)
             assertEquals(
-                listOf(TileId(3), TileId(2), TileId(1)),
+                listOf(TileId(3), TileId(1), TileId(2)),
                 desk.state.value!!
                     .workspace(1)
                     .tiles,
@@ -343,7 +345,8 @@ class WorkspacesViewModelTest {
             val divider = dividers(desk.state.value!!.workspace(1), metrics.area, metrics.gaps).first()
             vm.onIntent(WorkspacesIntent.DragDivider(divider, 600))
             vm.settle(this)
-            assertEquals(Rect(2, 2, 998, 598), layout(desk.state.value!!.workspace(1), metrics.area, metrics.gaps).tiled[TileId(3)])
+            // 3 y 1 comparten la mitad de arriba (3 a la izquierda); el divisor la deja en 600 px de alto.
+            assertEquals(Rect(2, 2, 498, 598), layout(desk.state.value!!.workspace(1), metrics.area, metrics.gaps).tiled[TileId(3)])
             vm.onIntent(WorkspacesIntent.DropOnWorkspace(TileId(2), 5))
             vm.settle(this)
             assertEquals(
