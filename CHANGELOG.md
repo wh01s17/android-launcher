@@ -3,6 +3,21 @@
 El proyecto usa [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
+## [Sin publicar]
+
+### Cambiado
+
+- La paleta de tidalamp pasa del widget de TIDAL a Estilo (`appearance.palette`) y tiñe todo el
+  launcher: barra, menú, tiles, bordes, controles, widgets y salvapantallas. Los avisos conservan su color.
+
+### Corregido
+
+- La notificación de música (TIDAL u otra app) aparece en el panel y en el contador mientras suena
+  y se oculta en pausa; antes era al revés.
+- El visualizador de TIDAL ya no dibuja un tramo plano a la izquierda: los graves no repiten el
+  mismo bin ni se recortan arriba (bordes fraccionarios desde el bin 2, compensación de 3 dB por
+  octava y margen sobre 0 dB).
+
 ## [0.5.0] — 2026-11-05
 
 Hito 10: estilo, fondos, salvapantallas y configuración. El Hito 9 experimental queda para después de la 1.0.

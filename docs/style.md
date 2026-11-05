@@ -7,6 +7,10 @@ ajustes usa la escala elegida; los escritorios la reciben al volver al inicio.
 - **Tema:** `wh01s17` es el único instalado. Sus colores, fuentes y medidas salen de los TOML
   sincronizados; no se ofrecen temas que la aplicación no contiene.
 - **Fuente:** escala del 75 al 200 %, con Departure Mono; también adapta el espaciado al texto.
+- **Paleta:** una de las 16 paletas de tidalamp (`phosphor` de fábrica, la de wh01s17). Tiñe todo el
+  launcher: barra, menú, tiles, bordes, controles, widgets y la W del salvapantallas. Cada color del
+  tema toma el papel equivalente de la paleta (`PaletteRemap`); los avisos (rojo, amarillo, naranja…)
+  y el negro OLED no cambian. El widget de TIDAL ya no tiene paleta propia.
 - **Barra:** transparencia activable.
 - **Tiles:** huecos interior/exterior y radio de 0 a 32, sin cambiar la distribución guardada.
 - **Iconos:** monocromos, originales o pixelados, tanto en tiles como en el menú.
@@ -41,7 +45,7 @@ Ejemplo de las nuevas claves (las demás siguen tomando los valores de fábrica)
 {
   "version": 1,
   "theme": "wh01s17",
-  "appearance": { "fontScale": 1.25, "wallpaper": "none" },
+  "appearance": { "fontScale": 1.25, "wallpaper": "none", "palette": "phosphor" },
   "apps": { "iconStyle": "monochrome" },
   "general": { "gapsIn": 2, "gapsOut": 2, "rounding": 10 },
   "idle": { "screensaver": 150 }
