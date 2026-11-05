@@ -22,11 +22,20 @@ import com.wh01s17.launcher.core.system.status.ClockSource
 import com.wh01s17.launcher.core.system.status.DoNotDisturbState
 import com.wh01s17.launcher.core.system.status.NetworkKind
 import com.wh01s17.launcher.core.system.status.NetworkState
+import com.wh01s17.launcher.core.system.timer.MetronomeRepository
+import com.wh01s17.launcher.core.system.timer.PomodoroPreset
+import com.wh01s17.launcher.core.system.timer.PomodoroRepository
 import com.wh01s17.launcher.feature.bar.clock.CalendarPanel
+import com.wh01s17.launcher.feature.bar.module.BarModuleRegistry
+import com.wh01s17.launcher.feature.bar.timer.MetronomeIcon
+import com.wh01s17.launcher.feature.bar.timer.MetronomeModule
+import com.wh01s17.launcher.feature.bar.timer.PomodoroModule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestScope
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -63,6 +72,19 @@ class BarScreenshotTest {
             override fun ticks(granularity: ClockGranularity): Flow<ZonedDateTime> = flowOf(fixedTime)
         }
 
+    @get:Rule
+    val folder = TemporaryFolder()
+
+    private val epoch = fixedTime.toInstant().toEpochMilli()
+
+    /** Un pomodoro con la hora fija; su temporizador no avanza (nadie mueve el [TestScope]). */
+    private fun pomodoro(setup: PomodoroRepository.() -> Unit = {}): PomodoroRepository =
+        PomodoroRepository(folder.newFile(), TestScope()) { epoch }.apply(setup)
+
+    private fun metronome() = MetronomeRepository(folder.newFile())
+
+    private fun registry() = defaultBarRegistry(clock, pomodoro(), metronome())
+
     private fun config(json: String? = null): BarConfig {
         val text = json ?: File("../../core/config/src/main/assets/default-launcher.json").readText()
         return (ConfigParser.parse(text) as ParseResult.Success).config.bar
@@ -92,7 +114,45 @@ class BarScreenshotTest {
     @Test
     fun defaultBar() =
         capture("bar-default") {
-            Bar(config(), defaultBarRegistry(clock), calm, onCommand = {})
+            Bar(config(), registry(), calm, onCommand = {})
+        }
+
+    /**
+     * Pomodoro en reposo (sólo el icono), trabajando, en pausa en el descanso corto y en el largo
+     * del ultradiano (`h:mm:ss`); metrónomo parado y sonando.
+     */
+    @Test
+    fun timers() =
+        capture("bar-timers") {
+            val timers =
+                config(
+                    """{"version":1,"bar":{"layout":{"left":[{"id":"pomodoro"}],"center":[],"right":[{"id":"wh01s17.metronome"}]}}}""",
+                )
+            val later = epoch + 5 * 60_000 + 9_000
+            val states =
+                listOf(
+                    pomodoro(),
+                    pomodoro { toggle() },
+                    pomodoro {
+                        toggle()
+                        skip()
+                        toggle()
+                    },
+                    pomodoro {
+                        setPreset(PomodoroPreset.Ultradian)
+                        toggle()
+                        skip()
+                        skip()
+                        skip()
+                    },
+                )
+            Column {
+                states.forEach { repo ->
+                    val modules = listOf(PomodoroModule(repo) { later }, MetronomeModule(metronome()))
+                    Bar(timers, BarModuleRegistry(modules), calm, onCommand = {})
+                }
+                MetronomeIcon(running = true, ticks = 1, bpm = 100, modifier = Modifier.padding(WhTheme.spacing.controlGap))
+            }
         }
 
     @Test
@@ -120,7 +180,7 @@ class BarScreenshotTest {
                         notices = listOf(BarNotice("nav", "gestos", NoticeSeverity.Warning)),
                     ),
                 )
-            val registry = defaultBarRegistry(clock)
+            val registry = registry()
             Column {
                 // Todos los módulos de estado (la barra por defecto ya no lleva red, bluetooth ni batería).
                 val all =

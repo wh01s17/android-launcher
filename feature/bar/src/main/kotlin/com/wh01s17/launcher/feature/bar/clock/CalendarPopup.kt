@@ -22,19 +22,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
 import com.wh01s17.launcher.core.designsystem.components.WhIcon
 import com.wh01s17.launcher.core.designsystem.components.WhPanel
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.icons.WhGlyph
 import com.wh01s17.launcher.core.designsystem.icons.WhIcons
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
+import com.wh01s17.launcher.feature.bar.BarPopup
 import com.wh01s17.launcher.feature.bar.R
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -56,13 +50,7 @@ internal fun CalendarPopup(
     locale: Locale,
     onDismiss: () -> Unit,
 ) {
-    Popup(
-        popupPositionProvider = remember { BelowBarPositionProvider },
-        onDismissRequest = onDismiss,
-        properties = PopupProperties(focusable = true),
-    ) {
-        CalendarPanel(today, weekStart, locale)
-    }
+    BarPopup(onDismiss) { CalendarPanel(today, weekStart, locale) }
 }
 
 /**
@@ -189,16 +177,6 @@ private fun Cell(
     content: @Composable RowScope.() -> Unit,
 ) {
     Box(modifier, contentAlignment = Alignment.Center) { Row(horizontalArrangement = Arrangement.Center) { content() } }
-}
-
-/** Bajo la barra y centrado en la ventana, sea cual sea el ancho del reloj que lo abre. */
-private object BelowBarPositionProvider : PopupPositionProvider {
-    override fun calculatePosition(
-        anchorBounds: IntRect,
-        windowSize: IntSize,
-        layoutDirection: LayoutDirection,
-        popupContentSize: IntSize,
-    ): IntOffset = IntOffset((windowSize.width - popupContentSize.width) / 2, anchorBounds.bottom)
 }
 
 private const val DAYS = 7

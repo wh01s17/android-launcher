@@ -38,5 +38,32 @@
     <string name="bar_calendar_today">Ir a hoy</string>
     <string name="bar_calendar_week">sem</string>
     <string name="bar_clock_calendar">Abrir calendario</string>
+
+    <!-- Pomodoro y metrónomo (plan.md §7 Hito 7). -->
+    <string name="bar_pomodoro">Pomodoro, faltan %1$s</string>
+    <string name="bar_pomodoro_work">Enfoque</string>
+    <string name="bar_pomodoro_short">Descanso corto</string>
+    <string name="bar_pomodoro_long">Descanso largo</string>
+    <string name="bar_pomodoro_session">%1$s · sesión %2$d/%3$d</string>
+    <string name="bar_pomodoro_skip">saltar</string>
+    <string name="bar_pomodoro_reset">reiniciar</string>
+    <string name="bar_pomodoro_minus">−1 min</string>
+    <string name="bar_pomodoro_plus">+1 min</string>
+    <string name="bar_pomodoro_presets">Sistema</string>
+    <string name="bar_pomodoro_balanced">Equilibrado</string>
+    <string name="bar_pomodoro_classic">Clásico</string>
+    <string name="bar_pomodoro_deep">Profundo</string>
+    <string name="bar_pomodoro_ultradian">Ultradiano</string>
+    <string name="bar_timer_start">iniciar</string>
+    <string name="bar_timer_pause">pausar</string>
+    <string name="bar_metronome">Metrónomo sonando, %1$s</string>
+    <string name="bar_metronome_stopped">Metrónomo parado</string>
+    <string name="bar_metronome_title">metrónomo</string>
+    <string name="bar_metronome_bpm">BPM · %1$s</string>
+    <string name="bar_metronome_stop">parar</string>
+    <string name="bar_metronome_tap">tap</string>
+    <string name="bar_metronome_beats">%1$d/4</string>
+    <string name="bar_metronome_accent">acento</string>
+    <string name="bar_metronome_edit_bpm">Escribir el tempo</string>
     <string name="bar_clock_alternate">Cambiar formato de la hora</string>
 </resources>

@@ -30,7 +30,9 @@ class ConfigParserTest {
             listOf(
                 "core.menu",
                 "core.workspaces",
+                "pomodoro",
                 "wh01s17.indicators",
+                "wh01s17.metronome",
                 "wh01s17.clock",
                 "wh01s17.audio",
             ),

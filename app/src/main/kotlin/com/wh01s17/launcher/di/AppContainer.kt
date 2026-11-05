@@ -137,7 +137,7 @@ class AppContainer(
         )
     }
 
-    val barRegistry: BarModuleRegistry by lazy { defaultBarRegistry(clockSource) }
+    val barRegistry: BarModuleRegistry by lazy { defaultBarRegistry(clockSource, pomodoro, metronome) }
 
     val barNotices: BarNotices by lazy { BarNotices(appContext, configRepository.state, compatibilityGateway) }
 

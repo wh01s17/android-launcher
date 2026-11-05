@@ -14,11 +14,13 @@
     "layout": {
       "left": [
         { "id": "core.menu" },
-        { "id": "core.workspaces" }
+        { "id": "core.workspaces" },
+        { "id": "pomodoro" }
       ],
       "center": [],
       "right": [
         { "id": "wh01s17.indicators" },
+        { "id": "wh01s17.metronome" },
         {
           "id": "wh01s17.clock",
           "format": "ddd d MMM",
