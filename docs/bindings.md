@@ -107,6 +107,8 @@ Quedan fuera, con su motivo (plan.md §3):
 | `group.toggle` | — | En un grupo, lo deshace; si no, agrupa el tile con el último enfocado de otro hueco |
 | `group.move-into` | `direction`: `left`, `right`, `up`, `down` | Mete el tile en el grupo (o tile) vecino de ese lado (`moveintogroup`) |
 | `group.move-out` | — | Saca el tile de su grupo a un hueco propio (`moveoutofgroup`) |
+| `scratchpad.toggle` | — | Muestra u oculta el scratchpad (`togglespecialworkspace`) |
+| `scratchpad.move` | — | Lleva el tile con el foco al scratchpad, sin seguirlo |
 | `edit.toggle` | — | Entra o sale del modo edición |
 | `none` | — | Quita un atajo de fábrica |
 
@@ -131,12 +133,14 @@ escritorio; `SUPER + SHIFT + 1…0` mover tile (y `+ ALT` sin seguirlo); `SUPER 
 siguiente/anterior; `SUPER + flechas` foco; `SUPER + SHIFT + flechas` intercambiar;
 `SUPER (+ SHIFT) + MINUS/EQUAL` tamaño; `SUPER + W/T/J/F/L`; `SUPER + ALT (+ SHIFT) + TAB` y
 `SUPER + CTRL + ←/→` grupo; `SUPER + G` agrupar/desagrupar, `SUPER + ALT + G` sacar del grupo y
-`SUPER + ALT + flechas` meter en el grupo de ese lado; dos dedos a los lados, escritorio
-siguiente/anterior.
+`SUPER + ALT + flechas` meter en el grupo de ese lado; `SUPER + S` scratchpad y `SUPER + ALT + S`
+llevar el tile a él; dos dedos a los lados, escritorio siguiente/anterior, y hacia abajo, el
+scratchpad.
 
 En el Redmi (sin tecla Meta, `ALT` hace de `SUPER`) los `SUPER + ALT + …` no pueden funcionar: serían
 `ALT` dos veces, y la tabla los marca como no disponibles. `SUPER + G` sí (`ALT + G`); para meter en
-un grupo o sacar de él están el arrastre y los botones del modo edición.
+un grupo o sacar de él están el arrastre y los botones del modo edición. Igual con `SUPER + S`
+(`ALT + S`): para llevar un tile al scratchpad, arrástralo a la «S» de la tira de arriba.
 
 `SUPER + K` abre la tabla y `SUPER + RETURN` la terminal. La terminal es `apps.terminal`: un
 paquete (`"com.termux"`, su actividad principal) o una actividad (`"com.termux/.app.TermuxActivity"`).

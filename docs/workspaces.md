@@ -110,6 +110,20 @@ actualización o un perfil de trabajo en pausa no borran la distribución.
   ViewModel y la UI (`WorkspacesScreenTest`: capturas a 407 dp y gestos del modo edición).
   `./gradlew :feature:workspaces:recordRoborazziDebug` regraba las capturas.
 
+## Scratchpad
+
+El `special:scratchpad` de Hyprland: un escritorio aparte que baja desde arriba sobre el actual (que
+se atenúa), con `Super + S` (`ALT + S` en el Redmi), deslizando dos dedos hacia abajo o tocando la
+«S» de la barra. Dentro funciona como cualquier escritorio (abrir apps, modo edición, arrastrar,
+deshacer) y, mientras se ve, lo que se añade o se quita va a él. Tocar fuera, *atrás* o cambiar de
+escritorio lo oculta.
+
+- **Llevar un tile:** arrástralo a la «S» magenta del final de la tira de arriba, o `Super + Alt + S`
+  (con teclado físico con tecla Meta). **Sacarlo:** desde el scratchpad, arrástralo a un número.
+- **En la barra:** si el scratchpad tiene algo o se ve, aparece su «S» en magenta tras los números,
+  subrayada mientras se ve.
+- Se guarda en `workspaces.json` (`"scratchpad"`); al volver al launcher empieza oculto.
+
 ## Widgets
 
 Un tile puede ser un widget del sistema (Hito 7). Fuera del modo edición el widget recibe sus

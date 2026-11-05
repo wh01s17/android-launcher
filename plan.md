@@ -963,8 +963,12 @@ el tempo se escribe tocando el número. No se porta la sincronización de No mol
 
 ### Hito 8 — Scratchpad, notificaciones y media (M)
 
-- [ ] Scratchpad: workspace especial superpuesto con scrim y animación desde
-      arriba (`Super + S` / dos dedos abajo).
+- [x] Scratchpad: workspace especial superpuesto con scrim y animación desde
+      arriba (`Super + S` / dos dedos abajo). En `Desk` (`SCRATCHPAD = 0`, `scratchpadVisible`):
+      mientras se ve es el escritorio activo; cambiar de escritorio lo oculta. `ScratchpadOverlay`
+      (`slidevert` 300 ms `easeOutQuint`), «S» al final de la tira del arrastre y en la barra
+      (magenta), `scratchpad.toggle`/`scratchpad.move` (`Super + S` / `Super + Alt + S`, dos dedos
+      abajo) y guardado en `workspaces.json`.
 - [ ] `NotificationListenerService` opt-in: badges en tiles (el hueco del badge en
       `TileView`, Hito 4), contador en
       indicadores, panel de notificaciones propio con la superficie de
@@ -1226,6 +1230,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-05 | Tempo del metrónomo escribible con `WhNumberField` (sistema de diseño), en el tile y en el panel de la barra | Petición del usuario; Enter aplica, Escape/atrás cancelan y ocultar el teclado aplica lo escrito |
 | 2026-11-05 | Soltar un tile cerca del borde de otro lo coloca a ese lado (`moveNextTo`) en vez de intercambiarlos; durante el arrastre se resalta el hueco que ocupará | El usuario esperaba que las dos apps quedaran donde las dejó (el intercambio hacía un «enroque»); así se arrastra una ventana en Hyprland |
 | 2026-11-05 | Vista previa real del arrastre (el escritorio se pinta como quedará al soltar) y `deshacer` en el modo edición (`UndoHistory`, 50 pasos, sin contar foco ni escritorio actual) | Un movimiento estiró tiles que el usuario no esperaba (el vecino ocupa el hueco que se deja) y no había forma de volver atrás |
+| 2026-11-05 | El scratchpad es un escritorio especial dentro de `Desk` (no un módulo `feature/scratchpad` aparte) | Comparte motor, guardado, edición y deshacer con los escritorios; como `special:scratchpad`, mientras se ve recibe los tiles nuevos y cambiar de escritorio lo oculta |
 
 ### 11.2 Riesgos
 
@@ -1254,7 +1259,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 - **Balance al 2026-11-05:** 56 de 75 tareas marcadas (75 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
   Quedan los Hitos 8–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 8 (0 de 4 tareas). **Hitos 0–7 terminados**; versión `0.3.0`. Los
+- **Hito en curso:** Hito 8 (1 de 3 tareas). **Hitos 0–7 terminados**; versión `0.3.0`. Los
   cierres y sus pruebas siguen en §13.
 - **Última tarea completada:** **Hito 7 cerrado**: módulos de barra del pomodoro y el metrónomo y
   servicio en primer plano con notificación, alarma exacta y aviso de fin de fase; además, buscador
@@ -1262,7 +1267,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 - **Incidencia de la sesión (resuelta):** la primera versión de la animación de vuelta cerraba el
   launcher al volver; HyperOS mostró el selector de launcher. Se cerró sin elegir, se reafirmó el
   rol HOME de `com.wh01s17.launcher.debug` y se corrigió (§13).
-- **Siguiente tarea:** Hito 8, scratchpad (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
+- **Siguiente tarea:** Hito 8, notificaciones (`NotificationListenerService`: badges, contador y panel; modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
   Bluetooth y los gestos de dos dedos a mano; medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj;
   probar a mano en el Redmi agrupar por arrastre y con los botones. Tras reinstalar, la vigilancia puede devolver los botones un instante hasta que el servicio
@@ -1296,6 +1301,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-05 | 8 | Scratchpad: `Desk.scratchpad`/`scratchpadVisible`/`active`/`toggleScratchpad` (un solo `copy` por cambio), `DeskCodec` con `scratchpad` opcional, `ScratchpadOverlay`, «S» en la tira (`STRIP_TARGETS`) y en `core.workspaces`, comandos y atajos de fábrica. Pruebas de modelo, guardado, ViewModel y captura de la barra. En el Redmi sólo se instaló (el usuario usaba el teléfono) | `feature/workspaces/model/Desk.kt`, `ui/ScratchpadOverlay.kt`, `feature/bar/module/WorkspacesModule.kt`, `core/input/` |
 | 2026-11-05 | 7 | Vista previa y deshacer (petición del usuario: mover WhatsApp estiró Cámara y no se podía volver atrás; su distribución anterior no se pudo recuperar). `afterDrop` + `rememberDropPreview`/`DragOverlay`: los tiles se colocan donde quedarán y se resalta el hueco del arrastrado; `UndoHistory` + `DeskEditor` (todo cambio de los escritorios pasa por él) y botón `deshacer`. Pruebas de historial y de deshacer en el ViewModel | `feature/workspaces/model/UndoHistory.kt`, `data/DeskEditor.kt`, `ui/WorkspacePage.kt`, `ui/EditToolbar.kt` |
 | 2026-11-05 | 7 | Arrastre de tiles como Hyprland (petición del usuario tras el cierre): `Workspace.moveNextTo` en `core/tiling` (pruebas propias y en las de propiedades), `DropZone`/`dropTargetAt` (centro agrupa, borde más cercano en proporción al lado), intent `MoveNextTo` en lugar de `SwapTiles` y `DropHint` con el hueco que ocupará. 8 pruebas nuevas | `core/tiling/WorkspaceMoves.kt`, `feature/workspaces/ui/PageGeometry.kt`, `ui/WorkspacePage.kt`, `ui/EditOverlay.kt` |
 | 2026-11-05 | 7 | **Hito 7 cerrado → 0.3.0.** Módulos `pomodoro` y `wh01s17.metronome` (`feature/bar/timer`, panel con `BarPopup`, captura `bar-timers`), `Pomodoro.finished`, `TimerSnapshot`, `MetronomeState.ticks`, `PomodoroRepository.tick`; `TimerService` + `TimerCoordinator` + `PomodoroAlarmReceiver` + `NotificationOptIn` en la app, icono de notificación con la «W». Peticiones del usuario: buscador en el selector de widgets (`WidgetSearch` sobre `core/fuzzy`) y tempo escribible (`WhNumberField`). En el Redmi (con permiso del usuario): pomodoro desde la barra con servicio `specialUse` y notificación «Pomodoro · Enfoque · Sesión 1/4» con cuenta atrás, metrónomo con `AudioTrack` iniciado y servicio `mediaPlayback\|specialUse`, fase reducida a 1 min → alarma exacta (`policy_permission`) → aviso «Terminó el enfoque · Ahora: Descanso corto · 5 min» → reinicio, servicio parado y alarma cancelada. El usuario usó el teléfono a la vez; se paró la prueba del tempo en el dispositivo y se cubrió con una prueba de Compose | `feature/bar/timer/`, `app/timer/`, `core/system/timer/`, `core/designsystem/components/WhNumberField.kt`, `feature/widgets/ui/` |
