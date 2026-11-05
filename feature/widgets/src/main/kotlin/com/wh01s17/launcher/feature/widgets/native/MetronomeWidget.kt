@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wh01s17.launcher.core.designsystem.components.WhNumberField
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
@@ -52,7 +53,15 @@ internal fun MetronomeWidget(
             if (size != WidgetSize.Small) NovaHeading(stringResource(R.string.native_metronome_title), settings.signature)
             if (size >= WidgetSize.Large) Spacer(Modifier.weight(1f))
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
-                WhText("${settings.bpm}", style = readoutStyle(size), color = colors.accent, maxLines = 1)
+                // Tocar el tempo lo deja escribir con el teclado.
+                WhNumberField(
+                    settings.bpm,
+                    onValue = { bpm -> metronome.edit { it.copy(bpm = bpm) } },
+                    style = readoutStyle(size),
+                    color = colors.accent,
+                    enabled = interactive,
+                    editLabel = stringResource(R.string.native_metronome_edit_bpm),
+                )
                 WhText(
                     "BPM · ${MetronomeMath.tempoName(settings.bpm)}",
                     style = WhTheme.typography.bodySmall,
