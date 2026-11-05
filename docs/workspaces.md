@@ -21,14 +21,17 @@ Un tile es un *lanzador vivo* (plan.md §2.2): tocarlo abre la app, no la incrus
 | Arrastrar un flotante / su punto de la esquina | — | Lo mueve / le cambia el tamaño |
 | *Atrás* o *Inicio* | — | Sale de edición |
 
-Mientras se arrastra, se resalta dónde quedará: la mitad del destino de ese lado, o el destino entero
-con «agrupar». Para intercambiar dos tiles, `Super + Shift + flechas`.
+Mientras se arrastra sobre otro tile, el escritorio se pinta como quedará al soltar (se ve si algún
+tile se estira) y se resalta el hueco que ocupará, con «agrupar» si cae en el centro. Si no convence,
+se suelta fuera o sobre el mismo tile y no cambia nada; y `deshacer` vuelve atrás lo que ya se soltó.
+Para intercambiar dos tiles, `Super + Shift + flechas`.
 
 En edición el escritorio se encoge entero para dejar sitio a la barra de herramientas, sin cambiar
 la distribución. La barra de herramientas actúa sobre el tile con el foco:
 
 | Botón | Equivale a | Qué hace |
 | --- | --- | --- |
+| `deshacer` | — | Vuelve atrás el último cambio de la distribución (mover, agrupar, tamaño, flotar, quitar, añadir…), hasta 50 pasos; un arrastre de borde cuenta como uno. Tocar o cambiar de escritorio no cuenta. Un widget del sistema quitado puede volver como «no disponible» si Android ya lo liberó |
 | `+ app` | — | Abre el selector del menú para elegir una app; se añade al escritorio actual |
 | `+ widget` | — | Abre el selector de widgets (también menú → Acciones → Añadir widget). Android pide permiso para enlazarlo la primera vez y algunos widgets se configuran antes de añadirse |
 | `split` | `Super + J` | Invierte el split del tile (sólo en dwindle) |
