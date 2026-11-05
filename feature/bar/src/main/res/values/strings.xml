@@ -6,6 +6,8 @@
     <string name="bar_workspace_focused">Escritorio %1$s, actual</string>
     <string name="bar_workspace_occupied">Escritorio %1$s, con apps</string>
     <string name="bar_workspace_empty">Escritorio %1$s, vacío</string>
+    <string name="bar_scratchpad">Scratchpad, con apps</string>
+    <string name="bar_scratchpad_shown">Scratchpad, a la vista</string>
 
     <string name="bar_battery">Batería al %1$d %%</string>
     <string name="bar_battery_charging">Batería al %1$d %%, cargando</string>

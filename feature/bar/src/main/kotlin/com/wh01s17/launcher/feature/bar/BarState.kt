@@ -15,6 +15,9 @@ data class WorkspaceBarState(
     val occupied: Set<Int> = emptySet(),
     /** Escritorios que se muestran siempre (`persistent`, como Hyprland): 1..[persistent]. */
     val persistent: Int = DEFAULT_PERSISTENT,
+    /** El scratchpad tiene tiles / se ve encima: la barra muestra su «S» si alguna es cierta. */
+    val scratchpadOccupied: Boolean = false,
+    val scratchpadVisible: Boolean = false,
 ) {
     /** Persistentes más los ocupados y el activo, ordenados; como `workspaceIds()` del shell. */
     val ids: List<Int>

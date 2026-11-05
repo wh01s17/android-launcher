@@ -153,8 +153,16 @@ class AppContainer(
     /** Lo que la barra necesita de los escritorios: el actual y los que tienen tiles. */
     val workspaceBarState: Flow<WorkspaceBarState> by lazy {
         desk.state
-            .map { desk -> desk?.let { WorkspaceBarState(focused = it.current, occupied = it.occupied) } ?: WorkspaceBarState() }
-            .distinctUntilChanged()
+            .map { desk ->
+                desk?.let {
+                    WorkspaceBarState(
+                        focused = it.current,
+                        occupied = it.occupied,
+                        scratchpadOccupied = !it.scratchpad.isEmpty,
+                        scratchpadVisible = it.scratchpadVisible,
+                    )
+                } ?: WorkspaceBarState()
+            }.distinctUntilChanged()
     }
 
     val notificationShade: NotificationShade by lazy { NotificationShade(appContext, navigationWatchdog) }

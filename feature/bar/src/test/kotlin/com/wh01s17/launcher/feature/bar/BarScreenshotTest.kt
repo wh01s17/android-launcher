@@ -161,6 +161,16 @@ class BarScreenshotTest {
             val states =
                 listOf(
                     calm.copy(workspaces = WorkspaceBarState(focused = 3, occupied = setOf(1, 3, 9))),
+                    // El scratchpad con apps y a la vista: su «S» magenta, subrayada.
+                    calm.copy(
+                        workspaces =
+                            WorkspaceBarState(
+                                focused = 3,
+                                occupied = setOf(1, 3),
+                                scratchpadOccupied = true,
+                                scratchpadVisible = true,
+                            ),
+                    ),
                     calm.copy(
                         battery = BatteryState(percent = 18, charging = false, full = false, powerSave = false),
                         network = NetworkState(NetworkKind.Wifi, hasInternet = false, vpn = false),
@@ -186,7 +196,7 @@ class BarScreenshotTest {
                 val all =
                     config(
                         """{"version":1,"bar":{"layout":{"left":[{"id":"core.menu"},{"id":"core.workspaces"}],
-                        "center":[{"id":"wh01s17.clock"}],
+                        "center":[{"id":"wh01s17.clock","format":"HH:mm"}],
                         "right":[{"id":"wh01s17.indicators"},{"id":"wh01s17.network"},{"id":"wh01s17.bluetooth"},
                         {"id":"wh01s17.audio"},{"id":"wh01s17.power"}]}}}""",
                     )
