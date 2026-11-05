@@ -150,13 +150,25 @@ class WorkspaceOpsTest {
     }
 
     @Test
-    fun `beyond the tile limit new tiles join the focused group`() {
-        val ws =
+    fun `new tiles never group by themselves and grouping is explicit`() {
+        assertEquals(
+            4,
             Workspace(maxTiles = 2)
                 .insert(a)
                 .insert(b)
                 .insert(c)
                 .insert(d)
+                .slots,
+            "no limit groups them",
+        )
+        val ws =
+            Workspace()
+                .insert(a)
+                .insert(b)
+                .insert(c)
+                .insert(d)
+                .groupWith(c, b)
+                .groupWith(d, b)
         assertEquals(2, ws.slots)
         assertEquals(d, ws.focused)
         val result = layout(ws, portrait, gaps)
@@ -173,7 +185,13 @@ class WorkspaceOpsTest {
 
     @Test
     fun `removing a tab shows the previous one`() {
-        val ws = Workspace(maxTiles = 1).insert(a).insert(b).insert(c)
+        val ws =
+            Workspace()
+                .insert(a)
+                .insert(b)
+                .insert(c)
+                .groupWith(b, a)
+                .groupWith(c, a)
         assertEquals(b, ws.remove(c).focused)
         assertEquals(
             c,
@@ -213,7 +231,7 @@ class WorkspaceOpsTest {
 
     @Test
     fun `focus selects the tab and ignores unknown tiles`() {
-        val ws = Workspace(maxTiles = 1).insert(a).insert(b)
+        val ws = Workspace().insert(a).insert(b).groupWith(b, a)
         assertEquals(a, layout(ws.focus(a), portrait, gaps).tiled.keys.single())
         assertSame(ws, ws.focus(TileId(99)))
     }

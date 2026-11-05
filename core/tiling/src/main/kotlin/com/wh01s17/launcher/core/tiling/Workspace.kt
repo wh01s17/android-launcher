@@ -17,7 +17,10 @@ data class Workspace(
     val floating: List<FloatingTile> = emptyList(),
     val fullscreen: TileId? = null,
     val masterRatio: Float = DEFAULT_MASTER_RATIO,
-    /** Huecos del mosaico (no tiles): por encima, un tile nuevo se agrupa con el del foco (plan.md §5.4). */
+    /**
+     * Obsoleto: antes, por encima de este número de huecos un tile nuevo se agrupaba solo. Ya no se
+     * usa (los grupos son explícitos); se conserva para leer los `workspaces.json` guardados.
+     */
     val maxTiles: Int = DEFAULT_MAX_TILES,
     /**
      * Tiles que tuvieron el foco antes, el más reciente al final. Al cerrar el tile con foco, éste

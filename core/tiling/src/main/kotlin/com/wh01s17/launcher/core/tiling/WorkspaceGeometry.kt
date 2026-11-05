@@ -24,7 +24,7 @@ fun Workspace.swapInDirection(
     return swap(current, other)
 }
 
-private fun Workspace.neighborOf(
+internal fun Workspace.neighborOf(
     direction: Direction,
     area: Rect,
     gaps: Gaps,

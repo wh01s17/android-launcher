@@ -22,7 +22,8 @@ class TilingPropertiesTest {
         fun newId() = TileId(nextId++)
     }
 
-    /** Una operación cualquiera sobre [ws], elegida al azar. */
+    /** Una operación cualquiera sobre [ws], elegida al azar: una rama por operación del motor. */
+    @Suppress("CyclomaticComplexMethod")
     private fun Run.step(
         ws: Workspace,
         area: Rect,
@@ -30,7 +31,7 @@ class TilingPropertiesTest {
     ): Workspace {
         val existing = ws.tiles
         val direction = Direction.entries.random(random)
-        return when (random.nextInt(12)) {
+        return when (random.nextInt(15)) {
             0, 1, 2 -> ws.insert(newId())
             3 -> if (existing.isEmpty()) ws else ws.remove(existing.random(random))
             4 -> if (existing.isEmpty()) ws else ws.focus(existing.random(random))
@@ -40,6 +41,9 @@ class TilingPropertiesTest {
             8 -> ws.toggleSplit(area, gaps)
             9 -> ws.toggleFloating()
             10 -> if (random.nextInt(4) == 0) ws.toggleFullscreen() else ws.cycleGroup(random.nextBoolean())
+            11 -> ws.moveIntoGroup(direction, area, gaps)
+            12 -> if (random.nextBoolean()) ws.toggleGroup() else ws.moveOutOfGroup()
+            13 -> if (existing.size < 2) ws else ws.groupWith(existing.random(random), existing.random(random))
             else -> ws.withLayout(TilingLayout.entries.random(random))
         }
     }
@@ -73,7 +77,6 @@ class TilingPropertiesTest {
         assertEquals(ws.floating.map { it.id }.toSet(), result.floating.keys)
         // Sin huecos, el mosaico cubre el área exacta: ni un píxel de más ni de menos.
         if (gaps.inner == 0 && ws.root != null) assertEquals(outer.area, tiled.sumOf { it.area })
-        assertTrue(ws.slots <= ws.maxTiles)
     }
 
     @Test
