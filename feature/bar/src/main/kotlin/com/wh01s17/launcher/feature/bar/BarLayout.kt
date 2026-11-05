@@ -2,10 +2,14 @@ package com.wh01s17.launcher.feature.bar
 
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.Layout
@@ -18,18 +22,80 @@ import androidx.compose.ui.unit.Constraints
 /** Los tres grupos de la barra (plan.md §5.5), de izquierda a derecha. */
 internal enum class BarGroup { Left, Center, Right }
 
-/** La posición de un módulo en la barra. [anchor] es el módulo que se mantiene centrado en la pantalla (`centerAnchor`). */
+/**
+ * Lo que un módulo cuenta de sí a la barra mientras se pinta. [collapsible]: está en reposo (metrónomo
+ * parado, media en pausa) y puede ocultarse si los módulos no caben juntos. Es estado: la barra lo lee
+ * al medir, así que cambiarlo sólo vuelve a colocar, no recompone.
+ */
+@Stable
+internal class BarSlotState {
+    var collapsible by mutableStateOf(false)
+}
+
+/** El [BarSlotState] del módulo que se está pintando; `null` fuera de la barra (p. ej. en un panel). */
+internal val LocalBarSlot = staticCompositionLocalOf<BarSlotState?> { null }
+
+/** `true` mientras la barra está en modo compacto porque sus módulos no caben con el relleno normal. */
+internal val LocalBarCompact = compositionLocalOf { false }
+
+/**
+ * La posición de un módulo en la barra. [anchor] es el módulo que se mantiene centrado en la pantalla
+ * (`centerAnchor`); [state], lo que el módulo dice de sí (si puede ocultarse).
+ */
 internal data class BarSlot(
     val group: BarGroup,
     val anchor: Boolean = false,
+    val state: BarSlotState? = null,
 )
 
-/** El ancho de un módulo ya medido. Uno de ancho 0 (que no pinta nada) no reserva hueco. */
+/**
+ * El ancho de un módulo ya medido. Uno de ancho 0 (que no pinta nada) no reserva hueco. Uno
+ * [collapsible] se puede ocultar si no cabe todo.
+ */
 internal data class SlotSpec(
     val group: BarGroup,
     val width: Int,
     val anchor: Boolean,
+    val collapsible: Boolean = false,
 )
+
+/** El ancho que necesitan todos los módulos juntos: los tres grupos, con sus huecos, sin pisarse. */
+internal fun requiredWidth(
+    slots: List<SlotSpec>,
+    itemGap: Int,
+    groupGap: Int,
+): Int {
+    val groups = BarGroup.entries.map { group -> slots.filter { it.group == group && it.width > 0 } }.filter { it.isNotEmpty() }
+    val spans = groups.sumOf { group -> group.sumOf { it.width } + itemGap * (group.size - 1) }
+    return spans + groupGap * (groups.size - 1).coerceAtLeast(0)
+}
+
+/**
+ * Los índices de los módulos que se dejan de pintar para que el resto quepa en [totalWidth]: los
+ * [SlotSpec.collapsible], empezando por el de más a la derecha, sólo los necesarios. Si ni así cabe,
+ * se ocultan todos los que se pueden.
+ */
+internal fun collapsedSlots(
+    slots: List<SlotSpec>,
+    totalWidth: Int,
+    itemGap: Int,
+    groupGap: Int,
+): Set<Int> {
+    val hidden = mutableSetOf<Int>()
+    val candidates = slots.indices.filter { slots[it].collapsible && slots[it].width > 0 }.sortedByDescending { screenOrder(slots, it) }
+    for (i in candidates) {
+        val visible = slots.mapIndexed { j, spec -> if (j in hidden) spec.copy(width = 0) else spec }
+        if (requiredWidth(visible, itemGap, groupGap) <= totalWidth) break
+        hidden += i
+    }
+    return hidden
+}
+
+/** Orden de izquierda a derecha en pantalla: por grupo y, dentro del grupo, por su posición. */
+private fun screenOrder(
+    slots: List<SlotSpec>,
+    index: Int,
+): Int = slots[index].group.ordinal * slots.size + index
 
 /**
  * Coordenada x de cada módulo. Izquierda y derecha se pegan a su borde; el centro se centra en la
@@ -112,8 +178,40 @@ private fun avoidNotch(
 }
 
 /**
+ * Cuándo la barra pasa a modo compacto y cuándo vuelve. Pasa en cuanto los módulos no caben con el
+ * relleno normal; al medir ya en compacto, apunta cuánto ahorró, y vuelve cuando el ancho compacto más
+ * ese ahorro cabe otra vez. Si el ahorro cambió (entró o salió un módulo), como mucho rebota una vez.
+ */
+internal class BarCompaction {
+    var compact by mutableStateOf(false)
+        private set
+
+    /** El modo con que se compusieron los módulos que se están midiendo. */
+    var composedCompact = false
+    private var normalWidth = 0
+    private var savings: Int? = null
+
+    fun update(
+        required: Int,
+        available: Int,
+    ) {
+        if (!composedCompact) {
+            if (required > available) {
+                normalWidth = required
+                savings = null
+                compact = true
+            }
+            return
+        }
+        val saved = savings ?: (normalWidth - required).coerceAtLeast(0).also { savings = it }
+        if (compact && required + saved <= available) compact = false
+    }
+}
+
+/**
  * Coloca los módulos de la barra. Cada hijo lleva su [BarSlot] como `layoutId`; el alto lo marca
- * la barra y los módulos se centran en él.
+ * la barra y los módulos se centran en él. Si no caben juntos, primero se compactan ([LocalBarCompact])
+ * y, si aún no caben, se dejan de pintar los que están en reposo ([collapsedSlots]): nunca se pisan.
  */
 @Composable
 internal fun BarLayout(
@@ -126,8 +224,13 @@ internal fun BarLayout(
     val view = LocalView.current
     var origin by remember { mutableStateOf(Offset.Zero) }
     var notch by remember { mutableStateOf<IntRange?>(null) }
+    val compaction = remember { BarCompaction() }
     Layout(
-        content = content,
+        content = {
+            val compact = compaction.compact
+            compaction.composedCompact = compact
+            CompositionLocalProvider(LocalBarCompact provides compact, content = content)
+        },
         modifier =
             modifier.onGloballyPositioned { coordinates ->
                 origin = coordinates.positionInWindow()
@@ -137,11 +240,19 @@ internal fun BarLayout(
         val loose = Constraints(maxWidth = constraints.maxWidth, maxHeight = constraints.maxHeight)
         val placeables = measurables.map { it.measure(loose) }
         val slots = measurables.map { it.layoutId as? BarSlot ?: BarSlot(BarGroup.Left) }
-        val specs = slots.mapIndexed { i, slot -> SlotSpec(slot.group, placeables[i].width, slot.anchor) }
-        val xs = placeSlots(specs, constraints.maxWidth, itemGapPx, groupGapPx, notch)
+        val specs =
+            slots.mapIndexed { i, slot ->
+                SlotSpec(slot.group, placeables[i].width, slot.anchor, slot.state?.collapsible == true)
+            }
+        compaction.update(requiredWidth(specs, itemGapPx, groupGapPx), constraints.maxWidth)
+        val hidden = collapsedSlots(specs, constraints.maxWidth, itemGapPx, groupGapPx)
+        val visible = specs.mapIndexed { i, spec -> if (i in hidden) spec.copy(width = 0) else spec }
+        val xs = placeSlots(visible, constraints.maxWidth, itemGapPx, groupGapPx, notch)
         val height = if (constraints.hasBoundedHeight) constraints.maxHeight else placeables.maxOfOrNull { it.height } ?: 0
         layout(constraints.maxWidth, height) {
-            placeables.forEachIndexed { i, placeable -> placeable.placeRelative(xs[i], (height - placeable.height) / 2) }
+            placeables.forEachIndexed { i, placeable ->
+                if (i !in hidden) placeable.placeRelative(xs[i], (height - placeable.height) / 2)
+            }
         }
     }
 }

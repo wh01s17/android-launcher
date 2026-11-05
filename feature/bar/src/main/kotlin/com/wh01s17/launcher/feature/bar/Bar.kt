@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -96,9 +99,14 @@ private fun BarContent(
         Box(Modifier.barSlot(BarSlot(BarGroup.Right))) { NoticeItem(notice) }
     }
     for ((group, modules) in listOf(BarGroup.Left to layout.left, BarGroup.Center to layout.center, BarGroup.Right to layout.right)) {
-        for (module in modules) {
-            val slot = BarSlot(group, anchor = group == BarGroup.Center && module.id == config.centerAnchor)
-            Box(Modifier.barSlot(slot)) { ModuleHost(module, registry, state, onCommand) }
+        modules.forEachIndexed { index, module ->
+            key(group, index, module.id) {
+                val slotState = remember { BarSlotState() }
+                val anchor = group == BarGroup.Center && module.id == config.centerAnchor
+                Box(Modifier.barSlot(BarSlot(group, anchor, slotState))) {
+                    CompositionLocalProvider(LocalBarSlot provides slotState) { ModuleHost(module, registry, state, onCommand) }
+                }
+            }
         }
     }
 }

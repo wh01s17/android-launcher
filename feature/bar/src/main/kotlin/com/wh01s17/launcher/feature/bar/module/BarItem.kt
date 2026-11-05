@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,6 +27,8 @@ import com.wh01s17.launcher.core.designsystem.modifier.whControlSurface
 import com.wh01s17.launcher.core.designsystem.theme.LocalWhContentColor
 import com.wh01s17.launcher.core.designsystem.theme.WhControlState
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
+import com.wh01s17.launcher.feature.bar.LocalBarCompact
+import com.wh01s17.launcher.feature.bar.LocalBarSlot
 
 /** Opacidad de un módulo atenuado (`dimmed` de `WidgetButton.qml`). */
 private const val DIMMED_ALPHA = 0.45f
@@ -53,18 +56,23 @@ internal fun rememberModuleStyle(
  * sus clases, atenuado si toca y entre corchetes si se pide. Con [onClick] o [onLongClick] recibe
  * toques y mide el alto del área táctil (48 dp); sin ellos es sólo un indicador.
  *
- * [contentDescription] es lo que lee TalkBack: sin él, sería sólo un glifo suelto.
+ * [contentDescription] es lo que lee TalkBack: sin él, sería sólo un glifo suelto. [collapsible]: el
+ * módulo está en reposo y la barra puede ocultarlo si no cabe todo. En modo compacto el relleno se reduce.
  */
 @Composable
 internal fun BarItem(
     style: ModuleStyle,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
+    collapsible: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
     val spacing = WhTheme.spacing
+    val slot = LocalBarSlot.current
+    SideEffect { slot?.collapsible = collapsible }
+    val paddingX = if (LocalBarCompact.current) spacing.barItemPaddingXCompact else spacing.barItemPaddingX
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val touch =
@@ -92,7 +100,7 @@ internal fun BarItem(
             modifier =
                 Modifier
                     .then(if (pressed) Modifier.whControlSurface(WhControlState.Pressed) else Modifier)
-                    .padding(horizontal = spacing.barItemPaddingX, vertical = spacing.controlPaddingY),
+                    .padding(horizontal = paddingX, vertical = spacing.controlPaddingY),
             horizontalArrangement = Arrangement.spacedBy(spacing.controlGap / 2),
             verticalAlignment = Alignment.CenterVertically,
         ) {

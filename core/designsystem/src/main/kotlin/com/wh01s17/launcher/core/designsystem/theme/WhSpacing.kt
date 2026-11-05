@@ -32,8 +32,12 @@ data class WhSpacing(
      * teléfono de 407 dp no caben los módulos del plan con tanto, así que se reduce.
      */
     val barItemPaddingX: Dp,
+    /** [barItemPaddingX] cuando los módulos no caben juntos en la barra (modo compacto). */
+    val barItemPaddingXCompact: Dp,
     /** Ancho de la celda de un escritorio en la barra (el shell usa 18 px). */
     val barWorkspaceWidth: Dp,
+    /** [barWorkspaceWidth] en modo compacto: aún cabe un número de dos cifras. */
+    val barWorkspaceWidthCompact: Dp,
     /** Subrayado del escritorio activo (`Workspaces.qml`: 8 × 2 px). */
     val barUnderlineWidth: Dp,
     val barUnderlineHeight: Dp,
@@ -68,6 +72,10 @@ data class WhSpacing(
         // que un número de dos cifras o un nombre de día no se corten con la fuente grande.
         private val BAR_ITEM_PADDING_X = 4.dp
         private val BAR_WORKSPACE_WIDTH = 20.8.dp
+
+        // Modo compacto de la barra: 2 y 20 dp con la fuente de fábrica.
+        private val BAR_ITEM_PADDING_X_COMPACT = 1.6.dp
+        private val BAR_WORKSPACE_WIDTH_COMPACT = 16.dp
         private val GRID_CELL = 35.2.dp
 
         fun create(fontScale: Float): WhSpacing {
@@ -87,7 +95,9 @@ data class WhSpacing(
                 // Una barra superior usa `size-horizontal` (el eje transversal de una barra horizontal).
                 barHeight = WhTokens.Bar.sizeHorizontal * factor,
                 barItemPaddingX = BAR_ITEM_PADDING_X * factor,
+                barItemPaddingXCompact = BAR_ITEM_PADDING_X_COMPACT * factor,
                 barWorkspaceWidth = BAR_WORKSPACE_WIDTH * factor,
+                barWorkspaceWidthCompact = BAR_WORKSPACE_WIDTH_COMPACT * factor,
                 barUnderlineWidth = SHELL_UNDERLINE_WIDTH * factor,
                 barUnderlineHeight = SHELL_UNDERLINE_HEIGHT * factor,
                 gridCell = GRID_CELL * factor,

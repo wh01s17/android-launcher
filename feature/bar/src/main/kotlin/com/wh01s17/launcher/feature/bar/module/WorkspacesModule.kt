@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.semantics
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.input.WorkspaceCommand
+import com.wh01s17.launcher.feature.bar.LocalBarCompact
 import com.wh01s17.launcher.feature.bar.R
 import com.wh01s17.launcher.feature.bar.WorkspaceBarState
 
@@ -90,7 +91,7 @@ private fun WorkspaceCell(
     Box(
         modifier =
             Modifier
-                .width(spacing.barWorkspaceWidth)
+                .width(if (LocalBarCompact.current) spacing.barWorkspaceWidthCompact else spacing.barWorkspaceWidth)
                 .height(spacing.touchTarget)
                 .alpha(if (focused || occupied) 1f else EMPTY_ALPHA)
                 .clickable(interactionSource = interaction, indication = null, role = Role.Tab, onClick = onClick)

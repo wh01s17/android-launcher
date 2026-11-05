@@ -1,6 +1,8 @@
 package com.wh01s17.launcher.feature.bar
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BarLayoutTest {
@@ -8,7 +10,8 @@ class BarLayoutTest {
         group: BarGroup,
         width: Int,
         anchor: Boolean = false,
-    ) = SlotSpec(group, width, anchor)
+        collapsible: Boolean = false,
+    ) = SlotSpec(group, width, anchor, collapsible)
 
     private val total = 400
     private val gap = 10
@@ -107,5 +110,51 @@ class BarLayoutTest {
         assertEquals(90, wide[1])
         // Lejos del recorte, nada cambia.
         assertEquals(150, placeSlots(listOf(spec(BarGroup.Center, 100)), total, gap, gap, 0..9)[0])
+    }
+
+    @Test
+    fun `the required width counts every group and the gaps between them`() {
+        val slots = listOf(spec(BarGroup.Left, 100), spec(BarGroup.Left, 50), spec(BarGroup.Right, 80), spec(BarGroup.Center, 0))
+        assertEquals(240, requiredWidth(slots, itemGap = 0, groupGap = gap))
+        assertEquals(0, requiredWidth(emptyList(), 0, gap))
+    }
+
+    @Test
+    fun `idle modules hide from the right only until the rest fits`() {
+        // Escritorio 6 con el pomodoro en marcha: 230 + 10 + 200 = 440 > 400.
+        val slots =
+            listOf(
+                spec(BarGroup.Left, 230),
+                spec(BarGroup.Right, 30),
+                spec(BarGroup.Right, 30, collapsible = true),
+                spec(BarGroup.Right, 30, collapsible = true),
+                spec(BarGroup.Right, 110),
+            )
+        assertEquals(setOf(3), collapsedSlots(slots, 420, 0, gap))
+        assertEquals(setOf(2, 3), collapsedSlots(slots, total, 0, gap))
+        assertEquals(emptySet<Int>(), collapsedSlots(slots, 440, 0, gap))
+    }
+
+    @Test
+    fun `without idle modules nothing hides even if it does not fit`() {
+        val slots = listOf(spec(BarGroup.Left, 300), spec(BarGroup.Right, 200))
+        assertEquals(emptySet<Int>(), collapsedSlots(slots, total, 0, gap))
+    }
+
+    @Test
+    fun `the bar compacts when it overflows and returns once the saving fits again`() {
+        val compaction = BarCompaction()
+        compaction.update(required = 440, available = total)
+        assertTrue(compaction.compact)
+        // Ya compacta: 380 ahorra 60, y 380 + 60 no cabe.
+        compaction.composedCompact = true
+        compaction.update(required = 380, available = total)
+        assertTrue(compaction.compact)
+        // El pomodoro se para y su texto desaparece: 330 + 60 cabe con el relleno normal.
+        compaction.update(required = 330, available = total)
+        assertFalse(compaction.compact)
+        compaction.composedCompact = false
+        compaction.update(required = 390, available = total)
+        assertFalse(compaction.compact)
     }
 }

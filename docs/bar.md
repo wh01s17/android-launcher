@@ -81,7 +81,7 @@ Colores: `#RGB`, `#RRGGBB` o `#RRGGBBAA`.
 | `core.workspaces` | Números `1`–`persistent` (por defecto `5`, como el shell) más los que tienen tiles y el activo; los demás vacíos no se muestran. El 10 se llama `0`. Activo en verde con subrayado, ocupados en el color del texto, vacíos al 35 %. Tocar cambia de escritorio | — | — |
 | `wh01s17.clock` | Hora y fecha. Tocar: calendario. Mantener: alterna `format` y `formatAlt` | — | `format` `HH:mm` (la barra de fábrica usa `ddd d MMM`) |
 | `wh01s17.indicators` | Contador de notificaciones (tocar abre el panel propio) y No molestar (luna); sin acceso no hay contador | `dnd`, `notifications` | — |
-| `media` | Sesión de cualquier app: tocar reproduce/pausa; mantener abre el panel de transporte | `playing`, `paused` | sonando verde; pausa atenuada |
+| `media` | Sesión de cualquier app. El icono es el del botón: `⏸` mientras suena, `▶` en pausa. Tocar reproduce/pausa; mantener abre el panel de transporte | `playing`, `paused` | sonando verde; pausa atenuada |
 | `wh01s17.power` | Batería (icono + %). Sin batería, nada | `charging`, `full`, `low` (≤ 20 %), `critical` (≤ 10 %), `power-save` | cargando verde, `low` amarillo, `critical` rojo |
 | `wh01s17.network` | Red por defecto: Wi-Fi, datos móviles, cable o sin conexión | `wifi`, `cellular`, `ethernet`, `other`, `none`, `no-internet`, `vpn` | `none` atenuado, `no-internet` amarillo |
 | `wh01s17.bluetooth` | Apagado, encendido o conectado | `off`, `on`, `connected` | `off` atenuado, `connected` verde |
@@ -115,9 +115,15 @@ el servicio de accesibilidad (*Gestos wh01s17*): sin él no pasa nada y se avisa
 ## Ancho en el Redmi (407 dp)
 
 La config de fábrica cabe a 407 dp: menú, cinco escritorios, hora, cuatro indicadores y la batería.
-Con más módulos, el centro se aparta hacia el espacio libre; si no hay, queda pegado a la izquierda
-y puede tapar a la derecha. Con un escritorio ocupado fuera de 1–5, o un aviso, el reloj se desplaza.
-`bar-states.png` (`feature/bar/src/test/screenshots/`) muestra los casos.
+Con más módulos, el centro se aparta hacia el espacio libre. Con un escritorio ocupado fuera de 1–5,
+o un aviso, el reloj se desplaza. `bar-states.png` (`feature/bar/src/test/screenshots/`) muestra los casos.
+
+**Cuando no cabe todo** (p. ej. escritorio 6 y el pomodoro en marcha), la barra nunca pisa un módulo:
+
+1. Pasa a **modo compacto**: relleno de los módulos de 5 a 2 dp y celdas de escritorio de 26 a 20 dp
+   (con la fuente de fábrica; escalan con ella). Vuelve al tamaño normal en cuanto vuelve a caber.
+2. Si aún no cabe, **oculta los módulos en reposo**, de derecha a izquierda y sólo los necesarios: el
+   metrónomo parado y la media en pausa. Reaparecen al sonar o al haber sitio.
 
 ## Estado y datos
 

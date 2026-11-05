@@ -65,6 +65,7 @@ internal class MetronomeModule(
         BarItem(
             style = style,
             contentDescription = description,
+            collapsible = !state.running,
             onClick = metronome::toggle,
             onLongClick = { panelOpen = true },
         ) {

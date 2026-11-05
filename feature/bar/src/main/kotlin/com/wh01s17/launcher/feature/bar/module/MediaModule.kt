@@ -49,10 +49,12 @@ internal class MediaModule(
         BarItem(
             style = style,
             contentDescription = stringResource(if (session.playing) R.string.bar_media_playing else R.string.bar_media_paused, title),
+            collapsible = !session.playing,
             onClick = { media.perform(session, MediaAction.PlayPause) },
             onLongClick = { panelOpen = true },
         ) {
-            WhIcon(if (session.playing) WhIcons.Music else WhIcons.Pause)
+            // Como un botón de transporte (y el widget de TIDAL): muestra lo que hará tocarlo.
+            WhIcon(if (session.playing) WhIcons.Pause else WhIcons.Play)
         }
         if (panelOpen) MediaPanel(media, session, title, onDismiss = { panelOpen = false })
     }
