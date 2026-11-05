@@ -170,6 +170,6 @@ class ConfigRepositoryTest {
 
     private companion object {
         /** Módulos de la barra en `default-launcher.json`: así se reconoce que se usó la de fábrica. */
-        const val FACTORY_BAR_MODULES = 7
+        const val FACTORY_BAR_MODULES = 8
     }
 }

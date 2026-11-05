@@ -71,6 +71,10 @@
     <string name="cmd_menu_apps">Menú de apps</string>
     <string name="cmd_menu_system">Menú de sistema</string>
     <string name="cmd_notifications">Cortina de notificaciones</string>
+    <string name="cmd_notification_panel">Panel de notificaciones</string>
+    <string name="cmd_media_play_pause">Reproducir o pausar</string>
+    <string name="cmd_media_next">Pista siguiente</string>
+    <string name="cmd_media_previous">Pista anterior</string>
     <string name="cmd_shortcuts">Lista de atajos</string>
     <string name="cmd_terminal">Terminal</string>
     <string name="cmd_volume_up">Subir volumen</string>

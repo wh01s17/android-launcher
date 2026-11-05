@@ -1,6 +1,7 @@
 package com.wh01s17.launcher.core.input.binding
 
 import com.wh01s17.launcher.core.input.LauncherCommand
+import com.wh01s17.launcher.core.input.MediaKey
 import com.wh01s17.launcher.core.input.WorkspaceCommand
 
 /** Un comando como se escribe en `bindings`: nombre y argumentos (`Int`, `Boolean` o `String`). */
@@ -20,6 +21,15 @@ fun LauncherCommand.encode(): EncodedCommand =
         LauncherCommand.OpenAppsMenu -> EncodedCommand("menu.apps")
         LauncherCommand.OpenSystemMenu -> EncodedCommand("menu.system")
         LauncherCommand.OpenNotificationShade -> EncodedCommand("notifications.open")
+        LauncherCommand.ToggleNotificationPanel -> EncodedCommand("notifications.panel")
+        is LauncherCommand.ControlMedia ->
+            EncodedCommand(
+                when (key) {
+                    MediaKey.PlayPause -> "media.play-pause"
+                    MediaKey.Next -> "media.next"
+                    MediaKey.Previous -> "media.previous"
+                },
+            )
         LauncherCommand.ShowShortcuts -> EncodedCommand("shortcuts.show")
         LauncherCommand.OpenTerminal -> EncodedCommand("terminal.open")
         is LauncherCommand.AdjustVolume -> EncodedCommand("audio.volume", mapOf("step" to steps))

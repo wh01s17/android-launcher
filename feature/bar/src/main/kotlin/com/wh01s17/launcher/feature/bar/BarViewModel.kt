@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wh01s17.launcher.core.input.LauncherCommand
 import com.wh01s17.launcher.core.input.LauncherCommandBus
+import com.wh01s17.launcher.core.system.notifications.NotificationSummary
 import com.wh01s17.launcher.core.system.status.AudioState
 import com.wh01s17.launcher.core.system.status.BatteryState
 import com.wh01s17.launcher.core.system.status.BluetoothStatus
@@ -23,6 +24,7 @@ class BarSources(
     val bluetooth: StatusSource<BluetoothStatus>,
     val audio: StatusSource<AudioState>,
     val doNotDisturb: StatusSource<DoNotDisturbState>,
+    val notifications: StatusSource<NotificationSummary>,
 )
 
 /**
@@ -37,8 +39,8 @@ class BarViewModel(
     private val commands: LauncherCommandBus,
 ) : ViewModel() {
     val state: StateFlow<BarState> =
-        combine(system(sources), workspaces, notices) { system, workspaces, notices ->
-            system.copy(workspaces = workspaces, notices = notices)
+        combine(system(sources), workspaces, notices, sources.notifications.observe()) { system, workspaces, notices, notifications ->
+            system.copy(workspaces = workspaces, notices = notices, notifications = notifications)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), BarState())
 
     fun send(command: LauncherCommand) = commands.send(command)
@@ -46,7 +48,7 @@ class BarViewModel(
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L
 
-        /** Las cinco fuentes del sistema en un [BarState] sin workspaces ni avisos. */
+        /** Las cinco fuentes del sistema en un [BarState] sin workspaces, avisos ni notificaciones. */
         fun system(sources: BarSources): Flow<BarState> =
             combine(
                 sources.battery.observe(),

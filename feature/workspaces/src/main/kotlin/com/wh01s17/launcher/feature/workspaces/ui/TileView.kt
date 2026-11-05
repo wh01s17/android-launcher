@@ -44,8 +44,8 @@ private const val UNAVAILABLE_ALPHA = 0.45f
 /**
  * Un tile (plan.md §7 Hito 4): un lanzador vivo con el icono grande y el nombre de la app, borde
  * activo (gradiente) si tiene el foco e inactivo si no, y radio del tema. Un grupo enseña sus
- * pestañas arriba, como la barra de grupos de Hyprland. El contador de notificaciones llega con el
- * acceso a notificaciones (Hito 8).
+ * pestañas arriba, como la barra de grupos de Hyprland. Con el acceso a notificaciones (Hito 8) el
+ * icono lleva una insignia con las notificaciones de esa app ([LocalTileBadges]).
  */
 @Composable
 internal fun TileView(
@@ -133,7 +133,13 @@ private fun TileBody(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(spacing.controlGap),
         ) {
-            if (app != null) AppIcon(app, iconLoader, iconSize, colors.foreground)
+            if (app != null) {
+                val badge = if (info.unavailable) 0 else LocalTileBadges.current.count(info.key)
+                Box {
+                    AppIcon(app, iconLoader, iconSize, colors.foreground)
+                    if (badge > 0) TileBadge(badge, Modifier.align(BadgeAlignment))
+                }
+            }
             if (showLabel) {
                 WhText(
                     app?.label ?: stringResource(R.string.tile_not_installed, info.key.packageName),

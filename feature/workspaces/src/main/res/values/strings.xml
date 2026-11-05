@@ -6,6 +6,10 @@
     <string name="workspace_empty_hint">Mantén pulsado para añadir apps · desliza arriba para el menú</string>
     <string name="workspace_open_menu">Abrir el menú</string>
     <string name="workspace_edit">Editar el escritorio</string>
+    <plurals name="tile_notifications">
+        <item quantity="one">%1$d notificación</item>
+        <item quantity="other">%1$d notificaciones</item>
+    </plurals>
     <string name="tile_open">Abrir</string>
     <string name="tile_edit">Editar</string>
     <string name="tile_drop_here">Soltar en el escritorio %1$s</string>

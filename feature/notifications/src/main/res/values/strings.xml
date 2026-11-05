@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Panel de notificaciones (plan.md §7 Hito 8). -->
+    <string name="notifications_title">notificaciones</string>
+    <plurals name="notifications_count">
+        <item quantity="one">%1$d notificación</item>
+        <item quantity="other">%1$d notificaciones</item>
+    </plurals>
+    <string name="notifications_empty">Sin notificaciones</string>
+    <string name="notifications_clear">limpiar</string>
+    <string name="notifications_dismiss">Descartar la notificación de %1$s</string>
+    <string name="notifications_close">Cerrar las notificaciones</string>
+    <string name="notifications_untitled">(sin título)</string>
+    <string name="notifications_age_now">ahora</string>
+    <string name="notifications_age_minutes">hace %1$d min</string>
+    <string name="notifications_age_hours">hace %1$d h</string>
+    <string name="notifications_age_days">hace %1$d d</string>
+
+    <!-- Opt-in (plan.md R8): se explica antes de mandar a los ajustes de Android. -->
+    <string name="notifications_access_title">Falta el acceso a notificaciones</string>
+    <string name="notifications_access_body">Con él, wh01s17 muestra tus notificaciones aquí, el número en los tiles de cada app y el contador de la barra, y la música que suena. Android lo pide como un permiso especial. Lo que lee no sale de este teléfono ni se guarda.</string>
+    <string name="notifications_access_grant">activar acceso</string>
+</resources>

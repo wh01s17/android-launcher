@@ -27,7 +27,18 @@ sealed interface LauncherCommand {
 
     /** Abrir la cortina de notificaciones del sistema (necesita el servicio de accesibilidad). */
     data object OpenNotificationShade : LauncherCommand
+
+    /** Abrir o cerrar el panel de notificaciones propio (Hito 8); pide el acceso si falta. */
+    data object ToggleNotificationPanel : LauncherCommand
+
+    /** `Ctrl + Alt + O/P/I`: reproducir/pausar, siguiente o anterior en la app de música que suene. */
+    data class ControlMedia(
+        val key: MediaKey,
+    ) : LauncherCommand
 }
+
+/** Las teclas multimedia que entiende el launcher. */
+enum class MediaKey { PlayPause, Next, Previous }
 
 /** Hacia dónde va un comando de foco, intercambio o tamaño (las flechas de `bindings/tiling.lua`). */
 enum class CommandDirection { Left, Right, Up, Down }

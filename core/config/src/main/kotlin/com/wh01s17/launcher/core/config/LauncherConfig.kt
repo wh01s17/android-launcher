@@ -23,7 +23,23 @@ data class LauncherConfig(
     val bindings: List<Binding> = emptyList(),
     val keyboard: KeyboardConfig = KeyboardConfig(),
     val apps: AppsConfig = AppsConfig(),
+    val notifications: NotificationsConfig = NotificationsConfig(),
 )
+
+/**
+ * `notifications` de `launcher.json`. [toast] enseña un aviso con cuenta atrás (`shell.notifications.toml`)
+ * cuando llega una notificación con el launcher a la vista; está apagado de fábrica porque Android ya
+ * muestra la suya.
+ */
+data class NotificationsConfig(
+    val toast: Boolean = false,
+    val toastSeconds: Int = DEFAULT_TOAST_SECONDS,
+) {
+    companion object {
+        const val DEFAULT_TOAST_SECONDS = 5
+        val TOAST_SECONDS = 1..30
+    }
+}
 
 /** `apps` de `launcher.json` (plan.md §6.1). */
 data class AppsConfig(

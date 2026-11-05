@@ -18,6 +18,7 @@ import com.wh01s17.launcher.core.system.media.AudioSpectrum
 import com.wh01s17.launcher.core.system.media.MediaSource
 import com.wh01s17.launcher.core.system.navigation.NavigationWatchdog
 import com.wh01s17.launcher.core.system.navigation.NotificationShade
+import com.wh01s17.launcher.core.system.notifications.NotificationRepository
 import com.wh01s17.launcher.core.system.oem.xiaomi.AndroidCompatibilityGateway
 import com.wh01s17.launcher.core.system.oem.xiaomi.CompatibilityGateway
 import com.wh01s17.launcher.core.system.status.AudioSource
@@ -26,6 +27,7 @@ import com.wh01s17.launcher.core.system.status.BluetoothSource
 import com.wh01s17.launcher.core.system.status.ClockSource
 import com.wh01s17.launcher.core.system.status.DoNotDisturbSource
 import com.wh01s17.launcher.core.system.status.NetworkSource
+import com.wh01s17.launcher.core.system.status.StatusSource
 import com.wh01s17.launcher.core.system.status.SystemClockSource
 import com.wh01s17.launcher.core.system.timer.MetronomeRepository
 import com.wh01s17.launcher.core.system.timer.PomodoroRepository
@@ -110,9 +112,18 @@ class AppContainer(
     /** Lo pone la pantalla de inicio: lanza el diálogo de permiso de micrófono. */
     var requestAudioPermission: () -> Unit = {}
 
+    /** Sesiones multimedia de otras apps (acceso a notificaciones, opt-in). */
+    val mediaSource: MediaSource by lazy { MediaSource(appContext) }
+
+    /** Notificaciones de otras apps: insignias, contador de la barra y panel (Hito 8, opt-in). */
+    val notifications: NotificationRepository by lazy { NotificationRepository(appContext) }
+
+    /** El panel de notificaciones está abierto; lo cambia el comando `notifications.panel`. */
+    val notificationPanelOpen = MutableStateFlow(false)
+
     val nativeWidgets: NativeWidgetSources by lazy {
         NativeWidgetSources(
-            MediaSource(appContext),
+            mediaSource,
             pomodoro,
             metronome,
             clockSource,
@@ -138,10 +149,11 @@ class AppContainer(
             bluetooth = BluetoothSource(appContext),
             audio = AudioSource(appContext),
             doNotDisturb = DoNotDisturbSource(appContext),
+            notifications = StatusSource { notifications.state.map { it.summary }.distinctUntilChanged() },
         )
     }
 
-    val barRegistry: BarModuleRegistry by lazy { defaultBarRegistry(clockSource, pomodoro, metronome) }
+    val barRegistry: BarModuleRegistry by lazy { defaultBarRegistry(clockSource, pomodoro, metronome, mediaSource) }
 
     val barNotices: BarNotices by lazy { BarNotices(appContext, configRepository.state, compatibilityGateway) }
 

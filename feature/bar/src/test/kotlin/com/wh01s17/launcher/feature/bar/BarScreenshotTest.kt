@@ -9,11 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.wh01s17.launcher.core.config.BarConfig
 import com.wh01s17.launcher.core.config.ConfigParser
 import com.wh01s17.launcher.core.config.ParseResult
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
+import com.wh01s17.launcher.core.system.media.MediaSource
 import com.wh01s17.launcher.core.system.status.AudioState
 import com.wh01s17.launcher.core.system.status.BatteryState
 import com.wh01s17.launcher.core.system.status.BluetoothStatus
@@ -83,7 +85,7 @@ class BarScreenshotTest {
 
     private fun metronome() = MetronomeRepository(folder.newFile())
 
-    private fun registry() = defaultBarRegistry(clock, pomodoro(), metronome())
+    private fun registry() = defaultBarRegistry(clock, pomodoro(), metronome(), MediaSource(ApplicationProvider.getApplicationContext()))
 
     private fun config(json: String? = null): BarConfig {
         val text = json ?: File("../../core/config/src/main/assets/default-launcher.json").readText()

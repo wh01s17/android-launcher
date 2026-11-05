@@ -61,35 +61,37 @@ class MediaSource(
     private val listener = ComponentName(appContext, WhNotificationListener::class.java)
 
     /** El estado de la sesión de [packageName], mientras se recoja. */
-    fun session(packageName: String): Flow<MediaState> =
+    fun session(packageName: String): Flow<MediaState> = watch { controllers -> controllers.firstOrNull { it.packageName == packageName } }
+
+    /**
+     * La sesión que suena ahora (o, si ninguna suena, la más reciente), sea de la app que sea: la
+     * que controlan el módulo `media` de la barra y los menús. Android ordena las sesiones por prioridad.
+     */
+    fun active(): Flow<MediaState> =
+        watch { controllers ->
+            controllers.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING } ?: controllers.firstOrNull()
+        }
+
+    private fun watch(choose: (List<MediaController>) -> MediaController?): Flow<MediaState> =
         callbackFlow {
             val handler = Handler(Looper.getMainLooper())
-            var controller: MediaController? = null
+            var controllers = emptyList<MediaController>()
+
+            fun publish() {
+                trySend(choose(controllers)?.let(::stateOf) ?: MediaState.Idle)
+            }
             val callback =
                 object : MediaController.Callback() {
-                    override fun onMetadataChanged(metadata: MediaMetadata?) {
-                        controller?.let { trySend(stateOf(it)) }
-                    }
+                    override fun onMetadataChanged(metadata: MediaMetadata?) = publish()
 
-                    override fun onPlaybackStateChanged(state: PlaybackState?) {
-                        controller?.let { trySend(stateOf(it)) }
-                    }
-
-                    override fun onSessionDestroyed() {
-                        trySend(MediaState.Idle)
-                    }
+                    override fun onPlaybackStateChanged(state: PlaybackState?) = publish()
                 }
 
-            fun attach(controllers: List<MediaController>?) {
-                controller?.unregisterCallback(callback)
-                controller = controllers?.firstOrNull { it.packageName == packageName }
-                val current = controller
-                if (current == null) {
-                    trySend(MediaState.Idle)
-                } else {
-                    current.registerCallback(callback, handler)
-                    trySend(stateOf(current))
-                }
+            fun attach(current: List<MediaController>?) {
+                controllers.forEach { it.unregisterCallback(callback) }
+                controllers = current.orEmpty()
+                controllers.forEach { it.registerCallback(callback, handler) }
+                publish()
             }
             val sessionsListener = MediaSessionManager.OnActiveSessionsChangedListener { attach(it) }
             try {
@@ -99,7 +101,7 @@ class MediaSource(
                 trySend(MediaState.NoAccess)
             }
             awaitClose {
-                controller?.unregisterCallback(callback)
+                controllers.forEach { it.unregisterCallback(callback) }
                 manager.removeOnActiveSessionsChangedListener(sessionsListener)
             }
         }.distinctUntilChanged()

@@ -41,8 +41,8 @@
 
         <!--
             Acceso a notificaciones (opt-in, plan.md R8): Android sólo deja leer las sesiones
-            multimedia de otras apps (TIDAL) a quien lo tiene. Hoy no lee notificaciones; el
-            Hito 8 lo usará para los contadores.
+            multimedia de otras apps (TIDAL, módulo `media`) y las notificaciones (insignias de los
+            tiles, contador de la barra y panel) a quien lo tiene. Lo que lee no sale del proceso.
         -->
         <service
             android:name=".media.WhNotificationListener"

@@ -5,8 +5,8 @@ plugins {
 
 android {
     defaultConfig {
-        versionCode = 300
-        versionName = "0.3.0"
+        versionCode = 400
+        versionName = "0.4.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 }
@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":core:system"))
     implementation(project(":feature:bar"))
     implementation(project(":feature:menu"))
+    implementation(project(":feature:notifications"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:widgets"))
     implementation(project(":feature:workspaces"))

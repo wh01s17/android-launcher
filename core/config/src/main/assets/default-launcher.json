@@ -20,6 +20,7 @@
       "center": [],
       "right": [
         { "id": "wh01s17.indicators" },
+        { "id": "media" },
         { "id": "wh01s17.metronome" },
         {
           "id": "wh01s17.clock",
@@ -39,6 +40,9 @@
     { "keys": "SUPER + RETURN", "command": "terminal.open" },
     { "keys": "CTRL + ALT + A", "command": "audio.volume", "args": { "step": 1 } },
     { "keys": "CTRL + ALT + Z", "command": "audio.volume", "args": { "step": -1 } },
+    { "keys": "CTRL + ALT + O", "command": "media.play-pause" },
+    { "keys": "CTRL + ALT + P", "command": "media.next" },
+    { "keys": "CTRL + ALT + I", "command": "media.previous" },
     { "keys": "SUPER + 1", "command": "workspace.focus", "args": { "id": 1 } },
     { "keys": "SUPER + 2", "command": "workspace.focus", "args": { "id": 2 } },
     { "keys": "SUPER + 3", "command": "workspace.focus", "args": { "id": 3 } },

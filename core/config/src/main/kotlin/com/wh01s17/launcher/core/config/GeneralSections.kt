@@ -73,6 +73,21 @@ internal object GeneralSections {
         return AppsConfig(terminal.takeIf { valid } ?: defaults.terminal)
     }
 
+    /** `notifications.toast` y `notifications.toastSeconds`; lo que falta conserva [defaults]. */
+    fun readNotifications(
+        element: JsonElement?,
+        defaults: NotificationsConfig,
+        errors: MutableList<ConfigError>,
+    ): NotificationsConfig {
+        val notifications = section(element, "notifications", errors) ?: return defaults
+        return NotificationsConfig(
+            toast = ConfigValues.readBoolean(notifications["toast"], "notifications.toast", errors) ?: defaults.toast,
+            toastSeconds =
+                ConfigValues.readInt(notifications["toastSeconds"], "notifications.toastSeconds", NotificationsConfig.TOAST_SECONDS, errors)
+                    ?: defaults.toastSeconds,
+        )
+    }
+
     /** El objeto de [path], o `null` si falta (sin error) o no es un objeto (con error). */
     private fun section(
         element: JsonElement?,

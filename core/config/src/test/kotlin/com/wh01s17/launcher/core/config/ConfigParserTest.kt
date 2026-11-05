@@ -32,6 +32,7 @@ class ConfigParserTest {
                 "core.workspaces",
                 "pomodoro",
                 "wh01s17.indicators",
+                "media",
                 "wh01s17.metronome",
                 "wh01s17.clock",
                 "wh01s17.audio",

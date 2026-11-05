@@ -30,6 +30,17 @@
     <string name="bar_audio_level">Volumen al %1$d %%</string>
 
     <string name="bar_dnd">No molestar activado</string>
+    <plurals name="bar_notifications">
+        <item quantity="one">%1$d notificación</item>
+        <item quantity="other">%1$d notificaciones</item>
+    </plurals>
+
+    <!-- Módulo media (plan.md §7 Hito 8). -->
+    <string name="bar_media_playing">Sonando: %1$s</string>
+    <string name="bar_media_paused">En pausa: %1$s</string>
+    <string name="bar_media_unknown">Sin título</string>
+    <string name="bar_media_previous">Anterior</string>
+    <string name="bar_media_next">Siguiente</string>
 
     <string name="bar_unknown_module">Módulo desconocido: %1$s</string>
     <string name="bar_notice_config">config</string>

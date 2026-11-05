@@ -33,6 +33,7 @@ include(
     ":feature:workspaces",
     ":feature:bar",
     ":feature:menu",
+    ":feature:notifications",
     ":feature:scratchpad",
     ":feature:widgets",
     ":feature:settings",

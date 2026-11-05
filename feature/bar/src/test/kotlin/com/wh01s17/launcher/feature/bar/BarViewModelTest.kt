@@ -2,6 +2,7 @@ package com.wh01s17.launcher.feature.bar
 
 import com.wh01s17.launcher.core.input.DefaultLauncherCommandBus
 import com.wh01s17.launcher.core.input.LauncherCommand
+import com.wh01s17.launcher.core.system.notifications.NotificationSummary
 import com.wh01s17.launcher.core.system.status.AudioState
 import com.wh01s17.launcher.core.system.status.BatteryState
 import com.wh01s17.launcher.core.system.status.BluetoothStatus
@@ -47,6 +48,7 @@ class BarViewModelTest {
     private val bluetooth = FakeSource(BluetoothStatus.On)
     private val audio = FakeSource(AudioState(40, muted = false))
     private val dnd = FakeSource(DoNotDisturbState(false))
+    private val notifications = FakeSource(NotificationSummary())
     private val workspaces = MutableStateFlow(WorkspaceBarState())
     private val notices = MutableStateFlow(emptyList<BarNotice>())
     private val bus = DefaultLauncherCommandBus()
@@ -57,7 +59,7 @@ class BarViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = BarViewModel(BarSources(battery, network, bluetooth, audio, dnd), workspaces, notices, bus)
+    private fun viewModel() = BarViewModel(BarSources(battery, network, bluetooth, audio, dnd, notifications), workspaces, notices, bus)
 
     @Test
     fun `the state joins every source and follows their changes`() =

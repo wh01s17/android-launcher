@@ -75,19 +75,35 @@ object ConfigParser {
         errors: MutableList<ConfigError>,
     ): LauncherConfig? {
         val version = readVersion(root["version"], errors)
-        val bar =
-            when (val element = root["bar"]) {
-                null -> fallback?.bar.also { if (it == null) errors += ConfigError("bar", "falta") }
-                is JsonObject -> readBar(element, fallback?.bar ?: BarConfig(), errors)
-                else -> null.also { errors += ConfigError("bar", "debe ser un objeto") }
-            }
+        val bar = readRootBar(root["bar"], fallback?.bar, errors)
         val general = GeneralSections.readGeneral(root["general"], fallback?.general ?: GeneralConfig(), errors)
         val animations = GeneralSections.readAnimations(root["animations"], fallback?.animations ?: AnimationsConfig(), errors)
         val bindings = BindingSections.readBindings(root["bindings"], fallback?.bindings.orEmpty(), errors)
         val keyboard = BindingSections.readKeyboard(root["keyboard"], fallback?.keyboard ?: KeyboardConfig(), errors)
         val apps = GeneralSections.readApps(root["apps"], fallback?.apps ?: AppsConfig(), errors)
-        return if (version != null && bar != null) LauncherConfig(version, bar, general, animations, bindings, keyboard, apps) else null
+        val notifications =
+            GeneralSections.readNotifications(
+                root["notifications"],
+                fallback?.notifications ?: NotificationsConfig(),
+                errors,
+            )
+        return if (version != null && bar != null) {
+            LauncherConfig(version, bar, general, animations, bindings, keyboard, apps, notifications)
+        } else {
+            null
+        }
     }
+
+    private fun readRootBar(
+        element: JsonElement?,
+        fallback: BarConfig?,
+        errors: MutableList<ConfigError>,
+    ): BarConfig? =
+        when (element) {
+            null -> fallback.also { if (it == null) errors += ConfigError("bar", "falta") }
+            is JsonObject -> readBar(element, fallback ?: BarConfig(), errors)
+            else -> null.also { errors += ConfigError("bar", "debe ser un objeto") }
+        }
 
     private fun readVersion(
         element: JsonElement?,

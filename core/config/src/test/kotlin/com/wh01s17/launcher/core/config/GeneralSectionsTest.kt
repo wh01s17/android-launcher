@@ -75,4 +75,25 @@ class GeneralSectionsTest {
             errors("""{"version":1,"apps":{"terminal":"com.termux/"}}"""),
         )
     }
+
+    @Test
+    fun `the toast is off by default and reads its seconds`() {
+        assertEquals(NotificationsConfig(toast = false, toastSeconds = 5), factory.notifications)
+        val config = success("""{"version":1,"notifications":{"toast":true,"toastSeconds":8}}""").notifications
+        assertEquals(NotificationsConfig(toast = true, toastSeconds = 8), config)
+        assertEquals(
+            NotificationsConfig(toast = true, toastSeconds = 5),
+            success("""{"version":1,"notifications":{"toast":true}}""").notifications,
+        )
+    }
+
+    @Test
+    fun `a bad toast value is reported with its path`() {
+        assertEquals(
+            listOf("notifications.toastSeconds" to "debe estar entre 1 y 30"),
+            errors("""{"version":1,"notifications":{"toastSeconds":0}}"""),
+        )
+        assertEquals(listOf("notifications.toast" to "debe ser true o false"), errors("""{"version":1,"notifications":{"toast":"si"}}"""))
+        assertEquals(listOf("notifications" to "debe ser un objeto"), errors("""{"version":1,"notifications":3}"""))
+    }
 }

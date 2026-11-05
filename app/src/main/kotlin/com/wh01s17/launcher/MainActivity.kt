@@ -2,6 +2,7 @@ package com.wh01s17.launcher
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -38,6 +39,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.wh01s17.launcher.core.designsystem.layout.chrome
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.input.WorkspaceCommand
+import com.wh01s17.launcher.core.system.notifications.BadgeKey
+import com.wh01s17.launcher.core.system.notifications.NotificationState
 import com.wh01s17.launcher.feature.bar.Bar
 import com.wh01s17.launcher.feature.bar.BarViewModel
 import com.wh01s17.launcher.feature.bar.barHeight
@@ -47,9 +50,12 @@ import com.wh01s17.launcher.feature.menu.search.MenuSearchViewModel
 import com.wh01s17.launcher.feature.menu.search.SearchIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesIntent
 import com.wh01s17.launcher.feature.workspaces.WorkspacesViewModel
+import com.wh01s17.launcher.feature.workspaces.ui.LocalTileBadges
 import com.wh01s17.launcher.feature.workspaces.ui.LocalWidgetRenderer
+import com.wh01s17.launcher.feature.workspaces.ui.TileBadges
 import com.wh01s17.launcher.feature.workspaces.ui.WorkspacesScreen
 import com.wh01s17.launcher.input.Shortcuts
+import com.wh01s17.launcher.ui.HomeNotifications
 import com.wh01s17.launcher.ui.HomeReturn
 import com.wh01s17.launcher.ui.NotificationOptIn
 import com.wh01s17.launcher.ui.screenReaderSemantics
@@ -174,7 +180,9 @@ class MainActivity : ComponentActivity() {
                 // Los escritorios ocupan lo que dejan la barra y los insets (la exclusive zone de
                 // la barra en Hyprland): ningún tile queda debajo. El teclado no cuenta: los tapa sin
                 // cambiar su tamaño (ver `WhInsets`).
-                CompositionLocalProvider(LocalWidgetRenderer provides widgets.renderer) {
+                val notificationState by container.notifications.state.collectAsStateWithLifecycle(NotificationState())
+                val tileBadges = remember(notificationState.badges) { badgesOf(notificationState.badges) }
+                CompositionLocalProvider(LocalWidgetRenderer provides widgets.renderer, LocalTileBadges provides tileBadges) {
                     WorkspacesScreen(
                         state = workspacesState,
                         iconLoader = container.iconLoader,
@@ -205,6 +213,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
                     )
                 }
+                HomeNotifications(container, ::openNotificationAccess, notificationState, config.config?.notifications)
                 LauncherMenu(
                     page = menuPage,
                     onNavigate = {
@@ -228,6 +237,14 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+        }
+    }
+
+    private fun openNotificationAccess() {
+        try {
+            startActivity(container.notifications.accessSettings())
+        } catch (ignored: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.notification_access_unavailable, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -263,6 +280,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         container.timers.ensureService()
+        container.notifications.ensureBound()
         // Una config editada a mano (o importada) se aplica al volver al inicio.
         lifecycleScope.launch { container.configRepository.reload() }
         if (container.navigationWatchdog.check()) {
@@ -292,6 +310,10 @@ class MainActivity : ComponentActivity() {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (shortcuts.onKeyEvent(event, typing = menu.page.value != null)) return true
         if (event.keyCode != KeyEvent.KEYCODE_ESCAPE) return super.dispatchKeyEvent(event)
+        if (container.notificationPanelOpen.value) {
+            if (event.action == KeyEvent.ACTION_UP && !event.isCanceled) container.notificationPanelOpen.value = false
+            return true
+        }
         if (widgets.pickerOpen) {
             if (event.action == KeyEvent.ACTION_UP && !event.isCanceled) widgets.closePicker()
             return true
@@ -317,7 +339,11 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
             menuController.close()
+            container.notificationPanelOpen.value = false
             workspaces.onIntent(WorkspacesIntent.ExitEdit)
         }
     }
 }
+
+/** Lo que un tile pregunta: cuántas notificaciones tiene su app (y su perfil). */
+private fun badgesOf(badges: Map<BadgeKey, Int>) = TileBadges { app -> badges[BadgeKey(app.packageName, app.userSerial)] ?: 0 }

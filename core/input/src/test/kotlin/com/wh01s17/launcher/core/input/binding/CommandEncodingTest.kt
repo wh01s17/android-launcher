@@ -2,6 +2,7 @@ package com.wh01s17.launcher.core.input.binding
 
 import com.wh01s17.launcher.core.input.CommandDirection
 import com.wh01s17.launcher.core.input.LauncherCommand
+import com.wh01s17.launcher.core.input.MediaKey
 import com.wh01s17.launcher.core.input.WorkspaceCommand
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -15,6 +16,10 @@ class CommandEncodingTest {
             LauncherCommand.OpenNotificationShade,
             LauncherCommand.ShowShortcuts,
             LauncherCommand.OpenTerminal,
+            LauncherCommand.ToggleNotificationPanel,
+            LauncherCommand.ControlMedia(MediaKey.PlayPause),
+            LauncherCommand.ControlMedia(MediaKey.Next),
+            LauncherCommand.ControlMedia(MediaKey.Previous),
             LauncherCommand.AdjustVolume(-2),
             WorkspaceCommand.FocusWorkspace(10),
             WorkspaceCommand.CycleWorkspace(forward = true),

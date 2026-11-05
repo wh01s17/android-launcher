@@ -1,6 +1,7 @@
 package com.wh01s17.launcher.feature.bar
 
 import androidx.compose.runtime.Immutable
+import com.wh01s17.launcher.core.system.notifications.NotificationSummary
 import com.wh01s17.launcher.core.system.status.AudioState
 import com.wh01s17.launcher.core.system.status.BatteryState
 import com.wh01s17.launcher.core.system.status.BluetoothStatus
@@ -56,4 +57,5 @@ data class BarState(
     val doNotDisturb: DoNotDisturbState = DoNotDisturbState(active = false),
     val workspaces: WorkspaceBarState = WorkspaceBarState(),
     val notices: List<BarNotice> = emptyList(),
+    val notifications: NotificationSummary = NotificationSummary(),
 )

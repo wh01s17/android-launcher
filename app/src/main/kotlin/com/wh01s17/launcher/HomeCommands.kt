@@ -1,15 +1,18 @@
 package com.wh01s17.launcher
 
 import android.media.AudioManager
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.wh01s17.launcher.core.apps.actions.LaunchResult
 import com.wh01s17.launcher.core.input.LauncherCommand
+import com.wh01s17.launcher.core.input.MediaKey
 import com.wh01s17.launcher.core.input.WorkspaceCommand
 import com.wh01s17.launcher.di.AppContainer
 import com.wh01s17.launcher.feature.menu.panel.MenuPage
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.abs
@@ -33,6 +36,8 @@ internal class HomeCommands(
             LauncherCommand.ShowShortcuts -> activity.startActivity(SettingsActivity.shortcuts(activity))
             LauncherCommand.OpenTerminal -> openTerminal()
             is LauncherCommand.AdjustVolume -> adjustVolume(command.steps)
+            LauncherCommand.ToggleNotificationPanel -> container.notificationPanelOpen.update { !it }
+            is LauncherCommand.ControlMedia -> sendMediaKey(command.key)
             is WorkspaceCommand -> onWorkspace(command)
         }
     }
@@ -60,6 +65,22 @@ internal class HomeCommands(
         val audio = activity.getSystemService(AudioManager::class.java) ?: return
         val direction = if (steps > 0) AudioManager.ADJUST_RAISE else AudioManager.ADJUST_LOWER
         repeat(abs(steps)) { audio.adjustStreamVolume(AudioManager.STREAM_MUSIC, direction, AudioManager.FLAG_SHOW_UI) }
+    }
+
+    /**
+     * `Ctrl + Alt + O/P/I`: la tecla multimedia llega a la app que tenga la sesión activa, como la de
+     * unos auriculares. Así funciona sin el acceso a notificaciones.
+     */
+    private fun sendMediaKey(key: MediaKey) {
+        val audio = activity.getSystemService(AudioManager::class.java) ?: return
+        val code =
+            when (key) {
+                MediaKey.PlayPause -> KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+                MediaKey.Next -> KeyEvent.KEYCODE_MEDIA_NEXT
+                MediaKey.Previous -> KeyEvent.KEYCODE_MEDIA_PREVIOUS
+            }
+        audio.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, code))
+        audio.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, code))
     }
 
     /**

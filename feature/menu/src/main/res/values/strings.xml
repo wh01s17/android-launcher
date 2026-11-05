@@ -46,6 +46,10 @@
     <string name="menu_next_workspace">Siguiente escritorio ocupado</string>
     <string name="menu_previous_workspace">Escritorio ocupado anterior</string>
     <string name="menu_notifications">Cortina de notificaciones</string>
+    <string name="menu_notification_panel">Notificaciones</string>
+    <string name="menu_media_play_pause">Reproducir o pausar</string>
+    <string name="menu_media_next">Pista siguiente</string>
+    <string name="menu_media_previous">Pista anterior</string>
     <string name="menu_wifi">Wi-Fi</string>
     <string name="menu_bluetooth">Bluetooth</string>
     <string name="menu_audio">Sonido</string>

@@ -2,6 +2,7 @@ package com.wh01s17.launcher.core.input.binding
 
 import com.wh01s17.launcher.core.input.CommandDirection
 import com.wh01s17.launcher.core.input.LauncherCommand
+import com.wh01s17.launcher.core.input.MediaKey
 import com.wh01s17.launcher.core.input.WorkspaceCommand
 
 /** Un problema al leer un comando: [arg] es el argumento culpable, o `null` si es el nombre. */
@@ -35,6 +36,10 @@ object CommandCatalog {
             CommandSpec("menu.apps") { LauncherCommand.OpenAppsMenu },
             CommandSpec("menu.system") { LauncherCommand.OpenSystemMenu },
             CommandSpec("notifications.open") { LauncherCommand.OpenNotificationShade },
+            CommandSpec("notifications.panel") { LauncherCommand.ToggleNotificationPanel },
+            CommandSpec("media.play-pause") { LauncherCommand.ControlMedia(MediaKey.PlayPause) },
+            CommandSpec("media.next") { LauncherCommand.ControlMedia(MediaKey.Next) },
+            CommandSpec("media.previous") { LauncherCommand.ControlMedia(MediaKey.Previous) },
             CommandSpec("shortcuts.show") { LauncherCommand.ShowShortcuts },
             CommandSpec("terminal.open") { LauncherCommand.OpenTerminal },
             CommandSpec("audio.volume", "step") { LauncherCommand.AdjustVolume(it.int("step", VOLUME_STEP)) },

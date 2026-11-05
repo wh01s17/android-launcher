@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.widget.Toast
 import com.wh01s17.launcher.core.input.CommandDirection
 import com.wh01s17.launcher.core.input.LauncherCommand
+import com.wh01s17.launcher.core.input.MediaKey
 import com.wh01s17.launcher.core.input.WorkspaceCommand
 import com.wh01s17.launcher.core.system.navigation.NotificationShade
 import com.wh01s17.launcher.feature.menu.panel.MenuAction
@@ -42,7 +43,7 @@ internal class MenuActions(
             MenuAction.PowerDialog -> requestAccessibility(navigationActions.powerDialog())
             MenuAction.Notifications -> requestAccessibility(navigationActions.open())
             else -> {
-                val command = workspaceCommand(action)
+                val command = LAUNCHER_ACTIONS[action] ?: workspaceCommand(action)
                 if (command != null) {
                     onCommand(command)
                     true
@@ -99,6 +100,14 @@ internal class MenuActions(
         Toast.makeText(activity, com.wh01s17.launcher.feature.menu.R.string.drawer_message_failed, Toast.LENGTH_LONG).show()
     }
 }
+
+private val LAUNCHER_ACTIONS: Map<MenuAction, LauncherCommand> =
+    mapOf(
+        MenuAction.NotificationPanel to LauncherCommand.ToggleNotificationPanel,
+        MenuAction.MediaPlayPause to LauncherCommand.ControlMedia(MediaKey.PlayPause),
+        MenuAction.MediaNext to LauncherCommand.ControlMedia(MediaKey.Next),
+        MenuAction.MediaPrevious to LauncherCommand.ControlMedia(MediaKey.Previous),
+    )
 
 private fun workspaceCommand(action: MenuAction): WorkspaceCommand? = WORKSPACE_ACTIONS[action] ?: workspaceDestination(action)
 
