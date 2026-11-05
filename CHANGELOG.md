@@ -3,6 +3,36 @@
 El proyecto usa [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
+## [0.3.0] — 2026-11-05
+
+Hito 7: widgets, y el pulido y el rendimiento pedidos durante el hito.
+
+### Añadido
+
+- Widgets del sistema como tiles, con un selector propio que tiene buscador.
+- Widgets propios: TIDAL (tema *nova* de tidalamp, paletas y visualizador elegibles), pomodoro,
+  metrónomo (el tempo se escribe tocando el número), reloj con calendario y uso del sistema
+  (estilo btop a pantalla completa). Se adaptan al tamaño del tile.
+- Módulos de barra `pomodoro` y `wh01s17.metronome`, con su panel al mantener pulsado.
+- Servicio en primer plano mientras el pomodoro o el metrónomo corren, con notificación (cuenta
+  atrás, pausar, saltar, parar) y aviso al terminar cada fase; permiso de notificaciones opt-in.
+- Grupos como en Hyprland, sólo a petición: soltar un tile en el centro de otro, botones del modo
+  edición y `SUPER + G` / `SUPER + ALT + G` / `SUPER + ALT + flechas`.
+- La «W» del escritorio en el botón del menú.
+- Compilación `fast` para el uso diario: no depurable, mismos datos que la debug.
+
+### Cambiado
+
+- La barra de fábrica no repite la de Android (hora, red, bluetooth, batería): fecha a la derecha.
+- El menú usa un solo tamaño de letra.
+
+### Corregido
+
+- Las apps nuevas ya no se agrupan solas al pasar de 8 tiles.
+- El selector de widgets se cierra con *atrás* y Escape.
+- El teclado aparecía «a cámara lenta»: los escritorios ya no se recalculan en cada fotograma de su
+  animación. Deslizar escritorios y abrir el menú son mucho más fluidos.
+
 ## [0.2.0] — 2026-11-04
 
 Hito 6: teclado físico y gestos configurables.

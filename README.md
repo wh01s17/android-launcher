@@ -4,16 +4,19 @@ Launcher para Android que recrea el uso de Hyprland (workspaces, tiling,
 barra modular, menú y atajos) con el tema `wh01s17` de
 [dotfiles](https://github.com/wh01s17/dotfiles).
 
-Estado: en desarrollo, con los **hitos 0–6 terminados (`0.2.0`)**. Ya incluye catálogo
+Estado: en desarrollo, con los **hitos 0–7 terminados (`0.3.0`)**. Ya incluye catálogo
 de apps con búsqueda difusa, barra modular, navegación propia para HyperOS
 y diez escritorios con tiles, edición y persistencia. Los tiles abren las
 apps; no las incrustan en el escritorio.
 
 El menú wh01s17 reúne apps, comandos, ajustes y atajos, con ranking persistente
 y navegación por teclado. Los atajos de teclado y los gestos se configuran como en
-`bindings.lua` (`ALT` hace de `SUPER`; `ALT + K` muestra la tabla). El próximo paso es el
-**Hito 7: widgets**. El avance se mantiene en [`plan.md` §12](plan.md#12-estado-actual).
-Esta versión se instala como APK debug; la distribución firmada llega en el Hito 11.
+`bindings.lua` (`ALT` hace de `SUPER`; `ALT + K` muestra la tabla). Los tiles pueden ser widgets
+del sistema o propios (TIDAL, pomodoro, metrónomo, reloj y uso del sistema), y el pomodoro y el
+metrónomo también viven en la barra. El próximo paso es el **Hito 8: scratchpad, notificaciones y
+media**. El avance se mantiene en [`plan.md` §12](plan.md#12-estado-actual).
+Esta versión se instala como APK de depuración (`./gradlew installFast` para el uso diario); la
+distribución firmada llega en el Hito 11.
 
 Probado en Redmi Note 13 Pro 5G con HyperOS 2.0.204 (Android 15).
 

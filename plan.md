@@ -940,8 +940,24 @@ multitáctil). Guía: [`docs/bindings.md`](docs/bindings.md).
       «wh01s17» del selector. Además, a petición del usuario, **TIDAL** con el tema *nova* de
       tidalamp y sus paletas (phosphor de fábrica; tocar el título cambia), sobre `MediaSource`
       y el acceso a notificaciones opt-in. Pendiente: oír el metrónomo en el Redmi.
-- [ ] Módulos de barra correspondientes (`pomodoro`, `wh01s17.metronome`).
-- [ ] Servicio en primer plano sólo para pomodoro/metrónomo activos.
+- [x] Módulos de barra correspondientes (`pomodoro`, `wh01s17.metronome`). Sobre los mismos
+      repositorios que los tiles (`feature/bar/timer`): pomodoro con icono de fase y tiempo (sin
+      empezar, sólo el icono, para caber en 407 dp) y clases de `pomodoro.sh`; metrónomo analógico de
+      `MetronomeIcon.qml` con la varilla por tiempo. Tocar inicia/pausa, mantener abre su panel
+      (`BarPopup`, compartido con el calendario). En la barra de fábrica, como en `shell.json`.
+- [x] Servicio en primer plano sólo para pomodoro/metrónomo activos. `TimerService`
+      (`mediaPlayback` con el metrónomo, `specialUse` con el pomodoro) con notificación (cuenta
+      atrás, pausar, saltar, parar); `TimerCoordinator` lo arranca, programa la alarma exacta del fin
+      de fase y publica el aviso cuando una fase termina sola (`Pomodoro.finished`); permiso de
+      notificaciones con explicación previa (R8). Probado en el Redmi: servicio y tipos, metrónomo
+      sonando (`AudioTrack` iniciado), alarma exacta, aviso «Terminó el enfoque» y parada al reiniciar.
+
+**Hito 7 terminado (2026-11-05)** → `0.3.0` (versionCode `300`). Comprobado con
+`./gradlew check assembleFast` y en el Redmi por ADB. Además, a petición del usuario durante el hito:
+grupos explícitos, barra sin repetir la de Android, rendimiento, buscador del selector de widgets y
+tempo del metrónomo escribible (§13). Pendiente manual: que el usuario confirme que oye el
+metrónomo (por ADB sólo se vio el `AudioTrack` sonando) y probar a mano escribir el tempo (cubierto
+con una prueba de Compose). No se porta la sincronización de No molestar de `pomodoro.sh`.
 
 ### Hito 8 — Scratchpad, notificaciones y media (M)
 
@@ -1199,6 +1215,13 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-04 | Sin lector de pantalla, el árbol de accesibilidad del inicio se vacía (`screenReaderSemantics`) | Compose lo recalcula en cada fotograma si hay *cualquier* servicio de accesibilidad, y el nuestro de gestos siempre lo está (25 % del hilo principal al deslizar). Con TalkBack vuelve en el acto |
 | 2026-11-04 | Tipo de compilación `fast` (no depurable, perfilable, firma debug, mismo id que debug) para el uso diario | En debug ART interpreta casi todo: deslizar escritorios 17 % → 4 % de fotogramas tarde. Comparte datos con la debug; R8 y Baseline Profile siguen en el Hito 11 |
 | 2026-11-04 | Menú con un solo cuerpo de letra (título, buscador y filas) y fila de 40 dp (50 dp con la escala 1,25) | El usuario veía tamaños mezclados y letra grande; sigue por encima del área táctil de 48 dp |
+| 2026-11-05 | Los módulos `pomodoro` y `wh01s17.metronome` reciben su repositorio (como `ClockModule` su reloj), no pasan por `BarState` | Tile, barra y servicio comparten un único estado; sin duplicar comandos en el bus |
+| 2026-11-05 | Pomodoro en la barra: sin empezar sólo el icono; tocar inicia/pausa y mantener abre el panel. Metrónomo: tocar inicia/para | La barra del teléfono no tiene sitio para el tiempo en reposo; en el teléfono no hay clic central/derecho ni rueda |
+| 2026-11-05 | Servicio en primer plano `mediaPlayback` (metrónomo) + `specialUse` (pomodoro, sin tipo propio en Android) | Android 14+ exige tipo; el pomodoro es un temporizador iniciado por el usuario (justificado en el manifiesto) |
+| 2026-11-05 | Fin de fase con alarma exacta (`USE_EXACT_ALARM`; `SCHEDULE_EXACT_ALARM` sólo en Android 12) | Con el teléfono dormido el `delay` interno llega minutos tarde aunque haya servicio; es un temporizador del usuario |
+| 2026-11-05 | `POST_NOTIFICATIONS` opt-in con explicación la primera vez que algo corre; «ahora no» no vuelve a preguntar | R8; sin el permiso el servicio funciona y sólo faltan los avisos |
+| 2026-11-05 | No se porta la sincronización de No molestar de `pomodoro.sh` durante el enfoque | Exige el acceso a la política de notificaciones (otro permiso especial); queda para el Hito 8 si se pide |
+| 2026-11-05 | Tempo del metrónomo escribible con `WhNumberField` (sistema de diseño), en el tile y en el panel de la barra | Petición del usuario; Enter aplica, Escape/atrás cancelan y ocultar el teclado aplica lo escrito |
 
 ### 11.2 Riesgos
 
@@ -1224,23 +1247,23 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-04:** 54 de 75 tareas marcadas (72 % del plan completo);
+- **Balance al 2026-11-05:** 56 de 75 tareas marcadas (75 % del plan completo);
   MVP completo: 45 de 45 (100 %). Son casillas, no una medida del esfuerzo.
-  Quedan los Hitos 7–11; el 9 es experimental y no bloquea la 1.0.
-- **Hito en curso:** Hito 7 (2 de 4 tareas). **Hitos 0–6 terminados**; versión `0.2.0`. Los
+  Quedan los Hitos 8–11; el 9 es experimental y no bloquea la 1.0.
+- **Hito en curso:** Hito 8 (0 de 4 tareas). **Hitos 0–7 terminados**; versión `0.3.0`. Los
   cierres y sus pruebas siguen en §13.
-- **Última tarea completada:** sesión de pulido a petición del usuario (§13): grupos explícitos,
-  barra sin repetir la de Android (con la «W» del escritorio), menú con un solo tamaño de letra,
-  widgets que se adaptan al tamaño del tile y rendimiento (insets sin teclado animado, accesibilidad
-  sólo con lector de pantalla, compilación `fast`). Medido en el Redmi con `gfxinfo` y simpleperf.
+- **Última tarea completada:** **Hito 7 cerrado**: módulos de barra del pomodoro y el metrónomo y
+  servicio en primer plano con notificación, alarma exacta y aviso de fin de fase; además, buscador
+  en el selector de widgets y tempo escribible (peticiones del usuario). Probado en el Redmi.
 - **Incidencia de la sesión (resuelta):** la primera versión de la animación de vuelta cerraba el
   launcher al volver; HyperOS mostró el selector de launcher. Se cerró sin elegir, se reafirmó el
   rol HOME de `com.wh01s17.launcher.debug` y se corrigió (§13).
-- **Siguiente tarea:** Hito 7, módulos de barra `pomodoro` y `wh01s17.metronome` sobre
-  `PomodoroRepository`/`MetronomeRepository` (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
+- **Siguiente tarea:** Hito 8, scratchpad (modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
   Bluetooth y los gestos de dos dedos a mano; medir en release la primera
   carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj;
-  probar a mano en el Redmi agrupar por arrastre y con los botones; oír el metrónomo.
+  probar a mano en el Redmi agrupar por arrastre y con los botones, oír el metrónomo y escribir el
+  tempo. Tras reinstalar, la vigilancia puede devolver los botones un instante hasta que el servicio
+  de gestos se reenlaza (visto el 2026-11-05; se ocultan solos).
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
   launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio → `ajustes`),
   activar el modo. El permiso `WRITE_SECURE_SETTINGS` ya está concedido a la app debug.
@@ -1258,7 +1281,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   funciona. Se restauró `0` (3 botones). La capa 3 pasa a ser la navegación
   principal (Hito 2). Observaciones, ajustes y matriz de pruebas en
   [`docs/xiaomi.md`](docs/xiaomi.md).
-- **Versión:** `0.2.0` (Hito 6, etiqueta `v0.2.0`); el MVP fue `0.1.0`. En el Redmi va la compilación
+- **Versión:** `0.3.0` (Hito 7); antes `0.2.0` (Hito 6, etiqueta `v0.2.0`) y el MVP `0.1.0`. En el Redmi va la compilación
   `fast` (`./gradlew installFast`, mismo id y datos que la debug; ver `docs/setup.md`);
   firma y distribución de APK release siguen en el Hito 11. Historial en `CHANGELOG.md`.
 
@@ -1270,6 +1293,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-05 | 7 | **Hito 7 cerrado → 0.3.0.** Módulos `pomodoro` y `wh01s17.metronome` (`feature/bar/timer`, panel con `BarPopup`, captura `bar-timers`), `Pomodoro.finished`, `TimerSnapshot`, `MetronomeState.ticks`, `PomodoroRepository.tick`; `TimerService` + `TimerCoordinator` + `PomodoroAlarmReceiver` + `NotificationOptIn` en la app, icono de notificación con la «W». Peticiones del usuario: buscador en el selector de widgets (`WidgetSearch` sobre `core/fuzzy`) y tempo escribible (`WhNumberField`). En el Redmi (con permiso del usuario): pomodoro desde la barra con servicio `specialUse` y notificación «Pomodoro · Enfoque · Sesión 1/4» con cuenta atrás, metrónomo con `AudioTrack` iniciado y servicio `mediaPlayback\|specialUse`, fase reducida a 1 min → alarma exacta (`policy_permission`) → aviso «Terminó el enfoque · Ahora: Descanso corto · 5 min» → reinicio, servicio parado y alarma cancelada. El usuario usó el teléfono a la vez; se paró la prueba del tempo en el dispositivo y se cubrió con una prueba de Compose | `feature/bar/timer/`, `app/timer/`, `core/system/timer/`, `core/designsystem/components/WhNumberField.kt`, `feature/widgets/ui/` |
 | 2026-11-04 | 7 | Pulido a petición del usuario. **Widgets:** se adaptan al tamaño del tile (`WidgetSize` pequeño/mediano/grande/completo), uso del sistema estilo btop a pantalla completa, glifos de transporte dibujados, cifra grande que crece y se centra; el selector se cierra con *atrás*/Escape; sin clima (R9). **Grupos:** sólo explícitos (`groupWith`, `toggleGroup`, `moveIntoGroup`, `moveOutOfGroup`; soltar en el centro, botones `agrupar`/`desagrupar`/`sacar`, `Super + G`); el usuario tenía dos grupos creados solos y se le dijo cómo deshacerlos. **Barra:** se probó ocultar la de Android y se volvió atrás; la de fábrica deja menú, escritorios, avisos, fecha y volumen; la «W» de los dotfiles; el centro esquiva el recorte de la cámara. **Menú:** un solo tamaño de letra. **Rendimiento (gfxinfo/simpleperf en el Redmi):** `safeDrawing` hacía medir el mosaico en cada fotograma del teclado (menú 86 % → 14 % de fotogramas tarde, mediana 65 → 13 ms); accesibilidad sólo con TalkBack (25 % del hilo principal); compilación `fast` (deslizar 17 % → 4 %, escritorio 1 al 3 %). Sin mejora medible: dejar compuestos los escritorios vecinos (se quitó) | `core/tiling/WorkspaceGroups.kt`, `core/designsystem/layout/WhInsets.kt`, `core/designsystem/icons/WhMark.kt`, `feature/bar/BarLayout.kt`, `app/ui/ScreenReaderSemantics.kt`, `build-logic/…/AndroidApplicationConventionPlugin.kt`, `docs/` |
 | 2026-11-04 | 7 | Widget de TIDAL al tema *nova* (petición del usuario), paleta y forma del analizador elegibles (`fine` de fábrica; `bars`, `mirror`, `curve`), visualizador con `AudioSpectrum` (`Visualizer` de la mezcla, permiso de micrófono opt-in) y contenido alineado arriba. Lo que parecía un tile perdido en el escritorio 3 eran cambios del propio usuario con el teléfono en la mano (confirmado); mi «restauración» los deshizo y se dejó todo como él lo tenía. Aun así se endureció el pager: `PageSettled` sólo tras un arrastre y tocar un tile hace actual su escritorio (prueba de regresión). Metrónomo: puntos del color de su sonido, tocarlos alterna «marcar el 1»/«todos iguales», leyenda con las voces; encabezados nova («▍ pomodoro») y widgets alineados arriba; tocar la carátula abre TIDAL | `feature/widgets/native/`, `core/system/media/AudioSpectrum.kt`, `app/widgets/HomeWidgets.kt` |
 | 2026-11-04 | 7 | Widgets nativos: `core/system/timer` (pomodoro puro + repositorio persistente, metrónomo puro + `AudioTrack`), `core/system/media` (`MediaSource`, `WhNotificationListener`), `TileContent.Native`, `feature/widgets/native` (TIDAL, pomodoro, metrónomo, reloj, uso; estilos `Retro` y `Nova`), `TidalampPalettes` en `core/designsystem` (16 paletas de tidalamp). En el Redmi: acceso a notificaciones concedido por ADB con permiso del usuario, TIDAL sonando con carátula, tiempo, canción, avance y pausa desde el widget; paleta cambiada y devuelta a phosphor; tiles de TIDAL y pomodoro en el escritorio 5. 8 pruebas nuevas | `core/system/timer/`, `core/system/media/`, `feature/widgets/native/`, `core/designsystem/palette/` |
