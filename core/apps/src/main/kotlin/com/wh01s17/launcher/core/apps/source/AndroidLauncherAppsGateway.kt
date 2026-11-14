@@ -23,6 +23,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
+import java.io.File
 
 /**
  * [LauncherAppsGateway] real: `LauncherApps` para las apps y sus cambios, `UserManager` para los
@@ -35,6 +36,7 @@ class AndroidLauncherAppsGateway(
     context: Context,
 ) : LauncherAppsGateway {
     private val appContext = context.applicationContext
+    private val labels = LabelCache(File(appContext.noBackupFilesDir, "app-labels.tsv"))
     private val launcherApps = appContext.getSystemService(LauncherApps::class.java)
     private val userManager = appContext.getSystemService(UserManager::class.java)
     private val myUser = Process.myUserHandle()
@@ -54,9 +56,13 @@ class AndroidLauncherAppsGateway(
         packageName: String?,
     ): List<AppEntry> {
         val user = userHandle(userSerial) ?: return emptyList()
+        val locale =
+            appContext.resources.configuration.locales[0]
+                .toLanguageTag()
         return runCatching { launcherApps.getActivityList(packageName, user) }
             .getOrDefault(emptyList())
-            .map { it.toEntry(userSerial) }
+            .map { it.toEntry(userSerial, locale) }
+            .also { labels.save() }
     }
 
     override fun events(): Flow<AppEvent> =
@@ -143,17 +149,25 @@ class AndroidLauncherAppsGateway(
         user == myUser ||
             runCatching { !userManager.isQuietModeEnabled(user) && userManager.isUserUnlocked(user) }.getOrDefault(true)
 
-    private fun LauncherActivityInfo.toEntry(userSerial: Long) =
-        AppEntry(
-            key = AppKey(componentName.packageName, componentName.className, userSerial),
-            label = label?.toString().orEmpty().ifBlank { componentName.packageName },
-            suspended = applicationInfo.flags and ApplicationInfo.FLAG_SUSPENDED != 0,
-            iconStamp =
-                applicationInfo.sourceDir
-                    .orEmpty()
-                    .hashCode()
-                    .toLong(),
-        )
+    private fun LauncherActivityInfo.toEntry(
+        userSerial: Long,
+        locale: String,
+    ) = AppEntry(
+        key = AppKey(componentName.packageName, componentName.className, userSerial),
+        // Leer el nombre abre los recursos del APK: se guarda entre arranques (LabelCache).
+        label =
+            labels.label(
+                LabelCache.key(componentName.flattenToShortString(), userSerial, applicationInfo.sourceDir.orEmpty(), locale),
+            ) {
+                label?.toString().orEmpty().ifBlank { componentName.packageName }
+            },
+        suspended = applicationInfo.flags and ApplicationInfo.FLAG_SUSPENDED != 0,
+        iconStamp =
+            applicationInfo.sourceDir
+                .orEmpty()
+                .hashCode()
+                .toLong(),
+    )
 
     private fun systemEventsFilter() =
         IntentFilter().apply {
