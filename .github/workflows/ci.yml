@@ -27,8 +27,29 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      - name: Check (tests, lint, ktlint, detekt, longitud de archivos)
-        run: ./gradlew check assembleDebug --continue
+      # La release se firma con la clave de los secretos (docs/release.md). Sin ellos (un fork, un PR
+      # desde fuera) sale sin firmar: sirve para comprobar R8, no para instalar.
+      - name: Clave de firma (si está)
+        env:
+          SIGNING_KEYSTORE_B64: ${{ secrets.SIGNING_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$SIGNING_KEYSTORE_B64" ]; then
+            echo "$SIGNING_KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/release.jks"
+            echo "SIGNING_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+          else
+            echo "::notice::Sin SIGNING_KEYSTORE_B64: el APK release sale sin firmar"
+          fi
+
+      - name: Check (tests, lint, ktlint, detekt, longitud de archivos) y APKs
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: ./gradlew check assembleDebug assembleRelease --continue
+
+      - name: Borrar la clave
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
 
       - name: Subir APK debug
         if: success()
@@ -36,6 +57,18 @@ jobs:
         with:
           name: wh01s17-launcher-debug
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      # APK release de cada push (firmado si hay secretos) con su mapping.txt para descifrar trazas
+      # de R8. Las versiones publicadas salen de release.yml al subir un tag vX.Y.Z.
+      - name: Subir APK release
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: wh01s17-launcher-release
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/mapping/release/mapping.txt
           if-no-files-found: error
 
       - name: Subir informes
