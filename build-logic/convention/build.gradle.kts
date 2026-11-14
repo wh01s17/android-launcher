@@ -49,6 +49,10 @@ gradlePlugin {
             id = "wh01s17.android.compose"
             implementationClass = "AndroidComposeConventionPlugin"
         }
+        register("androidTest") {
+            id = "wh01s17.android.test"
+            implementationClass = "AndroidTestConventionPlugin"
+        }
         register("designTokens") {
             id = "wh01s17.design.tokens"
             implementationClass = "DesignTokensConventionPlugin"

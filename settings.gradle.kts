@@ -34,8 +34,10 @@ include(
     ":feature:bar",
     ":feature:menu",
     ":feature:notifications",
-    ":feature:scratchpad",
     ":feature:widgets",
     ":feature:settings",
     ":feature:screensaver",
 )
+
+// Baseline Profile y Macrobenchmark de la app (plan.md §7 Hito 11).
+include(":benchmark")
