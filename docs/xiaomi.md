@@ -108,8 +108,9 @@ viva (§5.9). Con otro launcher ajeno ya se vio que no funciona ningún gesto (f
 Gestos simulados con `adb shell input swipe` / `input motionevent`; las acciones salen del log
 `WhNavigation: action: …`. Los ajustes de las franjas (cada gesto, grosor, sensibilidad) están en
 Ajustes → Compatibilidad → gestos de borde y se aplican al momento: apagar *atrás izquierdo* dejó
-ese borde sin acción y el derecho siguió funcionando. Con el teclado abierto, la franja inferior no recibe toques y las
-laterales terminan encima del teclado (y = 1589 en vez de 2664).
+ese borde sin acción y el derecho siguió funcionando. Con el teclado abierto las
+laterales terminan encima del teclado (y = 1589 en vez de 2664) y, desde el 2026-11-13, la inferior
+adelgaza a la mitad pegada al borde (SwiftKey llega hasta el borde: sin inset de navegación).
 
 ## Vigilancia (modo *gestos wh01s17*)
 
@@ -157,3 +158,29 @@ adb logcat -s WhNavigation WhNavigationWatchdog
 
 El test instrumentado pone el launcher como HOME, activa el servicio y el modo, mata `:nav` y
 lo deja todo como estaba (rol, ajustes, servicios, archivo del modo).
+
+## Limpiar recientes (la X) cierra el launcher
+
+Visto el 2026-11-13 con el registro completo: la X de recientes lanza `OneKeyClean`
+(`ProcessSceneCleaner`), que mata `com.wh01s17.launcher.debug` y `:nav` aunque éste tenga adj 200. El
+servicio de gestos se reprogramó a 70 s y volvió a los ~11 s; mientras, no hay navegación propia.
+La limpieza respeta las apps bloqueadas con el candado de recientes, guardadas en
+`settings system locked_apps` (JSON por usuario). El launcher no sale en recientes, así que se añade a
+mano, conservando lo que haya:
+
+```sh
+adb shell settings get system locked_apps
+adb shell "settings put system locked_apps '[{\"u\":0,\"pkgs\":[\"com.aspiro.tidal\",\"com.wh01s17.launcher.debug\"]},{\"u\":-100,\"pkgs\":[\"com.jeejen.family.miui\"]}]'"
+```
+
+Una app no puede escribir esa clave (no es pública en `Settings.System`), así que no lo hace el
+asistente de Compatibilidad. HyperOS sólo la lee al arrancar: hay que **reiniciar** después. Probado el
+2026-11-13: tras reiniciar, la X ya no mata el launcher.
+
+Segundo efecto: los recientes de HyperOS calculan la «app actual» que mantienen (`RecentsModel:
+getRunningTask`) ignorando la tarea de inicio, así que desde wh01s17 mantenían y abrían la última app
+(`startActivityFromRecents`). `RecentsClearGuard` (en `:nav`) recuerda la última app activa y, si al
+pulsar «Eliminar todo» (`com.miui.home:id/clearAnimView`) era el launcher, vuelve al inicio cuando
+aparece la app mantenida (se ve un instante). Esa app sigue abierta y en recientes: Android no deja a
+otra app quitar tareas ajenas, y desde Android 14 `killBackgroundProcesses` sólo cierra procesos propios
+(se probó con WhatsApp el 2026-11-14 y no tuvo efecto). Descartar una tarjeta deslizándola ya volvía al inicio.

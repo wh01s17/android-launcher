@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Sólo eventos de cambio de ventanas, para saber si el teclado está abierto y no taparlo con las
-    franjas. No se lee el contenido de ninguna ventana (plan.md §5.9).
+    Cambios de ventana, para saber si el teclado está abierto y no taparlo con las franjas, y qué
+    paquete está activo. Clics sólo para reconocer «Eliminar todo» en los recientes de HyperOS por su
+    id (RecentsClearGuard). No se lee el contenido de ninguna ventana (plan.md §5.9).
 -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:accessibilityEventTypes="typeWindowsChanged"
+    android:accessibilityEventTypes="typeWindowsChanged|typeViewClicked"
     android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagRetrieveInteractiveWindows"
+    android:accessibilityFlags="flagRetrieveInteractiveWindows|flagReportViewIds"
     android:canRetrieveWindowContent="true"
     android:description="@string/nav_service_description"
     android:isAccessibilityTool="false"

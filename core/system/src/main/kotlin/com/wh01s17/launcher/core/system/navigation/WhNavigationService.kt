@@ -9,10 +9,12 @@ import android.content.res.Configuration
 import android.database.ContentObserver
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityWindowInfo
 import androidx.core.content.ContextCompat
 import com.wh01s17.launcher.core.system.oem.xiaomi.GestureModePrefs
 import com.wh01s17.launcher.core.system.oem.xiaomi.GestureModeStatus
@@ -31,8 +33,9 @@ import com.wh01s17.launcher.core.system.oem.xiaomi.XiaomiGestureCompat
  * Corre en su propio proceso (`:nav`): si el launcher falla, la navegación sigue; si este proceso
  * muere, el launcher lo nota al instante ([NavigationWatchdog]) y devuelve los botones.
  *
- * Privacidad: pide ver las ventanas sólo para saber si el teclado está abierto y no taparlo. No lee
- * el contenido de ninguna app.
+ * Privacidad: pide ver las ventanas para saber si el teclado está abierto y no taparlo, y qué paquete
+ * está activo; de los clics sólo mira el id del botón «Eliminar todo» de los recientes de HyperOS
+ * ([RecentsClearGuard]). No lee el contenido de ninguna app.
  */
 class WhNavigationService : AccessibilityService() {
     private val handler = Handler(Looper.getMainLooper())
@@ -40,6 +43,25 @@ class WhNavigationService : AccessibilityService() {
     private lateinit var compat: XiaomiGestureCompat
     private var overlay: EdgeStripOverlay? = null
     private var stopping = false
+    private val recentsGuard by lazy { RecentsClearGuard(packageName) }
+
+    /**
+     * Pasa la app activa a [recentsGuard]. Tras «Eliminar todo» se repite hasta que HyperOS abre la
+     * app mantenida: su ventana tarda en tener contenido y después no llega otro cambio de ventanas.
+     */
+    private val activeAppCheck: Runnable =
+        object : Runnable {
+            override fun run() {
+                handler.removeCallbacks(this)
+                val now = SystemClock.uptimeMillis()
+                val active = windows.activeAppPackage(packageName)
+                if (active != null && recentsGuard.onActiveApp(active, now)) {
+                    Log.i(TAG, "recents cleared from home: back home")
+                    performGlobalAction(GLOBAL_ACTION_HOME)
+                }
+                if (recentsGuard.isPending(now)) handler.postDelayed(this, CLEAR_CHECK_MILLIS)
+            }
+        }
 
     /** Ajustes de las franjas ya «efectivos»: con los botones ocultos, *inicio* siempre activo. */
     private var edges = EdgeSettings()
@@ -98,7 +120,17 @@ class WhNavigationService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) refreshLayout()
+        when (event.eventType) {
+            AccessibilityEvent.TYPE_WINDOWS_CHANGED -> {
+                refreshLayout()
+                activeAppCheck.run()
+            }
+            AccessibilityEvent.TYPE_VIEW_CLICKED ->
+                if (event.isClearAllRecents()) {
+                    recentsGuard.onClearAll(SystemClock.uptimeMillis())
+                    activeAppCheck.run()
+                }
+        }
     }
 
     override fun onInterrupt() = Unit
@@ -122,6 +154,7 @@ class WhNavigationService : AccessibilityService() {
     private fun shutdown() {
         if (stopping) return
         stopping = true
+        handler.removeCallbacks(activeAppCheck)
         val active = overlay != null
         if (active) {
             // Primero dejar de escuchar: si no, nuestro propio 0 nos haría volver a ocultarlos.
@@ -173,8 +206,33 @@ class WhNavigationService : AccessibilityService() {
 
     private companion object {
         const val TAG = "WhNavigation"
+        const val CLEAR_CHECK_MILLIS = 250L
     }
 }
 
 /** Con el modo *gestos wh01s17* activado los botones pueden estar ocultos: *inicio* no se apaga. */
 private fun XiaomiGestureCompat.effectiveEdges(): EdgeSettings = files.readEdges().effective(buttonsHidden = files.readPrefs().enabled)
+
+/**
+ * Sólo el paquete de la app activa, para [RecentsClearGuard]; no se lee su contenido. Si ninguna lo
+ * está aún, el de la primera ventana de app que no sea [self]: el launcher puede seguir listado
+ * detrás de los recientes y sólo cuenta si está activo.
+ */
+private fun List<AccessibilityWindowInfo>.activeAppPackage(self: String): String? {
+    val apps = filter { it.type == AccessibilityWindowInfo.TYPE_APPLICATION }
+    apps
+        .firstOrNull { it.isActive }
+        ?.root
+        ?.packageName
+        ?.let { return it.toString() }
+    return apps.firstNotNullOfOrNull { window ->
+        window.root
+            ?.packageName
+            ?.toString()
+            ?.takeIf { it != self }
+    }
+}
+
+/** El botón «Eliminar todo» de los recientes de HyperOS; de otras apps no se mira nada. */
+private fun AccessibilityEvent.isClearAllRecents(): Boolean =
+    packageName == RecentsClearGuard.MIUI_HOME && source?.viewIdResourceName == RecentsClearGuard.CLEAR_ALL_ID
