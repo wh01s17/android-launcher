@@ -17,9 +17,9 @@ class EdgeLayoutTest {
     }
 
     @Test
-    fun `the keyboard hides the bottom strip and shortens the sides`() {
+    fun `the keyboard thins the bottom strip and shortens the sides`() {
         val strips = layoutStrips(redmi.copy(imeTop = 1700))
-        assertNull(strips[Edge.Bottom])
+        assertEquals(StripRect(0, 2712 - 24, 1220, 24), strips[Edge.Bottom])
         assertEquals(1700 - 110, strips[Edge.Left]!!.height)
     }
 

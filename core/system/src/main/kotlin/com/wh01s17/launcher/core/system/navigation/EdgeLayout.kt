@@ -10,7 +10,9 @@ data class StripRect(
 
 /**
  * Lo que decide dónde van las franjas. [imeTop] es el borde superior del teclado si está abierto;
- * [suspended] las desactiva todas (pantalla de bloqueo).
+ * [suspended] las desactiva todas (pantalla de bloqueo). [imeBottomThicknessPx] es el grosor de la
+ * franja inferior con el teclado abierto: más fina, pegada al borde, para tapar lo mínimo de su última
+ * fila (SwiftKey llega hasta el borde de la pantalla).
  */
 data class EdgeLayoutInput(
     val screenWidth: Int,
@@ -20,14 +22,16 @@ data class EdgeLayoutInput(
     /** Alto de la barra de estado: las franjas laterales empiezan debajo para no robar la cortina. */
     val topExclusionPx: Int,
     val imeTop: Int? = null,
+    val imeBottomThicknessPx: Int = bottomThicknessPx / 2,
     val suspended: Boolean = false,
     val enabled: Set<Edge> = Edge.entries.toSet(),
 )
 
 /**
  * Dónde va cada franja; `null` = no recibe toques. Las laterales van de la barra de estado al
- * borde de arriba de la inferior (o del teclado); la inferior ocupa todo el ancho y desaparece con
- * el teclado abierto, para no tapar su última fila (plan.md §5.9).
+ * borde de arriba de la inferior (o del teclado); la inferior ocupa todo el ancho y, con el teclado
+ * abierto, adelgaza a [EdgeLayoutInput.imeBottomThicknessPx] para que *inicio* siga funcionando sin
+ * tapar casi nada de su última fila (plan.md §5.9).
  */
 fun layoutStrips(input: EdgeLayoutInput): Map<Edge, StripRect?> {
     val sideBottom = input.imeTop ?: (input.screenHeight - input.bottomThicknessPx)
@@ -35,13 +39,12 @@ fun layoutStrips(input: EdgeLayoutInput): Map<Edge, StripRect?> {
 
     fun side(left: Int) =
         StripRect(left, input.topExclusionPx, input.sideThicknessPx, sideHeight).takeIf { sideHeight >= MIN_SIDE_HEIGHT_PX }
+    val bottom = if (input.imeTop == null) input.bottomThicknessPx else input.imeBottomThicknessPx
     val strips =
         mapOf(
             Edge.Left to side(0),
             Edge.Right to side(input.screenWidth - input.sideThicknessPx),
-            Edge.Bottom to
-                StripRect(0, input.screenHeight - input.bottomThicknessPx, input.screenWidth, input.bottomThicknessPx)
-                    .takeIf { input.imeTop == null },
+            Edge.Bottom to StripRect(0, input.screenHeight - bottom, input.screenWidth, bottom).takeIf { bottom > 0 },
         )
     return strips.mapValues { (edge, rect) -> rect.takeIf { !input.suspended && edge in input.enabled } }
 }
