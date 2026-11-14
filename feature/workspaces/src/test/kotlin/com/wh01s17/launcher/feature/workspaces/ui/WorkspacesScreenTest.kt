@@ -14,6 +14,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.wh01s17.launcher.core.apps.icons.AppIconLoader
 import com.wh01s17.launcher.core.apps.icons.IconRequest
@@ -170,6 +172,22 @@ class WorkspacesScreenTest {
         composeRule.onNodeWithText("Termux").performTouchInput { longClick() }
         composeRule.waitForIdle()
         assertTrue(intents.contains(WorkspacesIntent.LongPressTile(TileId(1))))
+    }
+
+    @Test
+    fun `swiping on a grouped tile switches to the neighbouring tab`() {
+        val intents = mutableListOf<WorkspacesIntent>()
+        show(state(), intents)
+        // «Mapas» sólo aparece como pestaña del grupo; deslizar sobre ella cuenta como sobre el tile.
+        composeRule.onNodeWithText("Mapas", useUnmergedTree = true).performTouchInput { swipeLeft() }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Mapas", useUnmergedTree = true).performTouchInput { swipeRight() }
+        composeRule.waitForIdle()
+        val selected = intents.filterIsInstance<WorkspacesIntent.SelectTab>()
+        assertTrue("$intents", selected.isNotEmpty())
+        // El carrusel no se mueve y no cuenta como pulsación larga.
+        assertTrue("$intents", intents.none { it is WorkspacesIntent.PageSettled && it.workspace != 1 })
+        assertTrue("$intents", intents.none { it is WorkspacesIntent.LongPressTile || it == WorkspacesIntent.LongPressBackground })
     }
 
     @Test

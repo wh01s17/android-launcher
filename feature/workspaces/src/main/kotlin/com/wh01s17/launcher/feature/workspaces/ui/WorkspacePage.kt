@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -76,10 +77,21 @@ internal fun WorkspacePage(
     modifier: Modifier = Modifier,
 ) {
     val editing = state.editing
-    BoxWithConstraints(modifier.fillMaxSize().then(if (editing) Modifier else Modifier.verticalSwipes(gestures.onGesture))) {
+    // El reparto actual, para saber qué grupo hay bajo el dedo (se lee en el gesto, sin recomponer).
+    val shownLayout = remember { LayoutHolder() }
+    val swipes =
+        if (editing) {
+            Modifier
+        } else {
+            Modifier
+                .verticalSwipes(gestures.onGesture)
+                .groupSwipes({ shownLayout.result }) { onIntent(WorkspacesIntent.SelectTab(it)) }
+        }
+    BoxWithConstraints(modifier.fillMaxSize().then(swipes)) {
         val area = Rect(0, 0, constraints.maxWidth, constraints.maxHeight)
         val gaps = style.gaps(LocalDensity.current)
         val result = remember(workspace, area, gaps) { layout(workspace, area, gaps) }
+        SideEffect { shownLayout.result = result }
         var drag by remember { mutableStateOf<TileDrag?>(null) }
         val stripHeight = with(LocalDensity.current) { WhTheme.spacing.touchTarget.roundToPx() }
         val canvas = PageCanvas(area, area.inset(gaps.outer), stripHeight, number)
