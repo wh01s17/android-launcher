@@ -5,13 +5,30 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
 ## [Sin publicar]
 
+### Añadido
+
+- Icono de la app: la «W» del botón del menú de la barra (trazo en el acento sobre el fondo del tema;
+  adaptativo y monocromo).
+- Estilo → *Modo OLED* (`appearance.oled`): fondos y paneles en negro puro con cualquier paleta.
+- Vibración corta al abrir el menú tocando el escritorio o la «W» de la barra, y al entrar en edición
+  manteniendo pulsado el escritorio.
+- Deslizar en horizontal sobre un tile agrupado cambia de pestaña; en la primera o la última, el
+  gesto sigue cambiando de escritorio.
+- Estilo → *Girar con el sensor* (`appearance.autoRotate`); de fábrica el launcher va en vertical.
+
 ### Cambiado
 
+- Salvapantallas al estilo de fastfetch: la W de puntos sombreada gira dos vueltas con pausas.
+- Mantener pulsado el escritorio pide al menos 600 ms antes de entrar en edición.
+- Con el teclado abierto, el gesto de *inicio* desde abajo sigue funcionando (franja más fina).
 - La paleta de tidalamp pasa del widget de TIDAL a Estilo (`appearance.palette`) y tiñe todo el
   launcher: barra, menú, tiles, bordes, controles, widgets y salvapantallas. Los avisos conservan su color.
 
 ### Corregido
 
+- Limpiar los recientes (la X) desde el inicio vuelve al inicio en vez de dejar abierta la última app
+  (esa app sigue abierta en recientes); con
+  el launcher en `locked_apps` (paso por ADB, `docs/xiaomi.md`) ya no se cierra.
 - La notificación de música (TIDAL u otra app) aparece en el panel y en el contador mientras suena
   y se oculta en pausa; antes era al revés.
 - El visualizador de TIDAL ya no dibuja un tramo plano a la izquierda: los graves no repiten el

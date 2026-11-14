@@ -636,7 +636,9 @@ bordes con `TYPE_ACCESSIBILITY_OVERLAY`:
 - Se activa por gesto: por ejemplo, si en HyperOS 2 sólo falla *atrás* con la
   capa 2, se habilita únicamente el *atrás* propio.
 - Grosor de la franja, sensibilidad y hápticos configurables; las franjas
-  no tapan el teclado en pantalla (se ocultan con el IME visible).
+  no tapan el teclado en pantalla: las laterales acaban encima del IME y la
+  inferior adelgaza a la mitad pegada al borde, para que *inicio* siga
+  funcionando con teclados que llegan al borde (SwiftKey).
 - MIUI suele matar servicios en segundo plano. El asistente pide poner la
   batería de la app en *Sin restricciones* y activar *Inicio automático*,
   abriendo directamente la pantalla de ajustes de la app.
@@ -1254,6 +1256,12 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-05 | Descartar el Hito 9 (freeform y pantallas externas) y, del Hito 11, la tarea de rotación, plegables, multiusuario y perfil de trabajo | Petición del usuario: no le interesan; la app es sólo para él, en su Redmi y en vertical. El plan queda en 69 tareas |
 | 2026-11-05 | La paleta de tidalamp se elige en Estilo y tiñe todo el launcher remapeando por RGB los colores de phosphor de los tokens; los tokens siguen siendo la única fuente (R6) | Petición del usuario. phosphor es idéntica al tema wh01s17, así que con ella nada cambia; rojo/amarillo/naranja/azul/magenta conservan su significado y el negro OLED no se toca |
 | 2026-11-05 | Barra llena: primero modo compacto (relleno 5 → 2 dp, celdas 26 → 20 dp) y, si no basta, ocultar de derecha a izquierda los módulos en reposo (metrónomo parado, media en pausa); nunca se pisan. El módulo `media` muestra el icono del botón (`⏸` sonando, `▶` en pausa) | Elección del usuario tras ver el escritorio 6 con el pomodoro en marcha (faltaban ~79 dp); el icono de estado (`♫`/`⏸`) se leía al revés |
+| 2026-11-13 | Con el teclado abierto la franja inferior no se quita: adelgaza a la mitad (8 dp de fábrica) pegada al borde | Petición del usuario: con SwiftKey (que llega hasta el borde, sin inset de navegación) no había *inicio* con el teclado abierto. Se acepta tapar esos 8 dp de la última fila; SwiftKey no se cambia |
+| 2026-11-13 | Rotación: vertical fijo de fábrica, con `appearance.autoRotate` para seguir al sensor (respetando el bloqueo del sistema). Modo OLED (`appearance.oled`): cualquier paleta con fondo negro puro y banda oscurecida a la mitad | Petición del usuario; revisa en parte el descarte de la rotación del 2026-11-05 (sólo el giro, no plegables). OLED: menos píxeles encendidos sin tocar texto, acento ni avisos |
+| 2026-11-13 | Pulsación larga del escritorio de al menos 600 ms (`HOME_LONG_PRESS_MILLIS`) en fondo, tiles y widgets | HyperOS usa 300 ms y la barra de edición salía sin querer |
+| 2026-11-13 | Salvapantallas al estilo de fastfetch: W de puntos braille extruida y sombreada punto a punto, giro de dos vueltas con pausas (ciclo de 7,2 s, 30 fps) sin la A de Arch ni la marca `wh01s17 OS` (sólo la W). Los puntos se dibujan en el canvas | Petición del usuario: igualar `w-spin.py`. Dibujar en vez de usar glifos braille evita depender de la fuente; reemplaza la W ASCII del 2026-11-05 |
+| 2026-11-13 | `:nav` también recibe clics y lee el paquete de la app activa: sólo para reconocer «Eliminar todo» de los recientes de HyperOS (`com.miui.home:id/clearAnimView`) y volver al inicio si se venía de él (`RecentsClearGuard`) | Los recientes de HyperOS ignoran la tarea de inicio de un launcher ajeno y abren la última app al limpiar. Se amplía la decisión de `canRetrieveWindowContent` del 2026-11-03: sigue sin leerse el contenido de ninguna app |
+| 2026-11-13 | El launcher se añade a `settings system locked_apps` por ADB (paso manual, `docs/xiaomi.md`) | `OneKeyClean` lo mataba con la X de recientes; la lista sólo se lee al arrancar y una app no puede escribir esa clave |
 
 ### 11.2 Riesgos
 
@@ -1299,6 +1307,12 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   launcher predeterminado y, en Ajustes → Compatibilidad (mantener pulsado el inicio → `ajustes`),
   activar el modo. El permiso `WRITE_SECURE_SETTINGS` ya está concedido a la app debug.
   Con teclado físico, `ALT` hace de `SUPER`; `ALT + K` muestra los atajos.
+- **Recientes → X (2026-11-13):** HyperOS ejecuta `OneKeyClean` y mataba el launcher y `:nav`. Con el
+  paquete en `settings system locked_apps` (por ADB) y tras reiniciar, ya no lo mata. Además, sus
+  recientes ignoran la tarea de inicio y mantenían/abrían la última app; `RecentsClearGuard` en `:nav`
+  vuelve al inicio si se venía de él (probado). La app mantenida sigue abierta y en recientes: Android
+  no deja quitar tareas ajenas y, desde Android 14, `killBackgroundProcesses` sólo cierra procesos propios
+  (probado con WhatsApp; se retiró).
 - **Bloqueos:** ninguno.
 - **Launcher predeterminado del Redmi:** `com.wh01s17.launcher.debug` con gestos
   (`force_fsg_nav_bar = 1`, `navigation_mode = 2`), comprobado al terminar las pruebas del
@@ -1324,6 +1338,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-13 | 11 | Peticiones del usuario: pulsación larga del escritorio ≥ 600 ms; franja inferior fina con el teclado abierto (SwiftKey); vertical fijo con opción *girar con el sensor*; *Modo OLED* en Estilo; vibración corta al abrir el menú tocando y al entrar en edición; swipe horizontal sobre un grupo cambia de pestaña (`GroupSwipe.kt`); limpiar recientes desde el inicio ya no cierra el launcher ni abre otra app (`locked_apps` + `RecentsClearGuard`); icono de la app con la W de la barra (`mipmap-anydpi-v26/ic_launcher.xml`); salvapantallas con la W de puntos de fastfetch (sólo la W). Instalado en el Redmi (orientación vertical comprobada). Limpiar recientes: ver §12 | `core/designsystem/layout/HomeLongPress.kt`, `core/system/navigation/EdgeLayout.kt`, `app/ui/ScreenRotation.kt`, `core/config/AppearanceConfig.kt`, `core/designsystem/palette/`, `core/designsystem/screensaver/` |
 | 2026-11-05 | Planificación | A petición del usuario se descartan el Hito 9 y la tarea de rotación/plegables/multiusuario/perfil de trabajo del Hito 11. Balance: 64 de 69 (93 %); sólo queda el Hito 11. Protocolo de retoma, tabla de modelos, §2, riesgos y estado actualizados | `plan.md` |
 | 2026-11-05 | 10 | **Revisión del Hito 10 con Opus** (`/code-review high db6bf80..HEAD`, 10 hallazgos). Corregidos: escala de fuente atascada en 104 % (`roundToInt`), ratón/rueda sin reiniciar la inactividad (`dispatchGenericMotionEvent`), Dream con la paleta de fábrica en arranque en frío (`PaletteHost.palettes` como flujo y `WhSpinView(accents)`), fondos siempre en 1220×2712 (`WallpaperStore.nearestSize`), `TidalampPalettes.after` muerto, KDoc en inglés y mensajes fuera de `strings.xml` (R5), música sin texto como fila vacía. Aceptados sin cambio: aviso emergente al reanudar la música (apagado de fábrica) e insignia en su tile, consecuencia de mostrarla mientras suena; inactividad de 150 s mayor que el apagado de pantalla habitual; remapeo por RGB (el `green` del tema es el acento); constantes de Estilo duplicadas con la config. `StyleIntegrationTest` corregida (`MainActivity` es `singleTask` y ya existe como HOME; HyperOS bloquea lanzarla desde segundo plano) y en verde en el Redmi; config del usuario intacta; atajo `ALT + CTRL + SPACE` abre los fondos | `feature/settings/style/StyleScreen.kt`, `app/MainActivity.kt`, `core/designsystem/palette/PaletteHost.kt`, `core/system/wallpaper/WallpaperStore.kt`, `app/src/androidTest/.../StyleIntegrationTest.kt` |
 | 2026-11-05 | 10 → 11 | Visualizador (petición del usuario: la izquierda se veía rara). Con 48 bandas logarítmicas sobre bins enteros, las ~12 primeras leían el bin 1 y saturaban: tramo plano y escalones. `SpectrumMath.bands`: bordes fraccionarios desde el bin 2 con un 15 % lineal, interpolación entre bins, +3 dB por octava, rango −36…+12 dB. 2 pruebas nuevas. Visto en el Redmi con TIDAL sonando | `core/system/media/AudioSpectrum.kt` |
