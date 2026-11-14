@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
@@ -95,7 +96,7 @@ internal fun WorkspacePage(
         var drag by remember { mutableStateOf<TileDrag?>(null) }
         val stripHeight = with(LocalDensity.current) { WhTheme.spacing.touchTarget.roundToPx() }
         val canvas = PageCanvas(area, area.inset(gaps.outer), stripHeight, number)
-        Background(editing, gestures, onIntent, onOpenMenu)
+        Background(number, editing, gestures, onIntent, onOpenMenu)
         if (workspace.isEmpty) EmptyHint(number, Modifier.align(Alignment.Center))
         val dropPreview = rememberDropPreview(workspace, result, area, gaps, drag, stripHeight)
         for ((tile, rect) in result.visible) {
@@ -341,6 +342,7 @@ private fun ResizeCorner(
  */
 @Composable
 private fun Background(
+    number: Int,
     editing: Boolean,
     gestures: PageGestures,
     onIntent: (WorkspacesIntent) -> Unit,
@@ -349,10 +351,18 @@ private fun Background(
     val doubleTap = !editing && Gesture.DoubleTap in gestures.bound
     val openLabel = stringResource(R.string.workspace_open_menu)
     val editLabel = stringResource(R.string.workspace_edit)
+    // Con TalkBack, el fondo dice en qué escritorio se está antes de ofrecer sus acciones.
+    val name =
+        if (number == Desk.SCRATCHPAD) {
+            stringResource(R.string.scratchpad_title)
+        } else {
+            stringResource(R.string.workspace_empty_title, workspaceLabel(number))
+        }
     Box(
         Modifier
             .fillMaxSize()
             .semantics {
+                contentDescription = name
                 onClick(openLabel) {
                     onOpenMenu()
                     true

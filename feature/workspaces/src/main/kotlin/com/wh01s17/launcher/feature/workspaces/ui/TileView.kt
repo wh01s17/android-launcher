@@ -21,6 +21,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -65,7 +68,9 @@ internal fun TileView(
         modifier
             .clip(style.shape)
             .background(WhTheme.surfaces.launcher.surface.background)
-            .whBorder(active = focused, shape = style.shape, width = style.border),
+            .whBorder(active = focused, shape = style.shape, width = style.border)
+            // TalkBack: el tile con foco se anuncia como seleccionado (el borde activo no se oye).
+            .semantics { selected = focused },
     ) {
         if (tabs != null) GroupTabs(tabs, shown, onSelectTab)
         val body = Modifier.fillMaxWidth().weight(1f)
@@ -128,8 +133,12 @@ private fun TileBody(
         val dim = app == null || info.unavailable
         // El nombre sólo si cabe debajo del icono.
         val showLabel = maxHeight >= iconSize + spacing.rowHeight
+        val label = app?.label ?: stringResource(R.string.tile_not_installed, info.key.packageName)
         Column(
-            Modifier.alpha(if (dim) UNAVAILABLE_ALPHA else 1f),
+            Modifier
+                .alpha(if (dim) UNAVAILABLE_ALPHA else 1f)
+                // Sin el nombre a la vista, TalkBack lo lee igual (si no, sólo diría «abrir»).
+                .then(if (showLabel) Modifier else Modifier.semantics { contentDescription = label }),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(spacing.controlGap),
         ) {
@@ -142,7 +151,7 @@ private fun TileBody(
             }
             if (showLabel) {
                 WhText(
-                    app?.label ?: stringResource(R.string.tile_not_installed, info.key.packageName),
+                    label,
                     style = WhTheme.typography.bodySmall,
                     color = colors.foreground,
                     textAlign = TextAlign.Center,

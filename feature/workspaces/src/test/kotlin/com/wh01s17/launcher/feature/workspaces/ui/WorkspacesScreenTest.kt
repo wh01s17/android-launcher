@@ -8,6 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithText
@@ -16,6 +20,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
+import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.wh01s17.launcher.core.apps.icons.AppIconLoader
 import com.wh01s17.launcher.core.apps.icons.IconRequest
@@ -199,5 +204,40 @@ class WorkspacesScreenTest {
         composeRule.onNodeWithText("quitar").performClick()
         composeRule.waitForIdle()
         assertEquals(listOf(WorkspaceCommand.ToggleFloating, WorkspaceCommand.ToggleLayout, WorkspaceCommand.CloseTile), commands)
+    }
+
+    /** TalkBack (plan.md §7 Hito 11): cada tile dice qué app es aunque el nombre no quepa, y el foco se oye. */
+    @Test
+    fun `every touchable tile is labelled, large enough and the focused one is selected`() {
+        show(state())
+        composeRule.waitForIdle()
+        val nodes =
+            composeRule
+                .onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.OnClick))
+                .fetchSemanticsNodes()
+        val minimum = with(composeRule.density) { 48.dp.toPx() } - 1f
+        val problems =
+            nodes.mapNotNull { node ->
+                val label =
+                    (
+                        node.config.getOrNull(SemanticsProperties.ContentDescription).orEmpty() +
+                            node.config
+                                .getOrNull(SemanticsProperties.Text)
+                                .orEmpty()
+                                .map { it.text }
+                    ).joinToString(" ")
+                val bounds = node.touchBoundsInRoot
+                when {
+                    label.isBlank() -> "unlabeled node at ${node.boundsInRoot}"
+                    bounds.width < minimum || bounds.height < minimum -> "'$label' touch target ${bounds.size}"
+                    else -> null
+                }
+            }
+        assertTrue(problems.joinToString("\n"), problems.isEmpty())
+        // Las cinco apps (tres tiles, uno de ellos un grupo con pestañas) y el fondo.
+        val labels = nodes.flatMap { it.config.getOrNull(SemanticsProperties.ContentDescription).orEmpty() }
+        assertTrue("$labels", labels.any { it.startsWith("escritorio") })
+        val selected = nodes.count { it.config.getOrNull(SemanticsProperties.Selected) == true }
+        assertTrue("selected = $selected", selected >= 1)
     }
 }
