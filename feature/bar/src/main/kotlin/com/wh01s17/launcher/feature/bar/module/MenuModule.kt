@@ -1,6 +1,8 @@
 package com.wh01s17.launcher.feature.bar.module
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import com.wh01s17.launcher.core.designsystem.icons.WhMark
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
@@ -13,11 +15,16 @@ internal class MenuModule : BarModule {
 
     @Composable
     override fun Content(context: BarModuleContext) {
+        val view = LocalView.current
         val style = rememberModuleStyle(context.settings, emptyList(), moduleDefaults(color = WhTheme.colors.accent))
         BarItem(
             style = style,
             contentDescription = stringResource(R.string.bar_menu),
-            onClick = { context.onCommand(LauncherCommand.OpenMenu) },
+            onClick = {
+                // Un toque corto, como al abrir el menú desde el escritorio.
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                context.onCommand(LauncherCommand.OpenMenu)
+            },
         ) {
             WhMark()
         }

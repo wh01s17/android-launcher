@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -204,7 +205,11 @@ class MainActivity : ComponentActivity() {
                         onCommand = workspaces::onCommand,
                         onAddTile = menuController::pick,
                         onAddWidget = widgets::openPicker,
-                        onOpenMenu = menuController::open,
+                        onOpenMenu = {
+                            // Un toque corto al abrir el menú tocando el escritorio.
+                            window.decorView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                            menuController.open()
+                        },
                         onGesture = shortcuts::onGesture,
                         boundGestures = remember(config.config?.bindings) { Shortcuts.boundGestures(config.config) },
                         onOpenSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },

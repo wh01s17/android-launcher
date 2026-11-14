@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.SizeF
 import android.view.MotionEvent
 import android.view.ViewConfiguration
+import com.wh01s17.launcher.core.designsystem.layout.HOME_LONG_PRESS_MILLIS
 import kotlin.math.hypot
 
 /**
@@ -40,7 +41,7 @@ class WhWidgetHostView(
                 downX = event.x
                 downY = event.y
                 longPressed = false
-                postDelayed(longPress, ViewConfiguration.getLongPressTimeout().toLong())
+                postDelayed(longPress, maxOf(ViewConfiguration.getLongPressTimeout().toLong(), HOME_LONG_PRESS_MILLIS))
             }
             MotionEvent.ACTION_MOVE -> if (hypot(event.x - downX, event.y - downY) > slop) removeCallbacks(longPress)
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> removeCallbacks(longPress)

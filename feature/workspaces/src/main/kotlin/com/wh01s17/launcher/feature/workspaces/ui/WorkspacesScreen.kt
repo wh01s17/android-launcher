@@ -1,5 +1,6 @@
 package com.wh01s17.launcher.feature.workspaces.ui
 
+import android.view.HapticFeedbackConstants
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -30,9 +31,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import com.wh01s17.launcher.core.apps.icons.AppIconLoader
+import com.wh01s17.launcher.core.designsystem.layout.ProvideHomeLongPress
 import com.wh01s17.launcher.core.input.WorkspaceCommand
 import com.wh01s17.launcher.core.input.binding.Gesture
 import com.wh01s17.launcher.core.tiling.Rect
@@ -76,44 +79,49 @@ fun WorkspacesScreen(
     val latestOnGesture by rememberUpdatedState(onGesture)
     val gestures = remember(boundGestures) { PageGestures(boundGestures) { latestOnGesture(it) } }
     BackHandler(enabled = state.editing) { onIntent(WorkspacesIntent.ExitEdit) }
+    // Una vibración corta al aparecer la barra de edición (mantener pulsado fondo, tile o widget).
+    val view = LocalView.current
+    LaunchedEffect(state.editing) { if (state.editing) view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS) }
     MessageToast(state.message, onIntent)
     var canvasHeight by remember { mutableIntStateOf(0) }
     var toolbarHeight by remember { mutableIntStateOf(0) }
     val editScale =
         if (state.editing && canvasHeight > 0) (1f - toolbarHeight.toFloat() / canvasHeight).coerceIn(MIN_EDIT_SCALE, 1f) else 1f
     val scale by animateFloatAsState(editScale, label = "editScale")
-    Box(modifier.fillMaxSize().onSizeChanged { canvasHeight = it.height }) {
-        if (state.loaded) {
-            WorkspacePager(
-                state,
-                iconLoader,
-                onIntent,
-                onOpenMenu,
-                gestures,
-                Modifier.fillMaxSize().graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                    transformOrigin = TransformOrigin(EDIT_PIVOT_X, 0f)
-                },
-            )
-        }
-        ScratchpadOverlay(state, iconLoader, onIntent, onOpenMenu, gestures)
-        AnimatedVisibility(
-            visible = state.editing && state.loaded,
-            modifier = Modifier.align(Alignment.BottomCenter).onSizeChanged { toolbarHeight = it.height },
-            enter = slideInVertically { it } + fadeIn(),
-            exit = slideOutVertically { it } + fadeOut(),
-        ) {
-            EditToolbar(
-                workspace = state.activeWorkspace,
-                onCommand = onCommand,
-                onAddTile = onAddTile,
-                onAddWidget = onAddWidget,
-                onOpenSettings = onOpenSettings,
-                onDone = { onIntent(WorkspacesIntent.ExitEdit) },
-                canUndo = state.canUndo,
-                onUndo = { onIntent(WorkspacesIntent.Undo) },
-            )
+    ProvideHomeLongPress {
+        Box(modifier.fillMaxSize().onSizeChanged { canvasHeight = it.height }) {
+            if (state.loaded) {
+                WorkspacePager(
+                    state,
+                    iconLoader,
+                    onIntent,
+                    onOpenMenu,
+                    gestures,
+                    Modifier.fillMaxSize().graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                        transformOrigin = TransformOrigin(EDIT_PIVOT_X, 0f)
+                    },
+                )
+            }
+            ScratchpadOverlay(state, iconLoader, onIntent, onOpenMenu, gestures)
+            AnimatedVisibility(
+                visible = state.editing && state.loaded,
+                modifier = Modifier.align(Alignment.BottomCenter).onSizeChanged { toolbarHeight = it.height },
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+            ) {
+                EditToolbar(
+                    workspace = state.activeWorkspace,
+                    onCommand = onCommand,
+                    onAddTile = onAddTile,
+                    onAddWidget = onAddWidget,
+                    onOpenSettings = onOpenSettings,
+                    onDone = { onIntent(WorkspacesIntent.ExitEdit) },
+                    canUndo = state.canUndo,
+                    onUndo = { onIntent(WorkspacesIntent.Undo) },
+                )
+            }
         }
     }
 }
