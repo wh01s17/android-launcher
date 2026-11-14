@@ -5,6 +5,12 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
 ## [Sin publicar]
 
+### Corregido
+
+- Un toque corto o un deslizamiento que empezaba en una zona sin botones de un widget del sistema
+  (por ejemplo, el margen del de TIDAL) metía el escritorio en modo edición con vibración a los
+  600 ms: la vista del widget no veía levantarse el dedo y su pulsación larga saltaba igual.
+
 ## [1.0.0] — 2026-11-14
 
 Hito 11: rendimiento, memoria, accesibilidad y la primera versión firmada. El Hito 9 (freeform) se
