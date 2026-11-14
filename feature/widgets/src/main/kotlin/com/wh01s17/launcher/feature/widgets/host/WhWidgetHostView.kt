@@ -33,7 +33,21 @@ class WhWidgetHostView(
             onLongPress()
         }
 
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean = interactive && super.dispatchTouchEvent(event)
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (!interactive) return false
+        val handled = super.dispatchTouchEvent(event)
+        // Si ningún botón del widget se quedó el DOWN, Android no nos pasará el resto del gesto: sin
+        // el UP, el temporizador saltaría con cualquier toque corto (entraba en edición al tocar el
+        // margen de un widget o al deslizar sobre él). Ese toque es del tile, que ya reconoce la
+        // pulsación larga en Compose.
+        if (event.actionMasked == MotionEvent.ACTION_DOWN && !handled) removeCallbacks(longPress)
+        return handled
+    }
+
+    override fun onDetachedFromWindow() {
+        removeCallbacks(longPress)
+        super.onDetachedFromWindow()
+    }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
