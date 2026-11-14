@@ -12,6 +12,7 @@ import com.wh01s17.launcher.core.designsystem.palette.PaletteRemap
 import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.palette.forOled
+import com.wh01s17.launcher.core.designsystem.tokens.WhTokens
 
 /** Valores por defecto del tema que no vienen de los dotfiles. */
 object WhDefaults {
@@ -76,7 +77,9 @@ fun WhTheme(
     content: @Composable () -> Unit,
 ) {
     val remap = remember(palette, oled) { PaletteRemap(if (oled) palette.forOled() else palette) }
-    val colors = remember(remap) { WhColors().remapped(remap::invoke) }
+    // Texto con contraste AA sobre cualquier superficie con texto (WhContrast, plan.md §7 Hito 11).
+    val colors = remember(remap) { WhColors().remapped(remap::invoke).readable(surface = remap(WhTokens.Bar.background)) }
+    val readablePalette = remember(palette, oled) { (if (oled) palette.forOled() else palette).readable() }
     val typography = remember(fontScale) { WhTypography.create(fontScale) }
     val spacing = remember(fontScale) { WhSpacing.create(fontScale) }
     val controls = remember(remap) { WhControls.create(remap::invoke) }
@@ -92,7 +95,7 @@ fun WhTheme(
         LocalWhControls provides controls,
         LocalWhSurfaces provides surfaces,
         LocalWhBorders provides borders,
-        LocalWhPalette provides palette,
+        LocalWhPalette provides readablePalette,
         LocalWhContentColor provides colors.foreground,
         LocalTextSelectionColors provides selection,
         content = content,
