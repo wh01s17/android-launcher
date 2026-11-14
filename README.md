@@ -4,19 +4,16 @@ Launcher para Android que recrea el uso de Hyprland (workspaces, tiling,
 barra modular, menú y atajos) con el tema `wh01s17` de
 [dotfiles](https://github.com/wh01s17/dotfiles).
 
-Estado: en desarrollo, con los **hitos 0–7 terminados (`0.3.0`)**. Ya incluye catálogo
-de apps con búsqueda difusa, barra modular, navegación propia para HyperOS
-y diez escritorios con tiles, edición y persistencia. Los tiles abren las
-apps; no las incrustan en el escritorio.
+Versión **1.0.0**: los hitos 0–8, 10 y 11 están terminados (el 9, ventanas libres, se descartó).
+Diez escritorios con tiles en mosaico (dwindle y master), edición, grupos y scratchpad; barra
+modular; menú wh01s17 con búsqueda difusa de apps, comandos, ajustes y atajos; atajos de teclado y
+gestos configurables como en `bindings.lua` (`ALT` hace de `SUPER`); widgets del sistema y propios
+(TIDAL, pomodoro, metrónomo, reloj, uso del sistema); notificaciones y media; estilo con 16 paletas,
+fondos y la W girando como salvapantallas; y navegación propia para HyperOS. Los tiles abren las
+apps; no las incrustan en el escritorio. El avance está en [`plan.md` §12](plan.md#12-estado-actual).
 
-El menú wh01s17 reúne apps, comandos, ajustes y atajos, con ranking persistente
-y navegación por teclado. Los atajos de teclado y los gestos se configuran como en
-`bindings.lua` (`ALT` hace de `SUPER`; `ALT + K` muestra la tabla). Los tiles pueden ser widgets
-del sistema o propios (TIDAL, pomodoro, metrónomo, reloj y uso del sistema), y el pomodoro y el
-metrónomo también viven en la barra. El próximo paso es el **Hito 8: scratchpad, notificaciones y
-media**. El avance se mantiene en [`plan.md` §12](plan.md#12-estado-actual).
-Esta versión se instala como APK de depuración (`./gradlew installFast` para el uso diario); la
-distribución firmada llega en el Hito 11.
+El APK firmado se publica en [Releases](https://github.com/wh01s17/android-launcher/releases)
+([cómo se publica](docs/release.md)); para el uso diario desde el código, `./gradlew installFast`.
 
 Probado en Redmi Note 13 Pro 5G con HyperOS 2.0.204 (Android 15).
 
@@ -24,6 +21,7 @@ Probado en Redmi Note 13 Pro 5G con HyperOS 2.0.204 (Android 15).
 
 Documentación:
 
+- [Guía de uso](docs/usage.md).
 - [Preparar el entorno y compilar](docs/setup.md).
 - [Usar y editar los escritorios](docs/workspaces.md).
 - [Configurar la barra](docs/bar.md).
@@ -31,5 +29,9 @@ Documentación:
 - [Atajos de teclado y gestos](docs/bindings.md).
 - [Sistema de diseño](docs/design-system.md).
 - [Gestos en Xiaomi, pruebas y recuperación](docs/xiaomi.md).
+- [Estilo y fondos](docs/style.md), [notificaciones y media](docs/notifications.md) y
+  [salvapantallas](docs/screensaver.md).
+- [Rendimiento](docs/performance.md), [accesibilidad](docs/accessibility.md),
+  [publicar una versión](docs/release.md) y [pruebas manuales](docs/manual-qa.md).
 
 Licencia: [MIT](LICENSE).

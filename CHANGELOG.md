@@ -5,8 +5,33 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
 ## [Sin publicar]
 
+## [1.0.0] — 2026-11-14
+
+Hito 11: rendimiento, memoria, accesibilidad y la primera versión firmada. El Hito 9 (freeform) se
+descartó.
+
 ### Añadido
 
+- Versión firmada: `version.properties` es la única fuente de la versión (`versionCode` automático),
+  la release se firma con la clave de `keystore.properties` o de los secretos de CI, y al subir un tag
+  `vX.Y.Z` el workflow `release.yml` publica el APK y su `mapping.txt` como GitHub Release con estas
+  notas ([docs/release.md](docs/release.md)). La CI de cada push deja además el APK release como
+  artefacto (firmado si están los secretos).
+- R8 (código y recursos) y Baseline Profile en la release y en la `fast` del uso diario; el APK baja
+  de 38 MB (debug) a 3,6 MB. Módulo `:benchmark` con el generador del perfil y Macrobenchmark de
+  arranque en frío, escritorios y menú; `tools/run-benchmarks.sh` para medir en HyperOS
+  ([docs/performance.md](docs/performance.md)).
+- LeakCanary en la build debug.
+- Los nombres de las apps se guardan entre arranques: un arranque en frío ya no abre los recursos de
+  todas las apps (era el 61 % de la CPU de los tres primeros segundos) y los tiles salen con nombre al
+  momento. Una actualización o un cambio de idioma vuelven a leer sólo ese nombre.
+- TalkBack: un tile dice el nombre de su app aunque no quepa y el del foco se anuncia como
+  seleccionado; el fondo dice en qué escritorio se está. Pruebas de etiquetas y de áreas táctiles de
+  48 dp en la barra y los escritorios ([docs/accessibility.md](docs/accessibility.md)).
+- Medido en el Redmi: arranque en frío de 461 ms (sin perfil) a 403–406 ms de mediana; deslizar
+  escritorios a 120 Hz sin fotogramas tarde (P99 +0,3 ms); abrir el menú, P90 +0,9 ms.
+- Guía de uso ([docs/usage.md](docs/usage.md)) y lista de pruebas manuales antes de publicar
+  ([docs/manual-qa.md](docs/manual-qa.md)).
 - Icono de la app: la «W» del botón del menú de la barra (trazo en el acento sobre el fondo del tema;
   adaptativo y monocromo).
 - Estilo → *Modo OLED* (`appearance.oled`): fondos y paneles en negro puro con cualquier paleta.
@@ -18,11 +43,17 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
 ### Cambiado
 
+- El texto cumple el contraste AA (4,5:1) con cualquier paleta: con `phosphor`, el texto secundario
+  pasa de `#748178` a `#838f87` (antes 4,1:1 sobre los tiles).
 - Salvapantallas al estilo de fastfetch: la W de puntos sombreada gira dos vueltas con pausas.
 - Mantener pulsado el escritorio pide al menos 600 ms antes de entrar en edición.
 - Con el teclado abierto, el gesto de *inicio* desde abajo sigue funcionando (franja más fina).
 - La paleta de tidalamp pasa del widget de TIDAL a Estilo (`appearance.palette`) y tiñe todo el
   launcher: barra, menú, tiles, bordes, controles, widgets y salvapantallas. Los avisos conservan su color.
+
+### Quitado
+
+- El módulo vacío `feature/scratchpad` (el scratchpad vive en los escritorios desde el Hito 8).
 
 ### Corregido
 

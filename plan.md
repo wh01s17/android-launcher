@@ -18,8 +18,8 @@ persona debe poder retomar el trabajo leyendo sólo este archivo y el código.
    y el [§13 Registro de actualizaciones](#13-registro-de-actualizaciones).
 2. Toma la **primera tarea sin marcar** del hito en curso. No empieces un hito
    nuevo si el anterior no cumple su *Definición de terminado*, salvo un hito
-   aplazado o descartado explícitamente. Sólo queda el **Hito 11** (versión 1.0); el Hito 9
-   está descartado (2026-11-05).
+   aplazado o descartado explícitamente. Desde el 2026-11-14 todos los hitos están cerrados
+   (versión 1.0; el Hito 9 está descartado): lo que queda son los pendientes de §12.
 3. Antes de escribir código, lee los archivos que vas a tocar y respeta las
    [reglas obligatorias](#1-reglas-obligatorias), sobre todo el límite de
    **1000 líneas por archivo**. Sólo se supera con una justificación
@@ -718,8 +718,8 @@ Cada hito termina con: `./gradlew check` verde, APK instalable, entrada en
 §13 y, si aplica, capturas en `docs/screenshots/`. Estimaciones en sesiones
 de trabajo de agente (S ≈ 1, M ≈ 2–3, L ≈ 4–6).
 
-**Pendiente (2026-11-05): sólo el Hito 11.** El Hito 9 se descartó a petición del usuario; se
-conserva la numeración para mantener las referencias.
+**Estado (2026-11-14): todos los hitos cerrados, versión 1.0.0.** El Hito 9 se descartó a petición
+del usuario; se conserva la numeración para mantener las referencias.
 
 ### Hito 0 — Fundaciones (M)
 
@@ -1017,14 +1017,34 @@ siguen siendo lanzadores vivos (§2.2).
 
 ### Hito 11 — Endurecimiento y versión 1.0 (M)
 
-- [ ] Rendimiento: arranque en frío < 400 ms en el Redmi Note 13 Pro 5G y
+- [x] Rendimiento: arranque en frío < 400 ms en el Redmi Note 13 Pro 5G y
       120 fps sostenidos en el pager y la apertura del menú a 120 Hz
-      (Macrobenchmark + Baseline Profile).
-- [ ] Memoria: sin fugas (LeakCanary en debug), caché de iconos acotada.
-- [ ] Accesibilidad: TalkBack en tiles y barra, contraste AA (verificado con
-      los tokens), tamaños táctiles ≥ 48 dp aunque el visual sea compacto.
-- [ ] Firma de release, `versionCode` automático, notas de versión.
-- [ ] Documentación de usuario `docs/usage.md`.
+      (Macrobenchmark + Baseline Profile). R8 y Baseline Profile en release y `fast`; módulo
+      `:benchmark` (generador y Macrobenchmark) y `tools/run-benchmarks.sh` (HyperOS no entrega los
+      broadcasts de `profileinstaller`). Medido en el Redmi: escritorios **cumple** (P99 +0,3 ms);
+      arranque **403–406 ms** de mediana (461 sin perfil; el objetivo se roza, no se cumple del todo);
+      menú P90 +0,9 ms (un 10–15 % de fotogramas ~1 ms tarde, con el teclado subiendo). `LabelCache`
+      quita el 61 % de la CPU del arranque (nombres de las apps). Detalle: [`docs/performance.md`](docs/performance.md).
+- [x] Memoria: sin fugas (LeakCanary en debug), caché de iconos acotada. LeakCanary 2.14 en debug;
+      10 actividades destruidas vigiladas en el emulador, ninguna retenida. `IconCache` ya acotada (Hito 2).
+- [x] Accesibilidad: TalkBack en tiles y barra, contraste AA (verificado con
+      los tokens), tamaños táctiles ≥ 48 dp aunque el visual sea compacto. `WhContrast` sube lo justo
+      el texto que no llega a 4,5:1 (con phosphor, `darkForeground` `#748178` → `#838f87`), probado
+      con las 16 paletas; tiles con nombre aunque no quepa y foco «seleccionado»; pruebas de etiquetas
+      y áreas táctiles en barra y escritorios. Falta la pasada manual con TalkBack ([`docs/accessibility.md`](docs/accessibility.md)).
+- [x] Firma de release, `versionCode` automático, notas de versión. `version.properties` →
+      `AppVersion` en `build-logic`; firma desde `keystore.properties` o secretos de CI
+      (`ReleaseSigning`); `release.yml` publica APK y `mapping.txt` al subir `vX.Y.Z` con la sección del
+      CHANGELOG (`tools/release-notes.py`). Clave creada en `~/.android/wh01s17-release.jks`
+      ([`docs/release.md`](docs/release.md)).
+- [x] Documentación de usuario `docs/usage.md`. Además `docs/manual-qa.md` (§9), `docs/release.md`,
+      `docs/performance.md` y `docs/accessibility.md`.
+
+**Hito 11 terminado (2026-11-14)** → `1.0.0` (versionCode `10000`). `./gradlew check assembleRelease`
+en verde; `fast` (R8 + perfil) instalada en el Redmi con el escritorio del usuario intacto, gestos
+wh01s17 activos y menú con búsqueda probado. Pendiente a mano (`docs/manual-qa.md`): TalkBack, teclado
+Bluetooth y dos dedos. El arranque queda a 3–6 ms del objetivo y el menú no llega del todo a 120 fps
+(§12).
 
 ---
 
@@ -1035,7 +1055,7 @@ siguen siendo lanzadores vivos (§2.2).
 - SemVer: `MAJOR.MINOR.PATCH`. MVP = `0.1.0`; cada hito posterior sube
   `MINOR`; `1.0.0` al cerrar el Hito 11.
 - `versionCode = MAJOR*10000 + MINOR*100 + PATCH`, calculado en
-  `build-logic` desde `version.properties` (única fuente).
+  `build-logic` desde `version.properties` (única fuente; `AppVersion`, desde el Hito 11).
 - Tag Git `vX.Y.Z` por versión; `CHANGELOG.md` en formato *Keep a Changelog*
   generado a partir de los commits convencionales.
 
@@ -1262,6 +1282,14 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 | 2026-11-13 | Salvapantallas al estilo de fastfetch: W de puntos braille extruida y sombreada punto a punto, giro de dos vueltas con pausas (ciclo de 7,2 s, 30 fps) sin la A de Arch ni la marca `wh01s17 OS` (sólo la W). Los puntos se dibujan en el canvas | Petición del usuario: igualar `w-spin.py`. Dibujar en vez de usar glifos braille evita depender de la fuente; reemplaza la W ASCII del 2026-11-05 |
 | 2026-11-13 | `:nav` también recibe clics y lee el paquete de la app activa: sólo para reconocer «Eliminar todo» de los recientes de HyperOS (`com.miui.home:id/clearAnimView`) y volver al inicio si se venía de él (`RecentsClearGuard`) | Los recientes de HyperOS ignoran la tarea de inicio de un launcher ajeno y abren la última app al limpiar. Se amplía la decisión de `canRetrieveWindowContent` del 2026-11-03: sigue sin leerse el contenido de ninguna app |
 | 2026-11-13 | El launcher se añade a `settings system locked_apps` por ADB (paso manual, `docs/xiaomi.md`) | `OneKeyClean` lo mataba con la X de recientes; la lista sólo se lee al arrancar y una app no puede escribir esa clave |
+| 2026-11-14 | R8 y Baseline Profile también en `fast` (el uso diario), un solo perfil en `src/main` (`mergeIntoMain`) y regenerado a mano en el emulador | El teléfono debe ir con lo mismo que se publica; generar en cada build exigiría un dispositivo |
+| 2026-11-14 | Patrón `/generated/baselineProfiles/` en `tools/file-length.exclude` (R3) | El perfil generado tiene ~23 000 líneas; es un artefacto de la herramienta, no código que se lea |
+| 2026-11-14 | Macrobenchmark mide la release (`com.wh01s17.launcher`), no la del uso diario, y en HyperOS compila con `cmd package compile` (`wh01s17.manualCompilation`) | Matar su proceso no toca el launcher del usuario; HyperOS no entrega los broadcasts de `profileinstaller` |
+| 2026-11-14 | Contraste AA calculado en `WhTheme` (`WhColors.readable`): sólo se aclara el texto que no llega a 4,5:1, y lo justo | Los tokens no se editan a mano (§4.1); con phosphor sólo cambia `darkForeground` (`#748178` → `#838f87`). `muted`, inactivos y *pressed* quedan fuera (decoración o estado inactivo) |
+| 2026-11-14 | Nombres de las apps en caché en disco (`LabelCache`, clave con ruta del APK e idioma) | `getLabel` de 156 apps era el 61 % de la CPU del arranque en frío; la clave hace imposible un nombre viejo |
+| 2026-11-14 | No se aplazan la vigilancia ni los temporizadores al primer momento libre del hilo principal | No mejoraba la medida y una alarma del pomodoro con el proceso muerto perdería el aviso de fin de fase |
+| 2026-11-14 | Clave de release local en `~/.android/wh01s17-release.jks` + `keystore.properties` (ignorado); en CI, secretos `SIGNING_*` | La clave nunca se versiona (§8.2); con datos a medias la build falla en vez de salir sin firmar |
+| 2026-11-14 | Se quita el módulo vacío `feature/scratchpad` | El scratchpad vive en `Desk` desde el Hito 8 (§11.1, 2026-11-05) |
 
 ### 11.2 Riesgos
 
@@ -1287,20 +1315,22 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 ## 12. Estado actual
 
-- **Balance al 2026-11-05:** 64 de 69 tareas marcadas (93 % del plan); MVP completo: 45 de 45
-  (100 %). Son casillas, no una medida del esfuerzo. Sólo queda el Hito 11 (versión 1.0); el Hito 9
-  y la tarea de rotación, plegables, multiusuario y perfil de trabajo se descartaron.
-- **Hito en curso:** Hito 11 (sin empezar). **Hitos 0–8 y 10 terminados**; versión `0.5.0`. Los
-  cierres y sus pruebas siguen en §13.
-- **Última tarea completada:** **Hito 10 cerrado**: editor de estilo, fondos W/lunas con selector propio,
-  W girando (vista previa, inactividad de HOME y Dream) e importación/exportación SAF. Además, barra sin
-  solapes (compacta y oculta módulos en reposo) e icono de media como botón. Ver §13.
+- **Balance al 2026-11-14:** 69 de 69 tareas marcadas (100 %). Son casillas, no una medida del
+  esfuerzo. El Hito 9 y la tarea de rotación, plegables, multiusuario y perfil de trabajo se descartaron.
+- **Hito en curso:** ninguno. **Hitos 0–8, 10 y 11 terminados**; versión `1.0.0`. Los cierres y sus
+  pruebas siguen en §13.
+- **Última tarea completada:** **Hito 11 cerrado**: R8 + Baseline Profile, Macrobenchmark en el Redmi,
+  LeakCanary, contraste AA y TalkBack, firma de release con publicación por tag y guías de uso, release,
+  rendimiento, accesibilidad y QA manual. Ver §13.
+- **Pendiente tras la 1.0 (sin bloquear):** el arranque en frío está en 403–406 ms de mediana (objetivo
+  < 400) y al abrir el menú un 10–15 % de los fotogramas llega ~1 ms tarde a 120 Hz; el siguiente paso
+  es leer una traza de Perfetto del primer fotograma ([`docs/performance.md`](docs/performance.md)).
+  Pasada manual de TalkBack ([`docs/manual-qa.md`](docs/manual-qa.md)).
 - **Incidencia de la sesión (resuelta):** la primera versión de la animación de vuelta cerraba el
   launcher al volver; HyperOS mostró el selector de launcher. Se cerró sin elegir, se reafirmó el
   rol HOME de `com.wh01s17.launcher.debug` y se corrigió (§13).
-- **Siguiente tarea:** Hito 11, rendimiento (arranque en frío y 120 fps con Macrobenchmark + Baseline Profile; modelo/esfuerzo en §0). Pendientes sin bloquear: probar los atajos con un teclado físico
-  Bluetooth y los gestos de dos dedos a mano; medir en release la primera
-  carga del índice, el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj;
+- **Siguiente tarea:** ninguna en el plan. Pendientes sin bloquear: probar los atajos con un teclado físico
+  Bluetooth y los gestos de dos dedos a mano; el opt-in de `BLUETOOTH_CONNECT` y guardar el formato alterno del reloj;
   probar a mano en el Redmi agrupar por arrastre y con los botones. Tras reinstalar, la vigilancia puede devolver los botones un instante hasta que el servicio
   de gestos se reenlaza (visto el 2026-11-05; se ocultan solos).
 - **Para usar wh01s17 a diario:** activar *Gestos wh01s17* en Accesibilidad, ponerlo como
@@ -1326,9 +1356,9 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   funciona. Se restauró `0` (3 botones). La capa 3 pasa a ser la navegación
   principal (Hito 2). Observaciones, ajustes y matriz de pruebas en
   [`docs/xiaomi.md`](docs/xiaomi.md).
-- **Versión:** `0.5.0` (Hito 10); antes `0.4.0` (Hito 8), `0.3.0` (Hito 7), `0.2.0` (Hito 6, etiqueta `v0.2.0`) y el MVP `0.1.0`. En el Redmi va la compilación
-  `fast` (`./gradlew installFast`, mismo id y datos que la debug; ver `docs/setup.md`);
-  firma y distribución de APK release siguen en el Hito 11. Historial en `CHANGELOG.md`.
+- **Versión:** `1.0.0` (Hito 11, etiqueta `v1.0.0`); antes `0.5.0` (Hito 10), `0.4.0` (Hito 8), `0.3.0` (Hito 7), `0.2.0` (Hito 6, etiqueta `v0.2.0`) y el MVP `0.1.0`. En el Redmi va la compilación
+  `fast` (`./gradlew installFast`, mismo id y datos que la debug, ahora con R8 y perfil; ver `docs/setup.md`);
+  la release firmada se publica por tag ([`docs/release.md`](docs/release.md)). Historial en `CHANGELOG.md`.
 
 ---
 
@@ -1338,6 +1368,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-14 | 11 | **Hito 11 cerrado → 1.0.0 (10000).** `version.properties` + `AppVersion`/`ReleaseSigning` en `build-logic` (7 pruebas), R8 en release y `fast`, módulo `:benchmark` (generador, arranque y fotogramas) y perfil generado en el emulador, `tools/run-benchmarks.sh` para HyperOS, `LabelCache` (simpleperf: 61 % de la CPU del arranque en `getLabel`), LeakCanary (sin retenciones), `WhContrast` (AA con las 16 paletas), semántica de tiles y fondo, `BarAccessibilityTest`, `release.yml` + `tools/release-notes.py`, clave local, quitado `feature/scratchpad`. En el Redmi: arranque 461 → 403–406 ms, escritorios a 120 Hz, menú P90 +0,9 ms; mientras corre UiAutomation Android suspende los gestos y la vigilancia devuelve los botones (vuelven solos). `fast` instalada con el escritorio intacto; apps de prueba desinstaladas y `stay_on_while_plugged_in` restaurado. Capturas Roborazzi regrabadas (texto secundario más claro) | `build-logic/`, `benchmark/`, `app/build.gradle.kts`, `core/apps/source/LabelCache.kt`, `core/designsystem/theme/WhContrast.kt`, `.github/workflows/release.yml`, `tools/`, `docs/` |
 | 2026-11-13 | 11 | Peticiones del usuario: pulsación larga del escritorio ≥ 600 ms; franja inferior fina con el teclado abierto (SwiftKey); vertical fijo con opción *girar con el sensor*; *Modo OLED* en Estilo; vibración corta al abrir el menú tocando y al entrar en edición; swipe horizontal sobre un grupo cambia de pestaña (`GroupSwipe.kt`); limpiar recientes desde el inicio ya no cierra el launcher ni abre otra app (`locked_apps` + `RecentsClearGuard`); icono de la app con la W de la barra (`mipmap-anydpi-v26/ic_launcher.xml`); salvapantallas con la W de puntos de fastfetch (sólo la W). Instalado en el Redmi (orientación vertical comprobada). Limpiar recientes: ver §12 | `core/designsystem/layout/HomeLongPress.kt`, `core/system/navigation/EdgeLayout.kt`, `app/ui/ScreenRotation.kt`, `core/config/AppearanceConfig.kt`, `core/designsystem/palette/`, `core/designsystem/screensaver/` |
 | 2026-11-05 | Planificación | A petición del usuario se descartan el Hito 9 y la tarea de rotación/plegables/multiusuario/perfil de trabajo del Hito 11. Balance: 64 de 69 (93 %); sólo queda el Hito 11. Protocolo de retoma, tabla de modelos, §2, riesgos y estado actualizados | `plan.md` |
 | 2026-11-05 | 10 | **Revisión del Hito 10 con Opus** (`/code-review high db6bf80..HEAD`, 10 hallazgos). Corregidos: escala de fuente atascada en 104 % (`roundToInt`), ratón/rueda sin reiniciar la inactividad (`dispatchGenericMotionEvent`), Dream con la paleta de fábrica en arranque en frío (`PaletteHost.palettes` como flujo y `WhSpinView(accents)`), fondos siempre en 1220×2712 (`WallpaperStore.nearestSize`), `TidalampPalettes.after` muerto, KDoc en inglés y mensajes fuera de `strings.xml` (R5), música sin texto como fila vacía. Aceptados sin cambio: aviso emergente al reanudar la música (apagado de fábrica) e insignia en su tile, consecuencia de mostrarla mientras suena; inactividad de 150 s mayor que el apagado de pantalla habitual; remapeo por RGB (el `green` del tema es el acento); constantes de Estilo duplicadas con la config. `StyleIntegrationTest` corregida (`MainActivity` es `singleTask` y ya existe como HOME; HyperOS bloquea lanzarla desde segundo plano) y en verde en el Redmi; config del usuario intacta; atajo `ALT + CTRL + SPACE` abre los fondos | `feature/settings/style/StyleScreen.kt`, `app/MainActivity.kt`, `core/designsystem/palette/PaletteHost.kt`, `core/system/wallpaper/WallpaperStore.kt`, `app/src/androidTest/.../StyleIntegrationTest.kt` |

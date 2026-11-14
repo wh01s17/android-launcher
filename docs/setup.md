@@ -45,7 +45,10 @@ python3 tools/sync-theme.py                          # traer el tema desde ~/dot
 Redmi, al deslizar escritorios el 17 % de los fotogramas llegaba tarde, frente al 4 % con `fast`. Para
 el día a día, `fast`. Con `fast` no hay `run-as` (no se puede leer `files/` por ADB) pero sí
 simpleperf (`simpleperf record --app com.wh01s17.launcher.debug`); para inspeccionar el estado,
-instala la debug encima y vuelve después. Sin R8 ni Baseline Profile hasta el Hito 11.
+instala la debug encima y vuelve después. Desde el Hito 11, `fast` es la release (R8 y Baseline
+Profile) con el id y la firma de debug: las trazas de error salen ofuscadas y se descifran con
+`app/build/outputs/mapping/fast/mapping.txt`. La debug lleva LeakCanary (un icono «Leaks» aparte).
+Rendimiento y perfil: [performance.md](performance.md); versión firmada: [release.md](release.md).
 
 Hace falta `python3` (3.10 o superior) para las herramientas de `tools/`. Los tests con Robolectric
 descargan el `android-all` de la API que usan la primera vez.
