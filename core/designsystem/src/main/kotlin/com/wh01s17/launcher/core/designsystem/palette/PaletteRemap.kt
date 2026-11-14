@@ -13,12 +13,12 @@ import com.wh01s17.launcher.core.designsystem.tokens.WhTokens
  * el cian del segundo tono) se sustituye por su equivalente; se compara el RGB y se conserva el alfa,
  * así que valen también los colores ya con transparencia (bordes, rellenos). Los colores de aviso
  * (rojo, amarillo, naranja, azul, magenta, marrón) no cambian: su significado es el mismo en toda
- * paleta. Con `phosphor` no cambia nada.
+ * paleta. Con `phosphor` tal cual no cambia nada; su variante OLED ([forOled]) sí se aplica.
  */
 class PaletteRemap(
     palette: PlayerPalette,
 ) {
-    private val table: Map<Int, Color>? = if (palette.name == TidalampPalettes.default.name) null else table(palette)
+    private val table: Map<Int, Color>? = if (palette == TidalampPalettes.default) null else table(palette)
 
     operator fun invoke(color: Color): Color {
         val mapped = table?.get(rgb(color)) ?: return color

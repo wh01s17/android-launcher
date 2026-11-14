@@ -62,6 +62,7 @@ import com.wh01s17.launcher.ui.IdleOverlay
 import com.wh01s17.launcher.ui.IdleScreensaver
 import com.wh01s17.launcher.ui.LauncherTheme
 import com.wh01s17.launcher.ui.NotificationOptIn
+import com.wh01s17.launcher.ui.followRotationSetting
 import com.wh01s17.launcher.ui.screenReaderSemantics
 import com.wh01s17.launcher.widgets.HomeWidgets
 import kotlinx.coroutines.flow.map
@@ -156,6 +157,7 @@ class MainActivity : ComponentActivity() {
             },
         )
         handleCommands()
+        followRotationSetting(container.configRepository)
         idle.start()
         // Registra el resultado del diálogo de enlace de widgets: tiene que ser antes de onStart.
         widgets =

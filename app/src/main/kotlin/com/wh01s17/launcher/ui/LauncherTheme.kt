@@ -22,6 +22,7 @@ internal fun LauncherTheme(
         WhTheme(
             fontScale = config?.appearance?.fontScale ?: AppearanceConfig.DEFAULT_FONT_SCALE,
             palette = TidalampPalettes.byName(config?.appearance?.palette),
+            oled = config?.appearance?.oled ?: false,
             content = content,
         )
     }

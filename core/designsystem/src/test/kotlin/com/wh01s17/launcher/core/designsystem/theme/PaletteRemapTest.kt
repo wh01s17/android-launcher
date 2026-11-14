@@ -1,7 +1,9 @@
 package com.wh01s17.launcher.core.designsystem.theme
 
+import androidx.compose.ui.graphics.Color
 import com.wh01s17.launcher.core.designsystem.palette.PaletteRemap
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
+import com.wh01s17.launcher.core.designsystem.palette.forOled
 import com.wh01s17.launcher.core.designsystem.tokens.WhTokens
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -52,5 +54,17 @@ class PaletteRemapTest {
                 .create(WhSpacing.create(1.25f), nord::invoke)
                 .bar.surface.text,
         )
+    }
+
+    @Test
+    fun `oled turns backgrounds black for any palette and keeps text and accent`() {
+        for (palette in listOf(TidalampPalettes.default, TidalampPalettes.byName("nord"))) {
+            val colors = WhColors().remapped(PaletteRemap(palette.forOled())::invoke)
+            assertEquals(Color.Black, colors.background)
+            assertEquals(Color.Black, colors.darkBackground)
+            assertEquals(Color.Black, colors.darkerBackground)
+            assertEquals(palette.accent, colors.accent)
+            assertEquals(palette.foreground, colors.foreground)
+        }
     }
 }

@@ -41,6 +41,7 @@ import com.wh01s17.launcher.feature.settings.shortcuts.ShortcutTable
 import com.wh01s17.launcher.feature.settings.shortcuts.ShortcutsScreen
 import com.wh01s17.launcher.feature.settings.shortcuts.rowFor
 import com.wh01s17.launcher.ui.LauncherTheme
+import com.wh01s17.launcher.ui.followRotationSetting
 import kotlinx.coroutines.launch
 import android.graphics.Color as AndroidColor
 
@@ -57,6 +58,7 @@ class SettingsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        followRotationSetting(container.configRepository)
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(AndroidColor.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(AndroidColor.TRANSPARENT),

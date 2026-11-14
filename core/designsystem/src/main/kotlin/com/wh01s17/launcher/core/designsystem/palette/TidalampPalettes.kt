@@ -2,6 +2,7 @@ package com.wh01s17.launcher.core.designsystem.palette
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 
 /**
  * Los colores de un reproductor con la forma de las paletas de tidalamp (`colors.toml` de Omarchy):
@@ -178,3 +179,12 @@ object TidalampPalettes {
 
     fun byName(name: String?): PlayerPalette = all.firstOrNull { it.name == name } ?: default
 }
+
+/**
+ * La misma paleta para pantallas OLED: el fondo pasa a negro puro (píxeles apagados) y la banda se
+ * oscurece a la mitad, así paneles, menú y tiles encienden pocos píxeles. Texto, acento y avisos no
+ * cambian, para que el contraste siga igual.
+ */
+fun PlayerPalette.forOled(): PlayerPalette = copy(background = Color.Black, band = lerp(band, Color.Black, OLED_BAND_DARKEN))
+
+private const val OLED_BAND_DARKEN = 0.5f

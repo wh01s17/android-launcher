@@ -29,6 +29,16 @@ class GeneralSectionsTest {
     }
 
     @Test
+    fun `oled and rotation are off by default and read from appearance`() {
+        assertEquals(false, factory.appearance.oled)
+        assertEquals(false, factory.appearance.autoRotate)
+        val appearance = success("""{"version":1,"appearance":{"oled":true,"autoRotate":true}}""").appearance
+        assertEquals(true, appearance.oled)
+        assertEquals(true, appearance.autoRotate)
+        assertEquals("appearance.oled", errors("""{"version":1,"appearance":{"oled":"yes"}}""").single().first)
+    }
+
+    @Test
     fun `animation values are read and a disabled animation takes no time`() {
         val animation = success("""{"version":1,"animations":{"workspaces":{"bezier":"quick","speed":3.5}}}""").animations.workspaces
         assertEquals(WorkspaceAnimation(enabled = true, curve = AnimationCurve.Quick, speed = 3.5f), animation)

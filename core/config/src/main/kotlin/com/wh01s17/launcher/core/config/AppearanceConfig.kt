@@ -10,6 +10,10 @@ data class AppearanceConfig(
     val wallpaper: String = "none",
     /** Paleta de tidalamp que tiñe todo el launcher; una desconocida se pinta con `phosphor`. */
     val palette: String = DEFAULT_PALETTE,
+    /** Fondos y superficies en negro puro con cualquier paleta: en pantallas OLED ahorra batería. */
+    val oled: Boolean = false,
+    /** Girar con el sensor (respetando el bloqueo de rotación del sistema); apagado, siempre en vertical. */
+    val autoRotate: Boolean = false,
 ) {
     companion object {
         const val DEFAULT_FONT_SCALE = 1.25f
@@ -43,7 +47,9 @@ internal object AppearanceSections {
         if (wallpaper !in AppearanceConfig.WALLPAPERS) errors += ConfigError("appearance.wallpaper", "fondo desconocido: $wallpaper")
         val palette = ConfigValues.readString(appearance["palette"], "appearance.palette", errors) ?: defaults.palette
         if (!PALETTE_NAME.matches(palette)) errors += ConfigError("appearance.palette", "nombre de paleta inválido: $palette")
-        return AppearanceConfig(theme, scale, wallpaper, palette)
+        val oled = ConfigValues.readBoolean(appearance["oled"], "appearance.oled", errors) ?: defaults.oled
+        val autoRotate = ConfigValues.readBoolean(appearance["autoRotate"], "appearance.autoRotate", errors) ?: defaults.autoRotate
+        return AppearanceConfig(theme, scale, wallpaper, palette, oled, autoRotate)
     }
 
     fun idle(

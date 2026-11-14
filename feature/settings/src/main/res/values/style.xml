@@ -4,6 +4,10 @@
     <string name="style_theme_hint">Tema instalado, sincronizado con tus dotfiles.</string>
     <string name="style_font">Escala de fuente (%)</string>
     <string name="style_transparent">Barra transparente</string>
+    <string name="style_oled">Modo OLED</string>
+    <string name="style_oled_hint">Fondos y paneles en negro puro con cualquier paleta: en pantallas OLED los píxeles negros van apagados y gastan menos batería.</string>
+    <string name="style_rotate">Girar con el sensor</string>
+    <string name="style_rotate_hint">Apagado, el launcher va siempre en vertical. Encendido, gira con el teléfono si la rotación automática del sistema está activa.</string>
     <string name="style_gaps_in">Hueco interior</string>
     <string name="style_gaps_out">Hueco exterior</string>
     <string name="style_rounding">Radio de los tiles</string>

@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import com.wh01s17.launcher.core.designsystem.palette.PaletteRemap
 import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
+import com.wh01s17.launcher.core.designsystem.palette.forOled
 
 /** Valores por defecto del tema que no vienen de los dotfiles. */
 object WhDefaults {
@@ -65,14 +66,16 @@ object WhTheme {
  * Tema `wh01s17`: los valores salen de los tokens generados desde los dotfiles
  * (plan.md §4.1), nunca de literales. Con otra [palette] de tidalamp, sus colores toman el papel
  * de los de phosphor en todo el tema ([PaletteRemap]); los avisos (rojo, amarillo…) se mantienen.
+ * Con [oled], fondos y superficies van en negro puro con cualquier paleta ([forOled]).
  */
 @Composable
 fun WhTheme(
     fontScale: Float = WhDefaults.FONT_SCALE,
     palette: PlayerPalette = TidalampPalettes.default,
+    oled: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val remap = remember(palette) { PaletteRemap(palette) }
+    val remap = remember(palette, oled) { PaletteRemap(if (oled) palette.forOled() else palette) }
     val colors = remember(remap) { WhColors().remapped(remap::invoke) }
     val typography = remember(fontScale) { WhTypography.create(fontScale) }
     val spacing = remember(fontScale) { WhSpacing.create(fontScale) }

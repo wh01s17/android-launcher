@@ -74,6 +74,10 @@ private fun Appearance(
         onChange("appearance", "fontScale", it.toFloat() / PERCENT)
     }
     WhToggle(config.bar.transparent, { onChange("bar", "transparent", it) }, label = stringResource(R.string.style_transparent))
+    WhToggle(config.appearance.oled, { onChange("appearance", "oled", it) }, label = stringResource(R.string.style_oled))
+    WhText(stringResource(R.string.style_oled_hint), color = WhTheme.colors.darkForeground)
+    WhToggle(config.appearance.autoRotate, { onChange("appearance", "autoRotate", it) }, label = stringResource(R.string.style_rotate))
+    WhText(stringResource(R.string.style_rotate_hint), color = WhTheme.colors.darkForeground)
     NumberSetting(R.string.style_gaps_in, config.general.gapsIn ?: DEFAULT_GAP, GAP_RANGE) { onChange("general", "gapsIn", it) }
     NumberSetting(R.string.style_gaps_out, config.general.gapsOut ?: DEFAULT_GAP, GAP_RANGE) { onChange("general", "gapsOut", it) }
     NumberSetting(R.string.style_rounding, config.general.rounding ?: DEFAULT_RADIUS, GAP_RANGE) { onChange("general", "rounding", it) }

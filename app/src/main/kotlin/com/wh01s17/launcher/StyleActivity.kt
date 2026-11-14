@@ -33,6 +33,7 @@ import com.wh01s17.launcher.feature.settings.style.StyleScreen
 import com.wh01s17.launcher.feature.settings.style.StyleViewModel
 import com.wh01s17.launcher.ui.HomeWallpaper
 import com.wh01s17.launcher.ui.LauncherTheme
+import com.wh01s17.launcher.ui.followRotationSetting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -83,6 +84,7 @@ class StyleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(SystemBarStyle.dark(AndroidColor.TRANSPARENT), SystemBarStyle.dark(AndroidColor.TRANSPARENT))
+        followRotationSetting(container.configRepository)
         setContent {
             LauncherTheme(container) {
                 val state by model.config.collectAsStateWithLifecycle()
