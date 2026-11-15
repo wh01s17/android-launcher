@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -36,6 +37,8 @@ import androidx.compose.ui.text.withStyle
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.layout.WidgetSize
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
+import com.wh01s17.launcher.feature.widgets.native.rememberSeek
+import com.wh01s17.launcher.feature.widgets.native.seekGestures
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -140,6 +143,7 @@ internal fun HackMeter(
     color: Color,
     modifier: Modifier = Modifier,
     marker: Boolean = false,
+    onSeek: ((Float) -> Unit)? = null,
 ) {
     val style = WhTheme.typography.bodySmall
     val colors = WhTheme.colors
@@ -151,12 +155,20 @@ internal fun HackMeter(
                 .size.width
                 .coerceAtLeast(1)
         }
-    BoxWithConstraints(modifier.fillMaxWidth()) {
+    // Con [onSeek] es una barra de tiempo: tocar o arrastrar sobre los `#…` busca (ver [seekGestures]);
+    // el alto sube al de medio objetivo táctil para que se pueda acertar con el dedo.
+    val seek = rememberSeek()
+    val touch = if (onSeek != null) Modifier.heightIn(min = WhTheme.spacing.touchTarget / 2) else Modifier
+    BoxWithConstraints(modifier.fillMaxWidth().then(touch), contentAlignment = Alignment.CenterStart) {
         val columns = constraints.maxWidth / charPx
         val cells = (columns - label.length - suffix.length - METER_FRAME_CHARS).coerceAtLeast(MIN_CELLS)
-        val filled = (fraction.coerceIn(0f, 1f) * cells).roundToInt()
+        val shown = (seek.preview ?: fraction).coerceIn(0f, 1f)
+        val filled = (shown * cells).roundToInt()
         // Con [marker], una sola `|` en la posición (un péndulo, un cursor) en vez de la barra llena.
-        val at = (fraction.coerceIn(0f, 1f) * (cells - 1)).roundToInt()
+        val at = (shown * (cells - 1)).roundToInt()
+        // La barra empieza tras `label [` (o `[`) y ocupa [cells] caracteres.
+        val start = (if (label.isEmpty()) 1 else label.length + 2) * charPx.toFloat()
+        val track = remember(start, cells, charPx) { { _: Int -> start..(start + cells * charPx) } }
         val text =
             buildAnnotatedString {
                 withStyle(SpanStyle(color = colors.darkForeground)) { append(if (label.isEmpty()) "[" else "$label [") }
@@ -171,7 +183,7 @@ internal fun HackMeter(
                 withStyle(SpanStyle(color = colors.darkForeground)) { append("] ") }
                 withStyle(SpanStyle(color = colors.foreground)) { append(suffix) }
             }
-        WhText(text, style = style, maxLines = 1, overflow = TextOverflow.Clip)
+        WhText(text, Modifier.fillMaxWidth().seekGestures(seek, onSeek, track), style = style, maxLines = 1, overflow = TextOverflow.Clip)
     }
 }
 

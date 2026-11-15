@@ -49,17 +49,16 @@ internal fun HackClock(
         HackPrompt("tty-clock -sc")
         // En mediano y grande las cifras llenan el alto que sobra (sin pasarse del ancho); a pantalla
         // completa el que se estira es el calendario.
+        // Las cifras ocupan el mismo hueco de antes pero a un [DIGITS_SCALE] de su tamaño, centradas: el
+        // margen que sobra hace de relleno y el resto del widget no se mueve.
         HackDigits(
             now.format(HOURS),
             colors.accent,
             if (size == WidgetSize.Full) Modifier else Modifier.weight(1f),
             alignment = Alignment.Center,
+            scale = DIGITS_SCALE,
         )
-        // El cursor marca los segundos: encendido en los pares, apagado en los impares.
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            WhText(dateLine(now, locale), Modifier.weight(1f), maxLines = 1)
-            HackCursor(WhTheme.typography.bodySmall, lit = now.second % 2 == 0)
-        }
+        WhText(dateLine(now, locale), maxLines = 1)
         // Cuánto va del día y del año; el segundero, sólo a pantalla completa (así lo prefiere el usuario).
         if (size == WidgetSize.Full) HackMeter("sec ", now.second / SECONDS_PER_MINUTE, ":%02d".format(now.second), colors.cyan)
         val day = now.toLocalTime().toSecondOfDay() / SECONDS_PER_DAY
@@ -163,3 +162,4 @@ private const val SECONDS_PER_MINUTE = 60f
 private const val SECONDS_PER_DAY = 86_400f
 private const val SECONDS_PER_HOUR = 3_600L
 private const val PERCENT = 100
+private const val DIGITS_SCALE = 0.8f

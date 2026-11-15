@@ -135,7 +135,13 @@ private fun ColumnScope.HackPlayer(
         }
     }
     val total = state.durationMillis
-    HackMeter("", if (total > 0) position.toFloat() / total else 0f, "${clock(position)}/${clock(total)}", colors.accent)
+    HackMeter(
+        "",
+        if (total > 0) position.toFloat() / total else 0f,
+        "${clock(position)}/${clock(total)}",
+        colors.accent,
+        onSeek = if (interactive && total > 0) ({ media.seek(state, (it * total).toLong()) }) else null,
+    )
     if (size >= WidgetSize.Large) {
         HackSpectrum(sources, viz, state.playing, interactive, onNextViz, Modifier.weight(1f).fillMaxWidth())
     } else {

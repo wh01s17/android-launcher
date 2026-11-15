@@ -2,7 +2,6 @@ package com.wh01s17.launcher.feature.widgets.native
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -77,11 +75,12 @@ internal fun NovaProgress(
 ) {
     val line = WhTheme.spacing.borderSize
     val dot = WhTheme.spacing.controlGap
-    val seek = if (onSeek != null) Modifier.pointerInput(onSeek) { detectTapGestures { onSeek(it.x / size.width) } } else Modifier
+    val seek = rememberSeek()
+    val shown = seek.preview ?: fraction
     Box(
-        Modifier.fillMaxWidth().height(WhTheme.spacing.touchTarget / 2).then(seek).drawBehind {
+        Modifier.fillMaxWidth().height(WhTheme.spacing.touchTarget / 2).seekGestures(seek, onSeek).drawBehind {
             val y = size.height / 2
-            val x = size.width * fraction.coerceIn(0f, 1f)
+            val x = size.width * shown.coerceIn(0f, 1f)
             val stroke = line.toPx()
             drawLine(palette.muted, Offset(x, y), Offset(size.width, y), stroke)
             drawLine(palette.accent, Offset(0f, y), Offset(x, y), stroke)

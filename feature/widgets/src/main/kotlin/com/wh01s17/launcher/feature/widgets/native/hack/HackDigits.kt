@@ -28,6 +28,7 @@ internal fun HackDigits(
     modifier: Modifier = Modifier,
     maxHeight: Dp = Dp.Infinity,
     alignment: Alignment = Alignment.CenterStart,
+    scale: Float = 1f,
 ) {
     val glyphs = text.map { GLYPHS[it] ?: BLANK }
     val columns = glyphs.sumOf { it.width } + (glyphs.size - 1).coerceAtLeast(0)
@@ -35,7 +36,7 @@ internal fun HackDigits(
     BoxWithConstraints(modifier.fillMaxWidth().semantics { contentDescription = text }, contentAlignment = alignment) {
         // Con alto acotado (p. ej. `weight(1f)`), las cifras crecen hasta llenarlo sin pasarse del ancho.
         val available = if (constraints.hasBoundedHeight) this.maxHeight else Dp.Infinity
-        val cell = min(min(maxWidth / columns, maxHeight / ROWS), available / ROWS)
+        val cell = min(min(maxWidth / columns, maxHeight / ROWS), available / ROWS) * scale
         Canvas(Modifier.size(cell * columns, cell * ROWS)) {
             val side = cell.toPx()
             val inset = gap.toPx()
