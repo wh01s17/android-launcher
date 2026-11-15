@@ -5,6 +5,14 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
 ## [Sin publicar]
 
+## [1.1.1] — 2026-11-14
+
+### Corregido
+
+- TIDAL con la temática `hack` vuelve a mostrar la carátula, a la izquierda de pista, artista y álbum,
+  y tocarla abre TIDAL. Si la pista, el artista o el álbum no caben, se deslizan ida y vuelta, todos a
+  la vez, como el marquee de tidalamp.
+
 ## [1.1.0] — 2026-11-14
 
 Temáticas de widgets, salvapantallas configurable y Estilo reordenado.
