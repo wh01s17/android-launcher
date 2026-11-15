@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.system.status.ClockSource
+import com.wh01s17.launcher.feature.bar.LocalBarTight
 import com.wh01s17.launcher.feature.bar.R
 import com.wh01s17.launcher.feature.bar.module.BarItem
 import com.wh01s17.launcher.feature.bar.module.BarModule
@@ -48,7 +49,7 @@ internal class ClockModule(
             onClick = { calendarOpen = !calendarOpen },
             onLongClick = { alternate = !alternate },
         ) {
-            WhText(ClockFormat.format(now, pattern, locale), maxLines = 1)
+            WhText(ClockFormat.format(now, pattern, locale, withoutWeekday = LocalBarTight.current), maxLines = 1)
         }
         if (calendarOpen) {
             CalendarPopup(

@@ -157,4 +157,54 @@ class BarLayoutTest {
         compaction.update(required = 390, available = total)
         assertFalse(compaction.compact)
     }
+
+    @Test
+    fun `as a last resort the right group hides from the right, never the left group or the anchor`() {
+        val slots =
+            listOf(
+                spec(BarGroup.Left, 200),
+                spec(BarGroup.Center, 60, anchor = true),
+                spec(BarGroup.Right, 50),
+                spec(BarGroup.Right, 50),
+            )
+        // 200 + 60 + 50 + 50 + 3 huecos de grupo (30) = 390 > 340: sobran 50, se va el de más a la derecha.
+        assertEquals(setOf(3), overflowSlots(slots, 340, 0, gap))
+        // Sin sitio ni para el ancla con la izquierda, se va todo el grupo derecho, pero no el ancla.
+        assertEquals(setOf(2, 3), overflowSlots(slots, 200, 0, gap))
+        assertEquals(emptySet<Int>(), overflowSlots(slots, 400, 0, gap))
+    }
+
+    @Test
+    fun `the bar turns tight only once compact and without idle modules it still overflows`() {
+        val compaction = BarCompaction()
+        compaction.update(required = 500, available = 400)
+        assertEquals(true, compaction.compact)
+        assertEquals(false, compaction.tight)
+        // Ya compacta: sin los módulos en reposo mide 420, aún no cabe.
+        compaction.composedCompact = true
+        compaction.update(required = 450, available = 400, visible = 420)
+        assertEquals(true, compaction.tight)
+        // Estrecha: mide 380 y apunta que ahorró 40; con 370 no vuelve (370 + 40 > 400)…
+        compaction.composedTight = true
+        compaction.update(required = 410, available = 400, visible = 380)
+        assertEquals(true, compaction.tight)
+        compaction.update(required = 400, available = 400, visible = 370)
+        assertEquals(true, compaction.tight)
+        // …y con 350 sí (350 + 40 <= 400), pero sigue compacta: medía con los textos cortos.
+        compaction.update(required = 380, available = 400, visible = 350)
+        assertEquals(false, compaction.tight)
+        assertEquals(true, compaction.compact)
+    }
+
+    @Test
+    fun `while tight the bar never leaves compact, so it cannot loop`() {
+        val compaction = BarCompaction()
+        compaction.update(required = 500, available = 400)
+        compaction.composedCompact = true
+        compaction.update(required = 450, available = 400, visible = 420)
+        compaction.composedTight = true
+        // Con los textos cortos mide muy poco: aun así no sale de compacto mientras esté estrecha.
+        compaction.update(required = 200, available = 400, visible = 200)
+        assertEquals(true, compaction.compact)
+    }
 }

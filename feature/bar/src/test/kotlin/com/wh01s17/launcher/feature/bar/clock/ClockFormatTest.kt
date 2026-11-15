@@ -71,4 +71,14 @@ class ClockFormatTest {
         // Una `s` entre comillas es texto.
         assertEquals(ClockGranularity.Minute, ClockFormat.granularity("HH:mm 'segundos'"))
     }
+
+    @Test
+    fun `the tight bar drops the weekday and its separator`() {
+        fun tight(pattern: String) = ClockFormat.format(tuesday, pattern, en, withoutWeekday = true)
+        assertEquals("3 Nov", tight("ddd d MMM"))
+        assertEquals("3 November", tight("dddd, d MMMM"))
+        assertEquals("21:54", tight("HH:mm ddd"))
+        // Sin día de la semana no cambia nada.
+        assertEquals("21:54", tight("HH:mm"))
+    }
 }

@@ -42,4 +42,12 @@ class PomodoroBarModelTest {
         assertEquals("1:30:00", PomodoroBarModel.clock(90 * minute))
         assertEquals("0:00", PomodoroBarModel.clock(0))
     }
+
+    @Test
+    fun `the short clock counts started minutes`() {
+        assertEquals("25m", PomodoroBarModel.shortClock(24 * 60_000L + 58_000L))
+        assertEquals("1m", PomodoroBarModel.shortClock(30_000L))
+        assertEquals("0m", PomodoroBarModel.shortClock(0L))
+        assertEquals("1h05", PomodoroBarModel.shortClock(64 * 60_000L + 1_000L))
+    }
 }

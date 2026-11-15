@@ -32,8 +32,10 @@ object ClockFormat {
         dateTime: ZonedDateTime,
         pattern: String,
         locale: Locale = Locale.getDefault(),
+        withoutWeekday: Boolean = false,
     ): String {
-        val parts = parse(pattern)
+        // En la barra estrecha (LocalBarTight) el día de la semana sobra: «sáb 14 nov» → «14 nov».
+        val parts = parse(pattern).let { if (withoutWeekday) dropWeekday(it) else it }
         val twelveHour = parts.any { it is Part.Token && (it.letter == 'A' || it.letter == 'a') }
         return parts.joinToString("") { part ->
             when (part) {
@@ -53,6 +55,26 @@ object ClockFormat {
         } else {
             ClockGranularity.Minute
         }
+
+    /** Sin los `ddd`/`dddd` (día de la semana) ni el separador que los seguía o precedía. */
+    private fun dropWeekday(parts: List<Part>): List<Part> {
+        fun separator(part: Part) = part is Part.Literal && part.text.all { it == ' ' || it == ',' || it == '.' }
+        val kept = mutableListOf<Part>()
+        var afterWeekday = false
+        for (part in parts) {
+            when {
+                part is Part.Token && part.letter == 'd' && part.length >= WEEKDAY_LENGTH -> afterWeekday = true
+                afterWeekday && separator(part) -> afterWeekday = false
+                else -> {
+                    afterWeekday = false
+                    kept += part
+                }
+            }
+        }
+        return kept.dropWhile(::separator).dropLastWhile(::separator)
+    }
+
+    private const val WEEKDAY_LENGTH = 3
 
     private fun parse(pattern: String): List<Part> {
         val parts = mutableListOf<Part>()

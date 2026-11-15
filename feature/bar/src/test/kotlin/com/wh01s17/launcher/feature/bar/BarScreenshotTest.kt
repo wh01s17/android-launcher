@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.test.core.app.ApplicationProvider
@@ -16,6 +18,7 @@ import com.wh01s17.launcher.core.config.ConfigParser
 import com.wh01s17.launcher.core.config.ParseResult
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.system.media.MediaSource
+import com.wh01s17.launcher.core.system.notifications.NotificationSummary
 import com.wh01s17.launcher.core.system.status.AudioState
 import com.wh01s17.launcher.core.system.status.BatteryState
 import com.wh01s17.launcher.core.system.status.BluetoothStatus
@@ -35,6 +38,7 @@ import com.wh01s17.launcher.feature.bar.timer.PomodoroModule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -235,4 +239,43 @@ class BarScreenshotTest {
                 CalendarPanel(LocalDate.of(2026, 11, 3), DayOfWeek.MONDAY, Locale.forLanguageTag("es"))
             }
         }
+
+    /**
+     * Una barra llena como la del usuario (2026-11-14): ocho escritorios, el pomodoro corriendo, tres
+     * avisos, la fecha y el volumen (más red, Bluetooth y batería), en 407 dp. Antes el grupo derecho pisaba
+     * al izquierdo («24:5🔔8»); ahora se compacta, se acortan los textos y, si hace falta, se oculta algo
+     * del grupo derecho. Ningún módulo puede pisar a otro.
+     */
+    @Test
+    fun crowdedBarNeverOverlaps() {
+        val running = pomodoro { toggle() }
+        val registry = defaultBarRegistry(clock, running, metronome(), MediaSource(ApplicationProvider.getApplicationContext()))
+        val crowded =
+            calm.copy(
+                workspaces = WorkspaceBarState(focused = 1, occupied = (1..8).toSet()),
+                notifications = NotificationSummary(granted = true, count = 3),
+            )
+        // La de fábrica con red, Bluetooth y batería además: no cabe ni estrecha (en Robolectric no hay
+        // sesión de media que ocupe su sitio), así que también entra el último recurso.
+        val full =
+            config(
+                """{"version":1,"bar":{"layout":{"left":[{"id":"core.menu"},{"id":"core.workspaces"},{"id":"pomodoro"}],
+                "center":[],"right":[{"id":"wh01s17.indicators"},{"id":"wh01s17.network"},{"id":"wh01s17.bluetooth"},
+                {"id":"wh01s17.clock","format":"ddd d MMM"},{"id":"wh01s17.audio"},{"id":"wh01s17.power"}]}}}""",
+            )
+        capture("bar-crowded") { Bar(full, registry, crowded, onCommand = {}) }
+        val items =
+            composeRule
+                .onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.OnClick))
+                .fetchSemanticsNodes()
+                // Los módulos ocultos no se colocan: ni se pintan ni reciben toques (ni los lee TalkBack).
+                .filter { it.layoutInfo.isPlaced }
+                .map { it.boundsInRoot }
+                .filter { it.width > 0f }
+        val overlaps =
+            items.indices.flatMap { a -> (a + 1 until items.size).map { b -> a to b } }.filter { (a, b) ->
+                items[a].intersect(items[b]).let { it.width > 1f && it.height > 1f }
+            }
+        assertTrue("overlapping bar items: ${overlaps.map { items[it.first] to items[it.second] }}", overlaps.isEmpty())
+    }
 }

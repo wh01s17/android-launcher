@@ -16,6 +16,7 @@ import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.core.system.timer.PomodoroPhase
 import com.wh01s17.launcher.core.system.timer.PomodoroRepository
 import com.wh01s17.launcher.core.system.timer.PomodoroState
+import com.wh01s17.launcher.feature.bar.LocalBarTight
 import com.wh01s17.launcher.feature.bar.R
 import com.wh01s17.launcher.feature.bar.module.BarItem
 import com.wh01s17.launcher.feature.bar.module.BarModule
@@ -70,7 +71,11 @@ internal class PomodoroModule(
             onLongClick = { panelOpen = true },
         ) {
             WhIcon(phaseGlyph(state.phase))
-            if (!PomodoroBarModel.idle(state, now)) WhText(PomodoroBarModel.clock(remaining), maxLines = 1)
+            if (!PomodoroBarModel.idle(state, now)) {
+                // En la barra estrecha, sólo los minutos («25m»).
+                val text = if (LocalBarTight.current) PomodoroBarModel.shortClock(remaining) else PomodoroBarModel.clock(remaining)
+                WhText(text, maxLines = 1)
+            }
         }
         if (panelOpen) PomodoroPanel(pomodoro, state, remaining, onDismiss = { panelOpen = false })
     }
@@ -94,6 +99,8 @@ internal object PomodoroBarModel {
     private const val MILLIS_PER_SECOND = 1000L
     private const val SECONDS_PER_MINUTE = 60L
     private const val SECONDS_PER_HOUR = 3600L
+    private const val MILLIS_PER_MINUTE = 60_000L
+    private const val MINUTES_PER_HOUR = 60L
 
     /** `work`, `short-break`, `long-break`: los nombres de fase de `pomodoro.sh`. */
     fun className(phase: PomodoroPhase): String =
@@ -114,6 +121,13 @@ internal object PomodoroBarModel {
         state: PomodoroState,
         now: Long,
     ): Boolean = !state.running && state.phase == PomodoroPhase.Work && state.sessions == 0 && state.remainingAt(now) == state.totalMillis
+
+    /** `25m` o `1h05`: los minutos que quedan, redondeando hacia arriba (con 24:58 quedan 25 empezados). */
+    fun shortClock(millis: Long): String {
+        val minutes = (millis + MILLIS_PER_MINUTE - 1) / MILLIS_PER_MINUTE
+        val h = minutes / MINUTES_PER_HOUR
+        return if (h > 0) "%dh%02d".format(h, minutes % MINUTES_PER_HOUR) else "${minutes}m"
+    }
 
     /** `m:ss` o `h:mm:ss` (el ultradiano dura 90 minutos), redondeando hacia abajo como el tile. */
     fun clock(millis: Long): String {
