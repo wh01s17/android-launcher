@@ -1,5 +1,6 @@
 package com.wh01s17.launcher.core.apps.icons
 
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorFilter
@@ -13,6 +14,7 @@ import android.os.Build
 import androidx.annotation.ColorInt
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
+import kotlin.math.roundToInt
 
 /**
  * Pasa el `Drawable` de una app a un `Bitmap` cuadrado con el estilo de [IconStyle].
@@ -36,11 +38,27 @@ class IconRenderer(
         require(sizePx > 0) { "sizePx must be positive: $sizePx" }
         return when (style) {
             IconStyle.Monochrome ->
-                monochromeLayer(icon)?.let { drawMonochrome(it, sizePx, tint) }
-                    ?: draw(icon, sizePx, desaturate(fallbackSaturation))
-            IconStyle.Original -> draw(icon, sizePx, filter = null)
+                monochromeLayer(icon)?.let { layer -> atNaturalSize(icon, sizePx) { drawMonochrome(layer, it, tint) } }
+                    ?: atNaturalSize(icon, sizePx) { draw(icon, it, desaturate(fallbackSaturation)) }
+            IconStyle.Original -> atNaturalSize(icon, sizePx) { draw(icon, it, filter = null) }
             IconStyle.Pixelated -> pixelate(icon, sizePx)
         }
+    }
+
+    /**
+     * Un icono adaptativo se dibuja al menos a su tamaño nativo (72 dp visibles de 108) y luego se
+     * reduce: sus capas pueden traer márgenes fijos en dp (la monocroma de Drive es un glifo con 26 dp
+     * por lado) y, dibujadas directamente al tamaño de un tile pequeño, el margen se comía la capa
+     * entera y quedaba un cuadrado vacío.
+     */
+    private inline fun atNaturalSize(
+        icon: Drawable,
+        sizePx: Int,
+        render: (Int) -> Bitmap,
+    ): Bitmap {
+        val natural = (ADAPTIVE_VISIBLE_DP * Resources.getSystem().displayMetrics.density).roundToInt()
+        if (icon !is AdaptiveIconDrawable || natural <= sizePx) return render(sizePx)
+        return render(natural).scale(sizePx, sizePx, filter = true)
     }
 
     private fun monochromeLayer(icon: Drawable): Drawable? =
@@ -97,6 +115,9 @@ class IconRenderer(
 
         /** (108 − 72) / 2 / 72: lo que sobresale por cada lado la capa de un icono adaptativo. */
         private const val ADAPTIVE_HIDDEN_FRACTION = 0.25f
+
+        /** Lo visible de un icono adaptativo: 72 de sus 108 dp. */
+        private const val ADAPTIVE_VISIBLE_DP = 72f
 
         private const val ALPHA_THRESHOLD = 128
         private const val ALPHA_SHIFT = 24

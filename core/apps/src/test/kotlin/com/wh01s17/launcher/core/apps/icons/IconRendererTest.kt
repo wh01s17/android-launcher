@@ -46,6 +46,22 @@ class IconRendererTest {
     }
 
     @Test
+    fun `a monochrome glyph with fixed dp insets still shows on a small tile`() {
+        // Como Drive: el glifo con 26 dp de margen por lado en una capa de 108 dp. Dibujada a 24 px
+        // (36 px de capa) el margen se comía todo y salía un cuadrado vacío.
+        val density =
+            android.content.res.Resources
+                .getSystem()
+                .displayMetrics.density
+        val inset = (26 * density).toInt()
+        val layer = InsetDrawable(ColorDrawable(Color.BLACK), inset, inset, inset, inset)
+        val bitmap = renderer.render(adaptive(layer), IconStyle.Monochrome, 24, tint)
+        assertEquals(24, bitmap.width)
+        assertEquals(tint, bitmap.getPixel(12, 12))
+        assertEquals(0, Color.alpha(bitmap.getPixel(1, 1)))
+    }
+
+    @Test
     fun `without a monochrome layer the original is desaturated`() {
         val bitmap = renderer.render(ColorDrawable(Color.RED), IconStyle.Monochrome, 48, tint)
         val pixel = bitmap.getPixel(24, 24)
