@@ -18,9 +18,9 @@ import com.wh01s17.launcher.core.tiling.TileId
  * hacia la derecha la anterior. Si no hay pestaña en ese sentido, el gesto no se toca y sigue al
  * carrusel de escritorios. Una pestaña por gesto.
  *
- * Va en el contenedor de la página y no en el tile: al cambiar de pestaña se compone otro tile
- * (`key(tile)`), y un detector dentro del tile desaparecería a mitad del gesto, dejando el resto del
- * arrastre al carrusel y la pulsación larga al fondo.
+ * Va en el contenedor de la página y no en el tile: el gesto necesita el reparto de toda la página
+ * (qué grupo hay bajo el dedo) y, al cambiar de pestaña, los detectores del tile se reinician
+ * (`pointerInput(tile)`) a mitad del gesto. El deslizamiento visual lo hace `GroupBody`.
  */
 @Composable
 internal fun Modifier.groupSwipes(

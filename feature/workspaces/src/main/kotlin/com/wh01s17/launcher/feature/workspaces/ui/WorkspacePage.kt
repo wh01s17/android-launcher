@@ -100,7 +100,9 @@ internal fun WorkspacePage(
         if (workspace.isEmpty) EmptyHint(number, Modifier.align(Alignment.Center))
         val dropPreview = rememberDropPreview(workspace, result, area, gaps, drag, stripHeight)
         for ((tile, rect) in result.visible) {
-            key(tile) {
+            // Un grupo se compone con una clave estable (su primera pestaña), no con la visible: así el
+            // tile sobrevive al cambio de pestaña y puede animarlo (`GroupBody`).
+            key(result.groups[tile]?.firstOrNull() ?: tile) {
                 // El arrastrado sigue en su sitio (ahí vive el gesto), invisible durante la vista previa.
                 val shown = if (dropPreview == null || drag?.tile == tile) rect else dropPreview.result.visible[tile]
                 if (shown != null) {

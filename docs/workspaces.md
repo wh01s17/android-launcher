@@ -60,7 +60,7 @@ Como en Hyprland con la config de `~/dotfiles`:
 - **Grupos**: como en Hyprland, sólo se crean a petición; un tile nuevo **nunca** se agrupa solo
   (siempre toma su hueco y los demás se achican). Se agrupa soltando un tile en el centro de otro,
   con `agrupar` o con los atajos de [bindings.md](bindings.md#comandos) (`group.toggle`,
-  `group.move-into`, `group.move-out`). Las pestañas se ven arriba del grupo; tocar una la muestra.
+  `group.move-into`, `group.move-out`). Las pestañas se ven arriba del grupo; tocar una la muestra y deslizar en horizontal sobre el grupo pasa a la vecina. Al cambiar, el contenido se desliza (260 ms, `easeOutQuint`): la nueva entra por el lado al que se va.
 - **Foco**: al quitar el tile con el foco, pasa al último que lo tuvo (`focus_on_close`).
 - Huecos, borde y radio salen del tema (`gaps_in 2`, `gaps_out 2`, `border_size 1`,
   `rounding 10`) salvo que `general` los cambie. Entre dos tiles hay dos `gapsIn`, como en Hyprland.
