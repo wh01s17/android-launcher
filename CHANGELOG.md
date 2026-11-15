@@ -5,6 +5,14 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
 ## [Sin publicar]
 
+## [1.1.3] — 2026-11-14
+
+### Corregido
+
+- El icono de Google Drive (y el de cualquier app cuya capa monocroma trae márgenes fijos en dp)
+  salía como un cuadrado vacío en los tiles pequeños: ahora los iconos adaptativos se dibujan a su
+  tamaño nativo (72 dp) y se reducen después.
+
 ## [1.1.2] — 2026-11-14
 
 ### Cambiado
