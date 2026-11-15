@@ -26,6 +26,7 @@ data class LauncherConfig(
     val notifications: NotificationsConfig = NotificationsConfig(),
     val appearance: AppearanceConfig = AppearanceConfig(),
     val idle: IdleConfig = IdleConfig(),
+    val screensaver: ScreensaverConfig = ScreensaverConfig(),
 )
 
 /**

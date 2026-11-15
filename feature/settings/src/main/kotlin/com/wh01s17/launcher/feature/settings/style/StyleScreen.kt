@@ -1,14 +1,12 @@
 package com.wh01s17.launcher.feature.settings.style
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,11 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.wh01s17.launcher.core.config.LauncherConfig
 import com.wh01s17.launcher.core.designsystem.components.WhButton
+import com.wh01s17.launcher.core.designsystem.components.WhListRow
 import com.wh01s17.launcher.core.designsystem.components.WhNumberField
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.components.WhToggle
 import com.wh01s17.launcher.core.designsystem.layout.chromeAndKeyboard
-import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
 import com.wh01s17.launcher.feature.settings.R
@@ -52,7 +50,12 @@ fun StyleScreen(
             wallpaperPreview()
             Wallpapers(config, onChange, actions)
         } else {
-            Appearance(config, onChange, actions)
+            // Cinco secciones, de lo general a lo concreto: el tema, el escritorio, los widgets, el
+            // salvapantallas y el archivo de configuración.
+            ThemeSection(config, onChange)
+            DesktopSection(config, onChange, actions)
+            Heading(R.string.style_widgets)
+            WidgetThemeSetting(config, onChange)
             Screensaver(config, onChange, actions)
             Heading(R.string.style_config)
             Action(R.string.style_import_config, actions.importConfig)
@@ -62,55 +65,60 @@ fun StyleScreen(
     }
 }
 
+/** Tema: el tema instalado, la paleta (en un panel con sus muestras), el modo OLED y la letra. */
 @Composable
-private fun Appearance(
+private fun ThemeSection(
+    config: LauncherConfig,
+    onChange: (String, String, Any) -> Unit,
+) {
+    Heading(R.string.style_section_theme)
+    WhText(stringResource(R.string.style_theme), color = WhTheme.colors.foreground)
+    WhText(stringResource(R.string.style_theme_hint), color = WhTheme.colors.darkForeground)
+    ChoiceSetting(
+        label = R.string.style_palette_current,
+        title = R.string.style_palette_choose,
+        choices =
+            TidalampPalettes.all.map { palette ->
+                Choice(palette.name, palette.name, swatch = listOf(palette.background, palette.band, palette.foreground, palette.accent))
+            },
+        current = TidalampPalettes.byName(config.appearance.palette).name,
+        onSelect = { onChange("appearance", "palette", it) },
+    )
+    WhToggle(config.appearance.oled, { onChange("appearance", "oled", it) }, label = stringResource(R.string.style_oled))
+    WhText(stringResource(R.string.style_oled_hint), color = WhTheme.colors.darkForeground)
+    NumberSetting(R.string.style_font, (config.appearance.fontScale * PERCENT).roundToInt(), FONT_RANGE) {
+        onChange("appearance", "fontScale", it.toFloat() / PERCENT)
+    }
+}
+
+/** Escritorio: el fondo (abre su pantalla), los iconos, el mosaico, la barra y la rotación. */
+@Composable
+private fun DesktopSection(
     config: LauncherConfig,
     onChange: (String, String, Any) -> Unit,
     actions: StyleActions,
 ) {
-    WhText(stringResource(R.string.style_theme), color = WhTheme.colors.accent)
-    WhText(stringResource(R.string.style_theme_hint), color = WhTheme.colors.darkForeground)
-    NumberSetting(R.string.style_font, (config.appearance.fontScale * PERCENT).roundToInt(), FONT_RANGE) {
-        onChange("appearance", "fontScale", it.toFloat() / PERCENT)
-    }
-    WhToggle(config.bar.transparent, { onChange("bar", "transparent", it) }, label = stringResource(R.string.style_transparent))
-    WhToggle(config.appearance.oled, { onChange("appearance", "oled", it) }, label = stringResource(R.string.style_oled))
-    WhText(stringResource(R.string.style_oled_hint), color = WhTheme.colors.darkForeground)
-    WhToggle(config.appearance.autoRotate, { onChange("appearance", "autoRotate", it) }, label = stringResource(R.string.style_rotate))
-    WhText(stringResource(R.string.style_rotate_hint), color = WhTheme.colors.darkForeground)
+    Heading(R.string.style_section_desktop)
+    val wallpaper = WALLPAPERS.firstOrNull { it.first == config.appearance.wallpaper }?.second ?: R.string.style_none
+    WhListRow(
+        title = stringResource(R.string.style_wallpaper_current, stringResource(wallpaper)),
+        onClick = actions.wallpapers,
+        modifier = Modifier.fillMaxWidth(),
+        chevron = true,
+    )
+    ChoiceSetting(
+        label = R.string.style_icons_current,
+        title = R.string.style_icons_choose,
+        choices = ICONS.map { (value, label) -> Choice(value, stringResource(label)) },
+        current = config.apps.iconStyle,
+        onSelect = { onChange("apps", "iconStyle", it) },
+    )
     NumberSetting(R.string.style_gaps_in, config.general.gapsIn ?: DEFAULT_GAP, GAP_RANGE) { onChange("general", "gapsIn", it) }
     NumberSetting(R.string.style_gaps_out, config.general.gapsOut ?: DEFAULT_GAP, GAP_RANGE) { onChange("general", "gapsOut", it) }
     NumberSetting(R.string.style_rounding, config.general.rounding ?: DEFAULT_RADIUS, GAP_RANGE) { onChange("general", "rounding", it) }
-    Heading(R.string.style_palette)
-    TidalampPalettes.all.forEach { palette ->
-        PaletteButton(palette, selected = TidalampPalettes.byName(config.appearance.palette) == palette) {
-            onChange("appearance", "palette", palette.name)
-        }
-    }
-    Action(R.string.style_wallpapers, actions.wallpapers)
-    Heading(R.string.style_icons)
-    ICONS.forEach { (value, label) ->
-        WhButton({ onChange("apps", "iconStyle", value) }, selected = config.apps.iconStyle == value) { WhText(stringResource(label)) }
-    }
-}
-
-/** Una paleta: muestras de fondo, banda y acento junto a su nombre. */
-@Composable
-private fun PaletteButton(
-    palette: PlayerPalette,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    WhButton(onClick, selected = selected) {
-        Row(horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap), verticalAlignment = Alignment.CenterVertically) {
-            Row {
-                listOf(palette.background, palette.band, palette.foreground, palette.accent).forEach { color ->
-                    Box(Modifier.size(WhTheme.spacing.iconSize).background(color))
-                }
-            }
-            WhText(palette.name)
-        }
-    }
+    WhToggle(config.bar.transparent, { onChange("bar", "transparent", it) }, label = stringResource(R.string.style_transparent))
+    WhToggle(config.appearance.autoRotate, { onChange("appearance", "autoRotate", it) }, label = stringResource(R.string.style_rotate))
+    WhText(stringResource(R.string.style_rotate_hint), color = WhTheme.colors.darkForeground)
 }
 
 @Composable
@@ -139,12 +147,13 @@ private fun Screensaver(
     Heading(R.string.style_screensaver)
     NumberSetting(R.string.style_idle, config.idle.screensaver, IDLE_RANGE) { onChange("idle", "screensaver", it) }
     WhText(stringResource(R.string.style_idle_hint), color = WhTheme.colors.darkForeground)
+    ScreensaverOptions(config.screensaver, onChange, actions.preview)
     Action(R.string.style_preview, actions.preview)
     Action(R.string.style_dream_settings, actions.dreamSettings)
 }
 
 @Composable
-private fun NumberSetting(
+internal fun NumberSetting(
     label: Int,
     value: Int,
     range: IntRange,

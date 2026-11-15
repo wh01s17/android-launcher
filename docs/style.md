@@ -4,6 +4,13 @@ Menú → Style → Estilo y configuración abre los ajustes propios. Setup ofre
 Los cambios se guardan en `files/config/launcher.json` y se aplican sin reiniciar. La pantalla de
 ajustes usa la escala elegida; los escritorios la reciben al volver al inicio.
 
+La pantalla va en cinco secciones, de lo general a lo concreto: **Tema** (tema, paleta, modo OLED y
+escala de letra), **Escritorio** (fondo, iconos, huecos y radio de los tiles, barra transparente y
+rotación), **Widgets** (temática), **Salvapantallas** (inactividad, estilo, miniatura en vivo, qué
+mostrar y su aspecto, vista previa) y **Configuración** (importar y exportar). Cada elección de una
+lista es una fila «Nombre: actual ›» que abre un panel con todas las opciones (con su descripción o sus
+muestras de color); elegir aplica y cierra, atrás o tocar fuera cierran sin cambiar.
+
 - **Tema:** `wh01s17` es el único instalado. Sus colores, fuentes y medidas salen de los TOML
   sincronizados; no se ofrecen temas que la aplicación no contiene.
 - **Fuente:** escala del 75 al 200 %, con Departure Mono; también adapta el espaciado al texto.
@@ -11,6 +18,20 @@ ajustes usa la escala elegida; los escritorios la reciben al volver al inicio.
   launcher: barra, menú, tiles, bordes, controles, widgets y la W del salvapantallas. Cada color del
   tema toma el papel equivalente de la paleta (`PaletteRemap`); los avisos (rojo, amarillo, naranja…)
   y el negro OLED no cambian. El widget de TIDAL ya no tiene paleta propia.
+- **Widgets:** temática de los widgets propios (reloj, pomodoro, metrónomo, TIDAL y sistema),
+  `appearance.widgetTheme`. `nova` (de fábrica) es el tema de tidalamp; `hack` los pinta como la
+  salida de una terminal: prompt `~$ orden`, líneas `> clave valor`, barras ASCII `[####....]`,
+  cursor que parpadea y teclas `[run]` que se encienden en vídeo inverso. Referencias: el reloj es
+  `tty-clock` (cifras de bloques; en grande, avance del minuto, día y año; en completo, `cal` y una
+  frase de `fortune` que cambia cada hora), el monitor a pantalla completa abre con `neofetch` (la W,
+  el equipo y los cuadros de colores), el pomodoro grande muestra el ciclo `F b F b F b F B` y el
+  metrónomo un péndulo `swing [|.....]`. TIDAL tiene cuatro visualizadores (tocar el espectro cambia,
+  se recuerda): `blocks` (ecualizador con picos), `cava` (columnas de `#`), `scope` (osciloscopio) y
+  `hexdump` (filas tipo `xxd`). Mismos datos y botones;
+  respeta las reglas del tema (colores planos, sin brillo ni CRT). Los widgets de otras apps no cambian.
+  Para añadir una temática: una entrada en `WidgetTheme` (`core/designsystem/widgets`), su piel
+  (`WidgetSkin` en `feature/widgets/native`) y su nombre en Estilo; si falta alguna de las dos
+  últimas, no compila. Capturas de referencia en `feature/widgets/src/test/screenshots/`.
 - **Barra:** transparencia activable.
 - **Tiles:** huecos interior/exterior y radio de 0 a 32, sin cambiar la distribución guardada.
 - **Iconos:** monocromos, originales o pixelados, tanto en tiles como en el menú.

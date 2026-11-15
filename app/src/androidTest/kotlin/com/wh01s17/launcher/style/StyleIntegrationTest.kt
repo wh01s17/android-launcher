@@ -14,7 +14,7 @@ import com.wh01s17.launcher.MainActivity
 import com.wh01s17.launcher.ScreensaverActivity
 import com.wh01s17.launcher.core.config.AndroidConfigSource
 import com.wh01s17.launcher.core.config.EditResult
-import com.wh01s17.launcher.core.designsystem.screensaver.WhSpinView
+import com.wh01s17.launcher.core.designsystem.screensaver.WhScreensaverView
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -120,6 +120,6 @@ class StyleIntegrationTest {
     }
 
     private fun containsSpin(view: View): Boolean =
-        view is WhSpinView ||
+        view is WhScreensaverView ||
             (view is ViewGroup && (0 until view.childCount).any { containsSpin(view.getChildAt(it)) })
 }

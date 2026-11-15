@@ -20,3 +20,7 @@ fun accentsOf(application: Any?): Flow<Color> =
     ((application as? PaletteHost)?.palettes ?: flowOf(TidalampPalettes.default))
         .map { it.accent }
         .distinctUntilChanged()
+
+/** Las paletas del [PaletteHost] de [application] (o la de fábrica), para las vistas clásicas. */
+fun palettesOf(application: Any?): Flow<PlayerPalette> =
+    ((application as? PaletteHost)?.palettes ?: flowOf(TidalampPalettes.default)).distinctUntilChanged()

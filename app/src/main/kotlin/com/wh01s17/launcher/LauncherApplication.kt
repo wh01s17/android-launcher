@@ -1,10 +1,14 @@
 package com.wh01s17.launcher
 
 import android.app.Application
+import com.wh01s17.launcher.core.config.ScreensaverConfig
 import com.wh01s17.launcher.core.designsystem.palette.PaletteHost
 import com.wh01s17.launcher.core.designsystem.palette.PlayerPalette
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
+import com.wh01s17.launcher.core.designsystem.screensaver.ScreensaverHost
+import com.wh01s17.launcher.core.designsystem.screensaver.ScreensaverSettings
 import com.wh01s17.launcher.di.AppContainer
+import com.wh01s17.launcher.feature.settings.style.toSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -17,7 +21,8 @@ import kotlinx.coroutines.launch
  */
 class LauncherApplication :
     Application(),
-    PaletteHost {
+    PaletteHost,
+    ScreensaverHost {
     lateinit var container: AppContainer
         private set
 
@@ -25,6 +30,12 @@ class LauncherApplication :
         get() =
             container.configRepository.state
                 .map { TidalampPalettes.byName(it.config?.appearance?.palette) }
+                .distinctUntilChanged()
+
+    override val screensaverSettings: Flow<ScreensaverSettings>
+        get() =
+            container.configRepository.state
+                .map { (it.config?.screensaver ?: ScreensaverConfig()).toSettings() }
                 .distinctUntilChanged()
 
     override fun onCreate() {

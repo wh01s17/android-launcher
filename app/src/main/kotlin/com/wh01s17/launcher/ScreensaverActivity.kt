@@ -8,14 +8,15 @@ import androidx.activity.ComponentActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.wh01s17.launcher.core.designsystem.palette.accentsOf
-import com.wh01s17.launcher.core.designsystem.screensaver.WhSpinView
+import com.wh01s17.launcher.core.designsystem.palette.palettesOf
+import com.wh01s17.launcher.core.designsystem.screensaver.WhScreensaverView
+import com.wh01s17.launcher.core.designsystem.screensaver.screensaverSettingsOf
 
 /** Vista previa a petición; la inactividad de HOME usa la misma vista en su propia capa. */
 class ScreensaverActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(WhSpinView(this, accents = accentsOf(application)))
+        setContentView(WhScreensaverView(this, palettesOf(application), screensaverSettingsOf(application)))
         WindowCompat.getInsetsController(window, window.decorView).apply {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             hide(WindowInsetsCompat.Type.systemBars())

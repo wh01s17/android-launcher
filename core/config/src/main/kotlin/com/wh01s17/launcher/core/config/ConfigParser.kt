@@ -90,8 +90,9 @@ object ConfigParser {
             )
         val appearance = AppearanceSections.read(root, base.appearance, errors)
         val idle = AppearanceSections.idle(root["idle"], base.idle, errors)
+        val screensaver = ScreensaverSections.read(root["screensaver"], base.screensaver, errors)
         return if (version != null && bar != null) {
-            LauncherConfig(version, bar, general, animations, bindings, keyboard, apps, notifications, appearance, idle)
+            LauncherConfig(version, bar, general, animations, bindings, keyboard, apps, notifications, appearance, idle, screensaver)
         } else {
             null
         }

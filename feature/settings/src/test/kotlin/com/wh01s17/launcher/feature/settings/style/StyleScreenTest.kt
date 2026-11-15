@@ -2,6 +2,9 @@ package com.wh01s17.launcher.feature.settings.style
 
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -28,7 +31,8 @@ class StyleScreenTest {
     @get:Rule val compose = createComposeRule()
     private val changed = mutableListOf<Triple<String, String, Any>>()
     private var imports = 0
-    private val actions get() = StyleActions({}, { imports++ }, {}, {}, {}, {}, {})
+    private var previews = 0
+    private val actions get() = StyleActions({}, { imports++ }, {}, {}, {}, { previews++ }, {})
 
     @Test
     fun appearance() {
@@ -44,12 +48,16 @@ class StyleScreenTest {
                 )
             }
         }
+        // La paleta y los iconos se eligen en su panel: la fila dice la actual y lo abre.
+        compose.onNodeWithText("Paleta: phosphor").performScrollTo().performClick()
         compose.onNodeWithText("nord").performScrollTo().performClick()
         assertEquals(Triple("appearance", "palette", "nord"), changed.last())
-        compose.onNodeWithText("Originales").performScrollTo().performClick()
+        compose.onNodeWithText("Iconos: monocromos").performScrollTo().performClick()
+        compose.onNodeWithText("originales").performClick()
         assertEquals(Triple("apps", "iconStyle", "original"), changed.last())
         compose.onNodeWithText("Barra transparente").performScrollTo().performClick()
         assertEquals(Triple("bar", "transparent", false), changed.last())
+        compose.onNodeWithText("Tema").performScrollTo()
         compose.onRoot().captureRoboImage("src/test/screenshots/style.png")
     }
 
@@ -91,5 +99,42 @@ class StyleScreenTest {
         compose.onNodeWithText("105").assertExists()
         compose.onAllNodesWithText("+")[0].performClick()
         assertEquals(Triple("appearance", "fontScale", 1.06f), changed.last())
+    }
+
+    @Test
+    fun `the widget theme row opens a list and picking one saves it`() {
+        compose.setContent {
+            WhTheme {
+                StyleScreen(
+                    LauncherConfig(1, BarConfig()),
+                    null,
+                    false,
+                    { section, key, value -> changed += Triple(section, key, value) },
+                    actions,
+                )
+            }
+        }
+        compose.onNodeWithText("Temática: nova").performScrollTo().performClick()
+        // El panel lista todas las temáticas; elegir una la guarda y lo cierra.
+        compose.onNodeWithText("Temática de los widgets").assertExists()
+        compose.onNodeWithText("hack").performClick()
+        assertEquals(Triple("appearance", "widgetTheme", "hack"), changed.last())
+        compose.onNodeWithText("Temática de los widgets").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the screensaver options show a live preview that opens full screen`() {
+        compose.setContent {
+            WhTheme {
+                StyleScreen(LauncherConfig(1, BarConfig()), null, false, { _, _, _ -> }, actions)
+            }
+        }
+        // La miniatura no tiene texto: se encuentra por la acción de toque, que abre la vista previa.
+        val miniature =
+            SemanticsMatcher("opens the full screen preview") {
+                it.config.getOrNull(SemanticsActions.OnClick)?.label == "Vista previa"
+            }
+        compose.onNode(miniature).performScrollTo().performClick()
+        assertEquals(1, previews)
     }
 }
