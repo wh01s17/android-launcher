@@ -5,6 +5,16 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
 ## [Sin publicar]
 
+## [1.1.2] — 2026-11-14
+
+### Cambiado
+
+- La barra de tiempo de TIDAL permite moverse por la canción en todas las temáticas: tocar salta a ese
+  punto y arrastrar mueve la posición, que se aplica al soltar. En `hack`, la barra `[####....]` sube
+  a medio objetivo táctil y sólo cuentan los `#…`.
+- Reloj `hack`: sin el cursor junto a la fecha y con las cifras un 20 % más pequeñas, centradas en el
+  mismo hueco para que el resto del widget no se mueva.
+
 ## [1.1.1] — 2026-11-14
 
 ### Corregido

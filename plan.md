@@ -718,7 +718,7 @@ Cada hito termina con: `./gradlew check` verde, APK instalable, entrada en
 §13 y, si aplica, capturas en `docs/screenshots/`. Estimaciones en sesiones
 de trabajo de agente (S ≈ 1, M ≈ 2–3, L ≈ 4–6).
 
-**Estado (2026-11-14): todos los hitos cerrados, versión 1.1.1.** El Hito 9 se descartó a petición
+**Estado (2026-11-14): todos los hitos cerrados, versión 1.1.2.** El Hito 9 se descartó a petición
 del usuario; se conserva la numeración para mantener las referencias.
 
 ### Hito 0 — Fundaciones (M)
@@ -1320,7 +1320,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
 
 - **Balance al 2026-11-14:** 69 de 69 tareas marcadas (100 %). Son casillas, no una medida del
   esfuerzo. El Hito 9 y la tarea de rotación, plegables, multiusuario y perfil de trabajo se descartaron.
-- **Hito en curso:** ninguno. **Hitos 0–8, 10 y 11 terminados**; versión `1.1.1`. Los cierres y sus
+- **Hito en curso:** ninguno. **Hitos 0–8, 10 y 11 terminados**; versión `1.1.2`. Los cierres y sus
   pruebas siguen en §13.
 - **Última tarea completada:** **Hito 11 cerrado**: R8 + Baseline Profile, Macrobenchmark en el Redmi,
   LeakCanary, contraste AA y TalkBack, firma de release con publicación por tag y guías de uso, release,
@@ -1359,7 +1359,7 @@ python3 tools/sync-theme.py     # traer el tema desde ~/dotfiles
   funciona. Se restauró `0` (3 botones). La capa 3 pasa a ser la navegación
   principal (Hito 2). Observaciones, ajustes y matriz de pruebas en
   [`docs/xiaomi.md`](docs/xiaomi.md).
-- **Versión:** `1.1.1` (etiqueta `v1.1.1`: carátula y marquee del TIDAL *hack*); antes `1.1.0` (temáticas de widgets, salvapantallas configurable, Estilo reordenado), `1.0.0` (Hito 11), `0.5.0` (Hito 10), `0.4.0` (Hito 8), `0.3.0` (Hito 7), `0.2.0` (Hito 6, etiqueta `v0.2.0`) y el MVP `0.1.0`. En el Redmi va la compilación
+- **Versión:** `1.1.2` (etiqueta `v1.1.2`: barra de tiempo de TIDAL operativa, reloj hack sin cursor); antes `1.1.1` (carátula y marquee del TIDAL *hack*), `1.1.0` (temáticas de widgets, salvapantallas configurable, Estilo reordenado), `1.0.0` (Hito 11), `0.5.0` (Hito 10), `0.4.0` (Hito 8), `0.3.0` (Hito 7), `0.2.0` (Hito 6, etiqueta `v0.2.0`) y el MVP `0.1.0`. En el Redmi va la compilación
   `fast` (`./gradlew installFast`, mismo id y datos que la debug, ahora con R8 y perfil; ver `docs/setup.md`);
   la release firmada se publica por tag ([`docs/release.md`](docs/release.md)). Historial en `CHANGELOG.md`.
 
@@ -1371,6 +1371,7 @@ Añadir una fila por cada sesión de trabajo, la más reciente arriba.
 
 | Fecha | Hito | Resumen | Archivos clave |
 | --- | --- | --- | --- |
+| 2026-11-14 | Tras la 1.1.1 | **Versión 1.1.2 (10102).** Peticiones del usuario: barra de tiempo de TIDAL operativa en las dos temáticas (`SeekState.kt`: tocar salta, arrastrar previsualiza y busca al soltar, gesto cancelado no busca; en hack la zona activa son sólo las celdas de la barra, `HackSeekTest`). Reloj hack del escritorio 1 sin cursor y cifras a 0,8 (`HackDigits(scale)`) en el mismo hueco. Instalado sin mirarlo en el teléfono (el usuario lo usaba) | `feature/widgets/native/SeekState.kt`, `hack/HackKit.kt`, `hack/HackClock.kt`, `Nova.kt` |
 | 2026-11-14 | Tras la 1.1.0 | **Versión 1.1.1 (10101).** Petición del usuario: TIDAL *hack* sin carátula (y sin forma de abrir TIDAL). `HackCover` a la izquierda de las líneas, del alto de 2–4 líneas medido con la fuente, clicable; sin carátula, `[♪]`. `HackGlide` (`HackGlide.kt`) porta el `Glide` de tidalamp: pausa 2,1 s, un carácter cada 0,3 s hasta el final, pausa y vuelta, fase compartida, sólo con fotogramas. `HackGlideTest` (la sesión de medios no se puede simular: `MediaController` interno). Instalado sin mirarlo en el teléfono (el usuario lo usaba) | `feature/widgets/native/hack/HackMedia.kt`, `hack/HackGlide.kt` |
 | 2026-11-14 | Tras la 1.0 | **Versión 1.1.0 (10100).** Peticiones del usuario: Estilo en cinco secciones (Tema, Escritorio, Widgets, Salvapantallas, Configuración) con todas las listas en el panel `ChoiceSetting` (títulos, descripciones, muestras de color, scroll); miniatura en vivo del salvapantallas (`ScreensaverPreview`, `AndroidView` de `WhScreensaverView`) y botón «Vista previa»; `screensaver.spinText` (el texto gira con el ángulo de la W, proyectado con `setPolyToPoly`; de canto no se dibuja; la primera versión con `Camera` no giraba nada en la prueba); reloj hack centrado y cursor al ritmo de los segundos. Instalado en el Redmi sin tocar la UI (el usuario usaba el teléfono) | `feature/settings/style/`, `core/designsystem/screensaver/ScreensaverPainter.kt`, `feature/widgets/native/hack/HackClock.kt` |
 | 2026-11-14 | Tras la 1.0 | Peticiones del usuario. **Barra:** se pisaba con ocho escritorios, pomodoro, avisos y media (`placeSlots` pegaba el grupo derecho aunque no cupiera): modo estrecho (`LocalBarTight`: fecha sin día de la semana, pomodoro en minutos) y último recurso `overflowSlots`; la primera versión entraba en bucle compacto↔estrecho (lo destapó la prueba nueva de la barra llena) y se corrigió. **Widgets:** reloj hack con dígitos que llenan el alto, día/año en vez del segundero (éste sólo a pantalla completa), fecha `dd-mm-yyyy`; nova con día/año, reparto vertical, mes que llena y ciclo del pomodoro. **Estilo:** temáticas y estilo del salvapantallas en un panel (`ChoiceSetting`). **Salvapantallas configurable:** `screensaver` en la config (estilo `w`/`clock`/`text`/`minimal`, líneas, texto, color, brillo, velocidad, tamaño), `WhScreensaverView` + `ScreensaverPainter` (sustituyen a `WhSpinView`), `ScreensaverHost` en la app | `feature/bar/BarLayout.kt`, `core/config/ScreensaverConfig.kt`, `core/designsystem/screensaver/`, `feature/settings/style/`, `feature/widgets/native/` |
