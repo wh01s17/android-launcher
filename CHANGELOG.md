@@ -5,8 +5,44 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
 ## [Sin publicar]
 
+## [1.1.0] — 2026-11-14
+
+Temáticas de widgets, salvapantallas configurable y Estilo reordenado.
+
+### Añadido
+
+- Salvapantallas configurable (Estilo → Salvapantallas, `screensaver` en la config): estilo `w` (la W
+  girando), `clock` (la hora en grande), `text` (tu texto con cursor de terminal) o `minimal`; líneas
+  de hora, fecha, batería y texto; color de la paleta, brillo, velocidad y tamaño. Siempre sobre negro
+  puro OLED, con deriva anti-quemado y pocos fotogramas.
+- Salvapantallas: interruptor «Girar el texto» (`screensaver.spinText`) que hace girar en 3D el texto
+  del estilo `text`, con el ritmo y la velocidad de la W, y una miniatura en Estilo que cambia en vivo
+  con cada ajuste (el botón «Vista previa» lo abre a pantalla completa).
+- Estilo → *Widgets*: temática de los widgets propios (`appearance.widgetTheme`). Además de `nova`
+  (la de siempre), `hack`: reloj con `date`, epoch en hex y `cal`; pomodoro como `focus` con barra
+  ASCII; metrónomo como `tick` con el compás `[1][2][3][4]`; monitor `sysmon` con un núcleo por línea;
+  TIDAL como `sniff` con cuatro visualizadores (`blocks`, `cava`, `scope`, `hexdump`; tocar cambia).
+  En grande y a pantalla completa, el reloj es `tty-clock` con avance del día y del año, `cal` y
+  `fortune`; el monitor abre con `neofetch`; el pomodoro muestra el ciclo y la cuenta atrás en bloques;
+  el metrónomo, un péndulo. Preparado para añadir más temáticas.
+- Cambiar de pestaña en un grupo (deslizando o tocando la pestaña) desliza el contenido: la nueva
+  entra por el lado al que se va y la anterior sale por el otro, con la curva de los escritorios.
+
+### Cambiado
+
+- Estilo reordenado en cinco secciones (Tema, Escritorio, Widgets, Salvapantallas, Configuración);
+  paleta, iconos, temática de widgets y estilo del salvapantallas se eligen en un panel con la
+  descripción o las muestras de cada opción.
+- Reloj de widgets: avance del día y del año en vez del segundero (éste sólo a pantalla completa),
+  fecha `dd-mm-yyyy` en `hack`, contenido repartido a lo alto en mediano y mes que llena en grande.
+  En `hack` las cifras van centradas y el cursor se enciende y apaga con cada segundo. Pomodoro nova
+  grande con el ciclo de sesiones.
+
 ### Corregido
 
+- La barra ya no se pisa cuando va muy llena (ocho escritorios, pomodoro, avisos, media, fecha…):
+  tras compactarse y ocultar lo que está en reposo, acorta los textos (la fecha sin el día de la
+  semana, el pomodoro en minutos) y, como último recurso, oculta módulos del grupo derecho.
 - Un toque corto o un deslizamiento que empezaba en una zona sin botones de un widget del sistema
   (por ejemplo, el margen del de TIDAL) metía el escritorio en modo edición con vibración a los
   600 ms: la vista del widget no veía levantarse el dedo y su pulsación larga saltaba igual.
