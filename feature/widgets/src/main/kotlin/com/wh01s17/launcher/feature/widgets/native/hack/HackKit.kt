@@ -86,7 +86,7 @@ internal fun HackLine(
     key: String,
     value: String,
     color: Color = WhTheme.colors.foreground,
-    keyWidth: Int = KEY_WIDTH,
+    keyWidth: Int = HACK_KEY_WIDTH,
 ) {
     val dim = WhTheme.colors.darkForeground
     val text =
@@ -97,7 +97,8 @@ internal fun HackLine(
     WhText(text, style = WhTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
 }
 
-private const val KEY_WIDTH = 6
+/** Caracteres de la clave en `> clave valor`: las líneas quedan alineadas. */
+internal const val HACK_KEY_WIDTH = 6
 
 /**
  * El cursor de bloque que parpadea, de la altura de [style]. Sólo se repinta dos veces por segundo; con

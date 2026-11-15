@@ -25,7 +25,9 @@ muestras de color); elegir aplica y cierra, atrás o tocar fuera cierran sin cam
   `tty-clock` (cifras de bloques; en grande, avance del minuto, día y año; en completo, `cal` y una
   frase de `fortune` que cambia cada hora), el monitor a pantalla completa abre con `neofetch` (la W,
   el equipo y los cuadros de colores), el pomodoro grande muestra el ciclo `F b F b F b F B` y el
-  metrónomo un péndulo `swing [|.....]`. TIDAL tiene cuatro visualizadores (tocar el espectro cambia,
+  metrónomo un péndulo `swing [|.....]`. TIDAL lleva la carátula a la izquierda de pista, artista y
+  álbum (tocarla abre TIDAL; sin carátula, un hueco `[♪]` que también la abre); lo que no cabe se
+  desliza ida y vuelta, todo a la vez, como el marquee de tidalamp. Tiene cuatro visualizadores (tocar el espectro cambia,
   se recuerda): `blocks` (ecualizador con picos), `cava` (columnas de `#`), `scope` (osciloscopio) y
   `hexdump` (filas tipo `xxd`). Mismos datos y botones;
   respeta las reglas del tema (colores planos, sin brillo ni CRT). Los widgets de otras apps no cambian.
