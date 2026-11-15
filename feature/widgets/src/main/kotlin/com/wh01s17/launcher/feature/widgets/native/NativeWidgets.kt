@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.wh01s17.launcher.core.designsystem.components.WhText
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
+import com.wh01s17.launcher.core.designsystem.widgets.LocalWidgetTheme
 import com.wh01s17.launcher.core.system.media.AudioSpectrum
 import com.wh01s17.launcher.core.system.media.MediaSource
 import com.wh01s17.launcher.core.system.status.ClockSource
@@ -46,7 +47,7 @@ class NativeWidgetSources(
     val requestAudio: () -> Unit,
 )
 
-/** Pinta el widget propio [id]; uno desconocido (de una versión futura) se ve como su nombre. */
+/** Pinta el widget propio [id] con la temática de [LocalWidgetTheme]; uno desconocido se ve como su nombre. */
 @Composable
 fun NativeWidgetView(
     id: String,
@@ -54,12 +55,14 @@ fun NativeWidgetView(
     interactive: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    // La temática elegida en Estilo decide el aspecto; los datos y las acciones son los mismos.
+    val skin = skinOf(LocalWidgetTheme.current)
     when (NativeWidget.fromId(id)) {
-        NativeWidget.Tidal -> TidalWidget(sources, interactive, modifier)
-        NativeWidget.Pomodoro -> PomodoroWidget(sources.pomodoro, interactive, modifier)
-        NativeWidget.Metronome -> MetronomeWidget(sources.metronome, interactive, modifier)
-        NativeWidget.Clock -> ClockWidget(sources.clock, modifier)
-        NativeWidget.Usage -> UsageWidget(modifier)
+        NativeWidget.Tidal -> skin.Tidal(sources, interactive, modifier)
+        NativeWidget.Pomodoro -> skin.Pomodoro(sources.pomodoro, interactive, modifier)
+        NativeWidget.Metronome -> skin.Metronome(sources.metronome, interactive, modifier)
+        NativeWidget.Clock -> skin.Clock(sources.clock, modifier)
+        NativeWidget.Usage -> skin.Usage(modifier)
         null ->
             Box(modifier, contentAlignment = Alignment.Center) {
                 WhText(stringResource(R.string.native_unknown, id), color = WhTheme.colors.darkForeground)

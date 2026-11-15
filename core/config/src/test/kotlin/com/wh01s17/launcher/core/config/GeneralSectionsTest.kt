@@ -39,6 +39,15 @@ class GeneralSectionsTest {
     }
 
     @Test
+    fun `the widget theme is nova by default and read from appearance`() {
+        assertEquals("nova", factory.appearance.widgetTheme)
+        assertEquals("hack", success("""{"version":1,"appearance":{"widgetTheme":"hack"}}""").appearance.widgetTheme)
+        // Una temática que esta versión no conoce se guarda tal cual (los widgets la pintan con nova).
+        assertEquals("future-theme", success("""{"version":1,"appearance":{"widgetTheme":"future-theme"}}""").appearance.widgetTheme)
+        assertEquals("appearance.widgetTheme", errors("""{"version":1,"appearance":{"widgetTheme":"Hack Mode"}}""").single().first)
+    }
+
+    @Test
     fun `animation values are read and a disabled animation takes no time`() {
         val animation = success("""{"version":1,"animations":{"workspaces":{"bezier":"quick","speed":3.5}}}""").animations.workspaces
         assertEquals(WorkspaceAnimation(enabled = true, curve = AnimationCurve.Quick, speed = 3.5f), animation)

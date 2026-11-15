@@ -58,4 +58,8 @@
     <string name="native_usage_uptime">encendido hace %1$s</string>
     <string name="native_clock_title">reloj</string>
     <string name="native_clock_week">semana %1$d</string>
+    <string name="native_clock_day">día %1$d %%</string>
+    <string name="native_clock_year">año %1$d %%</string>
+    <string name="native_hack_media_idle">nada sonando en TIDAL</string>
+    <string name="native_hack_media_denied">&gt; acceso denegado: wh01s17 necesita el acceso a notificaciones para leer la sesión de música.</string>
 </resources>

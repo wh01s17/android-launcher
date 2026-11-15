@@ -14,10 +14,13 @@ data class AppearanceConfig(
     val oled: Boolean = false,
     /** Girar con el sensor (respetando el bloqueo de rotación del sistema); apagado, siempre en vertical. */
     val autoRotate: Boolean = false,
+    /** Temática de los widgets propios (`nova`, `hack`…); una desconocida se pinta con `nova`. */
+    val widgetTheme: String = DEFAULT_WIDGET_THEME,
 ) {
     companion object {
         const val DEFAULT_FONT_SCALE = 1.25f
         const val DEFAULT_PALETTE = "phosphor"
+        const val DEFAULT_WIDGET_THEME = "nova"
         val WALLPAPERS = setOf("none", "mark", "moon", "moon-wordmark", "imported")
     }
 }
@@ -49,7 +52,11 @@ internal object AppearanceSections {
         if (!PALETTE_NAME.matches(palette)) errors += ConfigError("appearance.palette", "nombre de paleta inválido: $palette")
         val oled = ConfigValues.readBoolean(appearance["oled"], "appearance.oled", errors) ?: defaults.oled
         val autoRotate = ConfigValues.readBoolean(appearance["autoRotate"], "appearance.autoRotate", errors) ?: defaults.autoRotate
-        return AppearanceConfig(theme, scale, wallpaper, palette, oled, autoRotate)
+        val widgetTheme = ConfigValues.readString(appearance["widgetTheme"], "appearance.widgetTheme", errors) ?: defaults.widgetTheme
+        if (!PALETTE_NAME.matches(widgetTheme)) {
+            errors += ConfigError("appearance.widgetTheme", "nombre de temática inválido: $widgetTheme")
+        }
+        return AppearanceConfig(theme, scale, wallpaper, palette, oled, autoRotate, widgetTheme)
     }
 
     fun idle(

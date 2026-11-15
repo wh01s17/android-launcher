@@ -9,6 +9,8 @@ import com.wh01s17.launcher.core.apps.icons.LocalIconStyle
 import com.wh01s17.launcher.core.config.AppearanceConfig
 import com.wh01s17.launcher.core.designsystem.palette.TidalampPalettes
 import com.wh01s17.launcher.core.designsystem.theme.WhTheme
+import com.wh01s17.launcher.core.designsystem.widgets.LocalWidgetTheme
+import com.wh01s17.launcher.core.designsystem.widgets.WidgetTheme
 import com.wh01s17.launcher.di.AppContainer
 
 @Composable
@@ -18,7 +20,11 @@ internal fun LauncherTheme(
 ) {
     val state by container.configRepository.state.collectAsStateWithLifecycle()
     val config = state.config
-    CompositionLocalProvider(LocalIconStyle provides IconStyle.fromConfig(config?.apps?.iconStyle)) {
+    CompositionLocalProvider(
+        LocalIconStyle provides IconStyle.fromConfig(config?.apps?.iconStyle),
+        // La temática de los widgets propios (Estilo → Widgets).
+        LocalWidgetTheme provides WidgetTheme.byId(config?.appearance?.widgetTheme),
+    ) {
         WhTheme(
             fontScale = config?.appearance?.fontScale ?: AppearanceConfig.DEFAULT_FONT_SCALE,
             palette = TidalampPalettes.byName(config?.appearance?.palette),

@@ -2,17 +2,21 @@ package com.wh01s17.launcher.feature.widgets.native
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -85,6 +89,7 @@ internal fun PomodoroWidget(
             if (size >= WidgetSize.Large) WhText(phaseLabel(state.phase), color = color, maxLines = 1)
             WhText(clock(remaining), style = readoutStyle(size), color = color, maxLines = 1)
             if (size != WidgetSize.Small) NovaMeter(1f - remaining.toFloat() / state.totalMillis, color)
+            if (size >= WidgetSize.Large) NovaCycle(state.phase, state.sessions, state.preset.sessionsPerLongBreak)
             Spacer(Modifier.weight(1f))
             NovaBand(palette) {
                 NovaKey(stringResource(R.string.native_pomodoro_toggle), pomodoro::toggle, palette, interactive, lit = state.running) {
@@ -110,7 +115,7 @@ internal fun PomodoroWidget(
                         { pomodoro.adjust(-1) },
                         palette,
                         interactive,
-                    ) { WhText("−1", color = it) }
+                    ) { WhText("−1", color = it, maxLines = 1) }
                     NovaKey(
                         stringResource(R.string.native_pomodoro_preset),
                         { pomodoro.setPreset(nextPreset(state.preset)) },
@@ -124,9 +129,43 @@ internal fun PomodoroWidget(
                         { pomodoro.adjust(1) },
                         palette,
                         interactive,
-                    ) { WhText("+1", color = it) }
+                    ) { WhText("+1", color = it, maxLines = 1) }
                 }
             }
+        }
+    }
+}
+
+/**
+ * El ciclo entero en cuadros: uno grande por enfoque y uno pequeño por descanso (el último, el largo).
+ * Lo hecho en acento, la fase actual en su color y lo que falta apagado.
+ */
+@Composable
+private fun NovaCycle(
+    phase: PomodoroPhase,
+    sessions: Int,
+    perLongBreak: Int,
+) {
+    val colors = WhTheme.colors
+    val spacing = WhTheme.spacing
+    val slots = perLongBreak * 2
+    val current =
+        when (phase) {
+            PomodoroPhase.Work -> sessions * 2
+            PomodoroPhase.ShortBreak -> (sessions * 2 - 1).coerceAtLeast(0)
+            PomodoroPhase.LongBreak -> slots - 1
+        }
+    val currentColor = phaseColor(phase)
+    Row(horizontalArrangement = Arrangement.spacedBy(spacing.controlGap / 2), verticalAlignment = Alignment.CenterVertically) {
+        for (slot in 0 until slots) {
+            val side = if (slot % 2 == 0 || slot == slots - 1) spacing.controlGap * 2 else spacing.controlGap
+            val color =
+                when {
+                    slot == current -> currentColor
+                    slot < current -> colors.accent
+                    else -> colors.muted
+                }
+            Box(Modifier.size(side).background(color))
         }
     }
 }

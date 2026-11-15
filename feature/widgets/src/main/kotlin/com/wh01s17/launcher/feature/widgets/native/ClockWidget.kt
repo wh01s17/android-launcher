@@ -35,8 +35,9 @@ import java.util.Locale
 
 /**
  * Reloj y calendario (plan.md §7 Hito 7), con el encabezado nova y la semana ISO. Pequeño: hora y
- * fecha. Mediano: además la semana de lunes a domingo con hoy subrayado. Grande: el mes entero,
- * como el popup del reloj de la barra (la semana empieza en lunes).
+ * fecha. Mediano: además el avance del día y del año y la semana de lunes a domingo con hoy subrayado,
+ * repartidos a lo alto. Grande y completo: la hora más grande y el mes entero, que ocupa lo que queda
+ * (la semana empieza en lunes, como el popup del reloj de la barra).
  */
 @Composable
 internal fun ClockWidget(
@@ -49,7 +50,9 @@ internal fun ClockWidget(
     val today = now.toLocalDate()
     BoxWithConstraints(modifier.fillMaxSize().background(colors.background).padding(WhTheme.spacing.controlGap)) {
         val size = WidgetSize.of(maxWidth, maxHeight)
-        Column(verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap)) {
+        val gap = Arrangement.spacedBy(WhTheme.spacing.controlGap)
+        // En mediano se reparte el alto entero; en grande lo llena el mes.
+        Column(Modifier.fillMaxSize(), verticalArrangement = if (size == WidgetSize.Medium) Arrangement.SpaceBetween else gap) {
             if (size != WidgetSize.Small) {
                 NovaHeading(
                     stringResource(R.string.native_clock_title),
@@ -58,15 +61,41 @@ internal fun ClockWidget(
             }
             WhText(
                 now.format(DateTimeFormatter.ofPattern("HH:mm")),
-                style = WhTheme.typography.displayLarge,
+                style = if (size == WidgetSize.Small) WhTheme.typography.displayLarge else readoutStyle(size),
                 color = colors.accent,
                 maxLines = 1,
             )
             WhText(now.format(DateTimeFormatter.ofPattern("EEEE d MMMM", locale)), color = colors.foreground, maxLines = 1)
+            if (size != WidgetSize.Small) DayAndYear(now.toLocalTime().toSecondOfDay(), today)
             when (size) {
                 WidgetSize.Small -> Unit
                 WidgetSize.Medium -> Week(today.with(DayOfWeek.MONDAY), today, locale, header = true)
-                WidgetSize.Large, WidgetSize.Full -> Month(today, locale)
+                WidgetSize.Large, WidgetSize.Full -> Month(today, locale, Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+/** Cuánto va del día y del año: dos barras finas de nova con su porcentaje encima. */
+@Composable
+private fun DayAndYear(
+    secondOfDay: Int,
+    today: LocalDate,
+) {
+    val colors = WhTheme.colors
+    val day = secondOfDay / SECONDS_PER_DAY
+    val year = (today.dayOfYear - 1 + day) / today.lengthOfYear()
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(WhTheme.spacing.panelGap)) {
+        val meters = listOf(R.string.native_clock_day to (day to colors.accent), R.string.native_clock_year to (year to colors.cyan))
+        meters.forEach { (label, value) ->
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap / 2)) {
+                WhText(
+                    stringResource(label, (value.first * PERCENT).toInt()),
+                    style = WhTheme.typography.caption,
+                    color = colors.darkForeground,
+                    maxLines = 1,
+                )
+                NovaMeter(value.first, value.second)
             }
         }
     }
@@ -77,10 +106,12 @@ internal fun ClockWidget(
 private fun Month(
     today: LocalDate,
     locale: Locale,
+    modifier: Modifier = Modifier,
 ) {
     val first = today.withDayOfMonth(1)
     var monday = first.with(DayOfWeek.MONDAY)
-    Column(verticalArrangement = Arrangement.spacedBy(WhTheme.spacing.controlGap / 2)) {
+    // Con alto de sobra (grande, completo), las semanas se reparten ese alto.
+    Column(modifier, verticalArrangement = Arrangement.SpaceEvenly) {
         WhText(
             today.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale)),
             style = WhTheme.typography.caption,
@@ -136,3 +167,5 @@ private fun Week(
 }
 
 private const val DAYS_PER_WEEK = 7L
+private const val SECONDS_PER_DAY = 86_400f
+private const val PERCENT = 100
