@@ -5,6 +5,14 @@ versionado semántico. El alcance de cada hito está en [plan.md](plan.md).
 
 ## [Sin publicar]
 
+## [1.1.4] — 2026-11-16
+
+### Cambiado
+
+- Las ayudas de Estilo, el menú y el editor de escritorios son más breves.
+- El README incluye 24 capturas reales del Redmi: opciones, widgets `nova` y `hack` y los ocho
+  visualizadores de TIDAL. Las guías se alinearon con los nombres y acciones actuales de la app.
+
 ## [1.1.3] — 2026-11-14
 
 ### Corregido

@@ -66,7 +66,8 @@ En CI la clave llega como variables de entorno (`SIGNING_KEYSTORE_FILE`, `SIGNIN
    `python3 tools/release-notes.py notes X.Y.Z` las muestra.
 2. `./gradlew check assembleRelease` en local y, si cambió algo de rendimiento, regenera el perfil y
    mide ([performance.md](performance.md)).
-3. Commit, `git tag vX.Y.Z` y `git push --follow-tags`.
+3. Commit, `git tag -a vX.Y.Z -m "wh01s17 Launcher X.Y.Z"` y
+   `git push --follow-tags origin main`. `--follow-tags` sube las etiquetas anotadas.
 4. [`.github/workflows/release.yml`](../.github/workflows/release.yml) comprueba que el tag coincide
    con `version.properties` y que el CHANGELOG tiene la sección (`tools/release-notes.py check`),
    pasa `check`, firma `assembleRelease` y publica `wh01s17-launcher-X.Y.Z.apk` y

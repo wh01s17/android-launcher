@@ -4,7 +4,7 @@ Launcher para Android que recrea el uso de Hyprland (workspaces, tiling,
 barra modular, menú y atajos) con el tema `wh01s17` de
 [dotfiles](https://github.com/wh01s17/dotfiles).
 
-Versión **1.1.3**: los hitos 0–8, 10 y 11 están terminados (el 9, ventanas libres, se descartó).
+Versión **1.1.4**: los hitos 0–8, 10 y 11 están terminados (el 9, ventanas libres, se descartó).
 Diez escritorios con tiles en mosaico (dwindle y master), edición, grupos y scratchpad; barra
 modular; menú wh01s17 con búsqueda difusa de apps, comandos, ajustes y atajos; atajos de teclado y
 gestos configurables como en `bindings.lua` (`ALT` hace de `SUPER`); widgets del sistema y propios
