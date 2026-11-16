@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="docs/readme/banner.png" width="860" alt="Logo W de wh01s17 sobre el nombre wh01s17 launcher">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/banner-dark.png">
+    <img src="docs/readme/banner-light.png" width="720" alt="Logo W de wh01s17 sobre el nombre wh01s17 launcher">
+  </picture>
 </p>
 
 <p align="center">
@@ -22,7 +25,10 @@
 </p>
 
 <p align="center">
-  <img src="docs/readme/overview.png" width="860" alt="Escritorio con reloj y tiles, menú wh01s17 con búsqueda y modo edición de tiles">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/overview-dark.png">
+    <img src="docs/readme/overview-light.png" width="860" alt="Escritorio con reloj y tiles, menú wh01s17 con búsqueda y modo edición de tiles">
+  </picture>
 </p>
 
 ## Qué incluye
@@ -57,7 +63,10 @@ Capturas reales del Redmi. Las originales a tamaño completo están en
 ### Estilo
 
 <p align="center">
-  <img src="docs/readme/style.png" width="860" alt="Opciones de Estilo, selector de paletas y selector de temáticas nova y hack">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/style-dark.png">
+    <img src="docs/readme/style-light.png" width="860" alt="Opciones de Estilo, selector de paletas y selector de temáticas nova y hack">
+  </picture>
 </p>
 
 Más pantallas: [opciones de Estilo](docs/screenshots/style-widgets-redmi.png) ·
@@ -71,7 +80,10 @@ Más pantallas: [opciones de Estilo](docs/screenshots/style-widgets-redmi.png) �
 Cada widget tiene dos temáticas: `nova` y `hack`.
 
 <p align="center">
-  <img src="docs/readme/widgets.png" width="860" alt="Reloj, pomodoro con metrónomo y monitor del sistema en las temáticas nova y hack">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/widgets-dark.png">
+    <img src="docs/readme/widgets-light.png" width="860" alt="Reloj, pomodoro con metrónomo y monitor del sistema en las temáticas nova y hack">
+  </picture>
 </p>
 
 ### TIDAL: todos los visualizadores
@@ -79,7 +91,10 @@ Cada widget tiene dos temáticas: `nova` y `hack`.
 Capturados mientras sonaba música. Cada visualizador se cambia tocando su gráfico.
 
 <p align="center">
-  <img src="docs/readme/tidal.png" width="860" alt="Widget TIDAL con los visualizadores nova fine, bars, mirror y curve, y hack blocks, cava, scope y hexdump">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/tidal-dark.png">
+    <img src="docs/readme/tidal-light.png" width="860" alt="Widget TIDAL con los visualizadores nova fine, bars, mirror y curve, y hack blocks, cava, scope y hexdump">
+  </picture>
 </p>
 
 ## Documentación
