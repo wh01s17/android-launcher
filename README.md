@@ -105,7 +105,7 @@ Capturados mientras sonaba música. Cada visualizador se cambia tocando su gráf
 | Escritorio | [Escritorios](docs/workspaces.md) · [Barra](docs/bar.md) · [Menú wh01s17](docs/menu.md) · [Atajos y gestos](docs/bindings.md) |
 | Apariencia | [Estilo y fondos](docs/style.md) · [Salvapantallas](docs/screensaver.md) · [Sistema de diseño](docs/design-system.md) |
 | Sistema | [Notificaciones y media](docs/notifications.md) · [Gestos en Xiaomi, pruebas y recuperación](docs/xiaomi.md) |
-| Calidad | [Rendimiento](docs/performance.md) · [Accesibilidad](docs/accessibility.md) · [Pruebas manuales](docs/manual-qa.md) · [Publicar una versión](docs/release.md) |
+| Calidad | [Rendimiento](docs/performance.md) · [Accesibilidad](docs/accessibility.md) · [Pruebas manuales](docs/manual-qa.md) · [Publicar una versión](docs/release.md) · [Publicar en tiendas](docs/publish.md) |
 
 Las imágenes de este README se generan con `tools/readme-images.sh` a partir del logo y de las
 capturas de `docs/screenshots/`; vuelve a ejecutarlo tras recapturar.

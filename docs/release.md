@@ -2,7 +2,8 @@
 
 Cómo sale una versión firmada del launcher (plan.md §8). Sin Play Store: el APK se publica como
 *GitHub Release* y se instala con [Obtainium](https://github.com/ImranR98/Obtainium) o
-`adb install -r`. La app no busca actualizaciones por su cuenta (R9: sin red).
+`adb install -r`. La app no busca actualizaciones por su cuenta (R9: sin red). Qué haría falta para
+F-Droid, IzzyOnDroid o Google Play: [publish.md](publish.md).
 
 ## Versión
 
