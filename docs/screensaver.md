@@ -1,6 +1,6 @@
 # Salvapantallas
 
-Style → Estilo y configuración → Salvapantallas permite elegir qué se muestra y cómo, los segundos de
+Estilo → Estilo y configuración → Salvapantallas permite elegir qué se muestra y cómo, los segundos de
 inactividad, ver una vista previa y abrir los ajustes de salvapantallas de Android. La vista previa
 se cierra tocando la pantalla o pulsando una tecla.
 

@@ -166,6 +166,6 @@ opcional y los controles se explican en [notifications.md](notifications.md).
 
 ## Estilo y configuración (Hito 10)
 
-Style y Setup ofrecen el editor propio de [estilo](style.md): escala de fuente, transparencia,
-huecos, radio, iconos, fondos, salvapantallas e importación/exportación de JSON. La entrada Fondos
-abre el selector propio; Pantalla conserva el acceso a los ajustes de Android.
+Estilo y Configurar ofrecen el editor propio de [estilo](style.md): escala de fuente, transparencia,
+huecos, radio, iconos, fondos, salvapantallas e importación/exportación de JSON. Fondo del sistema y
+Pantalla conservan los accesos a los ajustes de Android.

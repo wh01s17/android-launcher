@@ -140,7 +140,7 @@ de su app); Enter añade el primero. La sección «wh01s17» añade widgets prop
 
 | Widget | Qué hace |
 | --- | --- |
-| TIDAL (tidalamp nova) | Carátula, tiempo, canción, avance (tocar salta) y ⏮ ⏯ ■ ⏭. Pide el acceso a notificaciones (sólo lee la sesión de música). Tocar «▍ tidalamp» cambia de paleta (las de tidalamp; *phosphor* de fábrica) |
+| TIDAL | Carátula, tiempo, canción, barra de avance (tocar o arrastrar) y controles. Pide acceso a notificaciones para leer la sesión de música. Tocar el gráfico cambia entre cuatro visualizadores `nova` (`fine`, `bars`, `mirror`, `curve`) o cuatro `hack` (`blocks`, `cava`, `scope`, `hexdump`). La temática y paleta se eligen en Estilo; [capturas](../README.md#tidal-todos-los-visualizadores) |
 | Pomodoro | Sistemas de `pomodoro.sh` (40/10, 25/5, 50/10, 90/20), iniciar/pausar, saltar, reiniciar, ±1 min; sigue contando con la app cerrada |
 | Metrónomo | 40–240 BPM (tocar el número lo deja escribir con el teclado), tap tempo, compás y subdivisiones de `wh01s17.metronome`; acento en el primer tiempo |
 | Reloj y calendario | Hora, fecha y la semana de lunes a domingo |

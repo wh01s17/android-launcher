@@ -44,8 +44,8 @@ Detalle en [workspaces.md](workspaces.md).
 ## 4. Menú wh01s17
 
 Deslizar hacia arriba, tocar la W de la barra o `ALT + SPACE`. Busca apps, comandos, ajustes y
-atajos de apps en el mismo campo; lo que más usas sube. Submenús *Apps, Learn, Trigger, Style,
-Setup, Install, Remove, Update, About, System*. Mantener pulsada una app: atajos, info y
+atajos de apps en el mismo campo; lo que más usas sube. Submenús *Apps, Aprender, Acciones, Estilo,
+Configurar, Instalar, Desinstalar, Actualizaciones, Acerca de, Sistema*. Mantener pulsada una app: atajos, info y
 desinstalar. Detalle en [menu.md](menu.md).
 
 ## 5. Barra
@@ -80,7 +80,7 @@ se guardan ni se envían a ningún sitio (la app no tiene permiso de Internet).
 
 ## 8. Estilo, fondos y salvapantallas
 
-Menú → Style: paleta (16, `phosphor` de fábrica), modo OLED, escala de letra, huecos y radio de
+Menú → Estilo: paleta (16, `phosphor` de fábrica), modo OLED, escala de letra, huecos y radio de
 los tiles, iconos (monocromos, originales o pixelados), fondo propio (W y lunas, o una imagen tuya),
 girar con el sensor y tiempo hasta el salvapantallas (la W girando). [style.md](style.md),
 [screensaver.md](screensaver.md).

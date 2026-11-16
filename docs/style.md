@@ -1,6 +1,6 @@
 # Estilo y fondos
 
-Menú → Style → Estilo y configuración abre los ajustes propios. Setup ofrece la misma entrada.
+Menú → Estilo → Estilo y configuración abre los ajustes propios. Configurar ofrece la misma entrada.
 Los cambios se guardan en `files/config/launcher.json` y se aplican sin reiniciar. La pantalla de
 ajustes usa la escala elegida; los escritorios la reciben al volver al inicio.
 
@@ -28,9 +28,11 @@ muestras de color); elegir aplica y cierra, atrás o tocar fuera cierran sin cam
   metrónomo un péndulo `swing [|.....]`. TIDAL lleva la carátula a la izquierda de pista, artista y
   álbum (tocarla abre TIDAL; sin carátula, un hueco `[♪]` que también la abre); lo que no cabe se
   desliza ida y vuelta, todo a la vez, como el marquee de tidalamp; la barra de tiempo se toca o se
-  arrastra para moverse por la canción (también en `nova`). Tiene cuatro visualizadores (tocar el espectro cambia,
-  se recuerda): `blocks` (ecualizador con picos), `cava` (columnas de `#`), `scope` (osciloscopio) y
-  `hexdump` (filas tipo `xxd`). Mismos datos y botones;
+  arrastra para moverse por la canción (también en `nova`). Tocar el gráfico cambia el visualizador y
+  la elección se recuerda. `nova` ofrece `fine`, `bars`, `mirror` y `curve`; `hack` ofrece `blocks`
+  (ecualizador con picos), `cava` (columnas de `#`), `scope` (osciloscopio) y `hexdump` (filas tipo
+  `xxd`). Las ocho variantes están en el [README](../README.md#tidal-todos-los-visualizadores).
+  Mismos datos y botones;
   respeta las reglas del tema (colores planos, sin brillo ni CRT). Los widgets de otras apps no cambian.
   Para añadir una temática: una entrada en `WidgetTheme` (`core/designsystem/widgets`), su piel
   (`WidgetSkin` en `feature/widgets/native`) y su nombre en Estilo; si falta alguna de las dos
@@ -41,7 +43,7 @@ muestras de color); elegir aplica y cierra, atrás o tocar fuera cierran sin cam
 
 ## Fondos
 
-Style → Fondos, o `SUPER + CTRL + SPACE` (`ALT + CTRL + SPACE` en el Redmi), abre el selector propio.
+Estilo → Escritorio → Fondo, o `SUPER + CTRL + SPACE` (`ALT + CTRL + SPACE` en el Redmi), abre el selector propio.
 Incluye sin fondo, marca W, luna llena, luna con la marca escrita e imagen importada.
 Los fondos incluidos y el fondo base del escritorio usan negro puro OLED (`#000000`).
 Las imágenes importadas conservan sus colores originales. El fondo se
@@ -52,7 +54,7 @@ almacenamiento privado, reducida a un máximo de 2048 píxeles de lado. No hacen
 almacenamiento ni conservar acceso al documento original. Una imagen inválida conserva la anterior.
 Puedes importar Gengar u Opeth desde tus propios archivos; no se distribuyen con la app.
 
-**Fijar también como fondo de inicio de Android** es una acción separada y explícita. Requiere
+**Usar también como fondo de Android** es una acción separada y explícita. Requiere
 seleccionar antes una imagen disponible; no cambia el fondo de bloqueo. Elegir un fondo dentro del
 launcher sólo cambia el launcher.
 

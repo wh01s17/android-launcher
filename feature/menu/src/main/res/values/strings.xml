@@ -53,9 +53,9 @@
     <string name="menu_wifi">Wi-Fi</string>
     <string name="menu_bluetooth">Bluetooth</string>
     <string name="menu_audio">Sonido</string>
-    <string name="menu_learn_description">Desliza a los lados para cambiar de escritorio. Mantén pulsado un tile o un hueco para editar. En edición, arrastra tiles para intercambiarlos o llevarlos a otro escritorio; arrastra las asas verdes para redimensionar. Toca un tile para abrir su app.</string>
-    <string name="menu_remove_description">Elige una app y mantenla pulsada para abrir su menú de desinstalación. Quitar un tile del escritorio conserva la app instalada.</string>
-    <string name="menu_update_description">Todavía no hay una versión publicada. Las actualizaciones se instalan mediante APK; wh01s17 no busca actualizaciones en segundo plano.</string>
+    <string name="menu_learn_description">Desliza para cambiar de escritorio. Toca un tile para abrirlo; mantenlo pulsado para editar.</string>
+    <string name="menu_remove_description">Mantén pulsada una app para desinstalarla. Quitar un tile conserva la app.</string>
+    <string name="menu_update_description">Actualiza instalando el APK de una versión nueva.</string>
     <string name="menu_about_description">wh01s17 Launcher\nEscritorios inspirados en Hyprland, con el tema wh01s17.\nLicencia MIT. Sin red ni telemetría.</string>
     <string name="menu_search_placeholder">Buscar apps, acciones y ajustes…</string>
     <string name="menu_lock">Bloquear pantalla</string>
